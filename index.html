@@ -4,1243 +4,3819 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>スライム城くずしメーカー</title>
+
 <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
+
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,"Noto Sans JP",sans-serif;background:#f5f5f5}
-button,input{font:inherit}
-button{cursor:pointer;border:0}
-.screen{display:none;width:100%;height:100%}
-.screen.active{display:flex}
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",Arial,sans-serif;
+    background:#f4f4f4;
+}
+
+button,
+input{
+    font:inherit;
+}
+
+button{
+    border:0;
+    cursor:pointer;
+    user-select:none;
+    -webkit-user-select:none;
+}
+
+.screen{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:none;
+    overflow:hidden;
+}
+
+.screen.active{
+    display:flex;
+}
+
+/* =========================
+   スタート
+========================= */
 
 #startScreen{
- flex-direction:column;align-items:center;justify-content:center;
- background:linear-gradient(180deg,#fff,#eaf5ff)
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    background:
+        linear-gradient(#fff 0%,#f8fbff 55%,#e5f1ff 100%);
+    z-index:100;
 }
-.logo{font-size:42px;font-weight:900;color:#333;margin-bottom:35px;text-align:center}
-.startButtons{display:flex;flex-direction:column;gap:18px;width:min(430px,85vw)}
-.bigBtn{
- padding:20px;border-radius:18px;font-size:24px;font-weight:bold;
- background:#f80;color:#fff;box-shadow:0 5px 0 #c60
-}
-.bigBtn:active{transform:translateY(4px);box-shadow:0 1px 0 #c60}
-.bigBtn.blue{background:#168cff;box-shadow:0 5px 0 #0665bd}
 
-#selectScreen{flex-direction:column;background:#f5f7fa}
+.logo{
+    text-align:center;
+    font-size:clamp(30px,7vw,48px);
+    line-height:1.2;
+    font-weight:900;
+    color:#222;
+    margin-bottom:38px;
+    text-shadow:0 3px 0 #fff;
+}
+
+.startButtons{
+    width:min(430px,88vw);
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.startButton{
+    width:100%;
+    min-height:70px;
+    border-radius:18px;
+    color:#fff;
+    font-size:24px;
+    font-weight:900;
+    box-shadow:0 6px 0 rgba(0,0,0,.2);
+}
+
+.startButton:active{
+    transform:translateY(4px);
+    box-shadow:0 2px 0 rgba(0,0,0,.2);
+}
+
+.makeButton{
+    background:#ff8800;
+}
+
+.playButton{
+    background:#168cff;
+}
+
+/* =========================
+   ステージ選択
+========================= */
+
+#selectScreen{
+    flex-direction:column;
+    background:#eef2f6;
+    z-index:90;
+}
+
 .header{
- height:64px;display:flex;align-items:center;padding:0 14px;
- background:#222;color:#fff;gap:10px;flex-shrink:0
+    height:62px;
+    min-height:62px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px;
+    background:#222;
+    color:#fff;
+    position:relative;
+    z-index:100;
 }
-.header h1{font-size:21px;margin:0;flex:1}
-.backBtn{background:#fff;color:#222;border-radius:10px;padding:9px 14px;font-weight:bold}
+
+.header h1{
+    margin:0;
+    font-size:21px;
+    flex:1;
+}
+
+.headerButton{
+    background:#fff;
+    color:#222;
+    border-radius:10px;
+    padding:9px 14px;
+    font-weight:bold;
+}
+
 .stageList{
- padding:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
- gap:15px;overflow:auto
+    flex:1;
+    overflow:auto;
+    padding:16px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:14px;
 }
+
 .stageCard{
- background:#fff;border-radius:16px;padding:17px;box-shadow:0 3px 12px #0002;
- min-height:130px;display:flex;flex-direction:column;gap:12px
+    background:#fff;
+    border-radius:16px;
+    padding:15px;
+    min-height:145px;
+    box-shadow:0 3px 12px rgba(0,0,0,.14);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
 }
-.stageName{font-weight:bold;font-size:20px;flex:1}
-.stageCard button{border-radius:10px;padding:10px;background:#168cff;color:#fff;font-weight:bold}
 
-#editorScreen,#playScreen{position:relative;background:#dceeff}
-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.stageName{
+    font-size:20px;
+    font-weight:900;
+    flex:1;
+}
 
-#editorUI,#playUI{
- position:absolute;z-index:10;left:0;right:0;top:0;pointer-events:none
+.stageCard button{
+    width:100%;
+    padding:10px;
+    border-radius:9px;
+    background:#168cff;
+    color:#fff;
+    font-weight:bold;
 }
-#editorUI>* ,#playUI>*{pointer-events:auto}
-.toolbar{
- display:flex;gap:6px;align-items:center;padding:7px;
- background:#222e;color:#fff;overflow-x:auto;white-space:nowrap
+
+.stageCard .delete{
+    background:#e33;
 }
-.tool{
- min-width:58px;height:48px;border-radius:10px;background:#fff;color:#222;
- font-size:12px;font-weight:bold;padding:3px
+
+.empty{
+    grid-column:1/-1;
+    text-align:center;
+    padding:50px 15px;
+    color:#777;
 }
-.tool.selected{outline:4px solid #f80}
-.tool .icon{display:block;font-size:22px;line-height:25px}
+
+/* =========================
+   ゲーム画面
+========================= */
+
+#editorScreen,
+#playScreen{
+    background:#cfe9ff;
+}
+
+.gameCanvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    z-index:1;
+    touch-action:none;
+}
+
+/* =========================
+   UI
+========================= */
+
+.gameUI{
+    position:absolute;
+    inset:0;
+    z-index:50;
+    pointer-events:none;
+}
+
+.gameUI button,
+.gameUI input,
+.gameUI .toolbar{
+    pointer-events:auto;
+}
+
 .topbar{
- display:flex;align-items:center;gap:6px;padding:6px;
- background:#111c;overflow:auto
+    width:100%;
+    min-height:58px;
+    padding:6px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(20,20,20,.94);
+    overflow-x:auto;
+    overflow-y:hidden;
+    white-space:nowrap;
+    position:relative;
+    z-index:100;
 }
+
 .topbar button{
- padding:9px 12px;border-radius:9px;background:#fff;font-weight:bold;white-space:nowrap
+    flex-shrink:0;
+    background:#fff;
+    color:#222;
+    padding:9px 13px;
+    border-radius:9px;
+    font-weight:800;
 }
-.topbar .orange{background:#f80;color:#fff}
-.topbar input{width:170px;padding:8px;border-radius:8px;border:0}
+
+.topbar .orange{
+    background:#ff8800;
+    color:#fff;
+}
+
+.topbar .red{
+    background:#e33;
+    color:#fff;
+}
+
+.topbar input{
+    flex-shrink:0;
+    width:180px;
+    padding:9px;
+    border:0;
+    border-radius:9px;
+    outline:none;
+}
+
+/* =========================
+   ツールバー
+========================= */
+
+.toolbar{
+    width:100%;
+    padding:6px;
+    display:flex;
+    gap:6px;
+    background:rgba(35,35,35,.94);
+    overflow-x:auto;
+    overflow-y:hidden;
+    position:relative;
+    z-index:100;
+}
+
+.tool{
+    flex:0 0 65px;
+    height:52px;
+    border-radius:10px;
+    background:#fff;
+    color:#222;
+    font-size:11px;
+    font-weight:900;
+    padding:3px;
+}
+
+.tool:active{
+    transform:scale(.96);
+}
+
+.tool.selected{
+    outline:4px solid #ff8800;
+    outline-offset:-2px;
+}
+
+.toolIcon{
+    display:block;
+    height:27px;
+    line-height:27px;
+    font-size:22px;
+}
+
+/* =========================
+   プロパティ
+========================= */
 
 #propertyPanel{
- position:absolute;z-index:20;right:10px;top:120px;width:220px;
- background:#fff;border-radius:14px;padding:13px;box-shadow:0 5px 20px #0004;
- display:none
+    position:absolute;
+    right:10px;
+    top:120px;
+    width:235px;
+    background:#fff;
+    border-radius:15px;
+    padding:14px;
+    box-shadow:0 5px 25px rgba(0,0,0,.3);
+    display:none;
+    z-index:200;
+    pointer-events:auto;
 }
-#propertyPanel.show{display:block}
-#propertyPanel h3{margin:0 0 10px}
-.propRow{display:flex;align-items:center;gap:6px;margin:7px 0}
-.propRow label{width:70px;font-size:13px}
-.propRow input{width:90px;padding:6px;border:1px solid #bbb;border-radius:7px}
-.propBtns{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.propBtns button{padding:8px;border-radius:7px;background:#168cff;color:#fff}
 
-.hint{
- position:absolute;left:10px;bottom:10px;background:#000b;color:#fff;
- padding:8px 12px;border-radius:9px;font-size:12px;pointer-events:none
+#propertyPanel.show{
+    display:block;
 }
-#playTop{display:flex;gap:7px}
-#playTop button{padding:10px 14px;border-radius:10px;font-weight:bold}
-#bombBtn{background:#f80;color:#fff}
-#allBomb{background:#e22;color:#fff}
-#playStageName{color:#fff;font-weight:bold;padding:0 8px}
-.empty{padding:30px;text-align:center;color:#666}
+
+#propertyPanel h3{
+    margin:0 0 12px;
+    font-size:18px;
+}
+
+.propertyRow{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    margin:8px 0;
+}
+
+.propertyRow label{
+    width:55px;
+    font-weight:bold;
+    font-size:13px;
+}
+
+.propertyRow input{
+    flex:1;
+    min-width:0;
+    padding:7px;
+    border:1px solid #bbb;
+    border-radius:7px;
+}
+
+.propertyButtons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    margin-top:10px;
+}
+
+.propertyButtons button{
+    padding:9px 4px;
+    border-radius:8px;
+    background:#168cff;
+    color:#fff;
+    font-weight:bold;
+}
+
+/* =========================
+   下部メッセージ
+========================= */
+
+.message{
+    position:absolute;
+    left:50%;
+    bottom:15px;
+    transform:translateX(-50%);
+    z-index:300;
+    background:rgba(0,0,0,.82);
+    color:#fff;
+    padding:9px 16px;
+    border-radius:12px;
+    font-size:14px;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .15s;
+    white-space:nowrap;
+}
+
+.message.show{
+    opacity:1;
+}
+
+.help{
+    position:absolute;
+    left:10px;
+    bottom:10px;
+    z-index:40;
+    background:rgba(0,0,0,.7);
+    color:#fff;
+    padding:7px 11px;
+    border-radius:8px;
+    font-size:12px;
+    pointer-events:none;
+}
+
+#playStageName{
+    color:#fff;
+    font-weight:900;
+    padding:0 5px;
+    flex-shrink:0;
+}
 </style>
 </head>
+
 <body>
 
-<div id="startScreen" class="screen active">
-  <div class="logo">スライム城くずし<br>ステージメーカー</div>
-  <div class="startButtons">
-    <button class="bigBtn" id="makeBtn">ステージを作る</button>
-    <button class="bigBtn blue" id="playBtn">ステージで遊ぶ</button>
-  </div>
-</div>
+<!-- =========================
+     スタート
+========================= -->
 
-<div id="selectScreen" class="screen">
-  <div class="header">
-    <button class="backBtn" id="selectBack">戻る</button>
-    <h1>ステージを選択</h1>
-  </div>
-  <div id="stageList" class="stageList"></div>
-</div>
+<section id="startScreen" class="screen active">
+    <div class="logo">
+        スライム城くずし<br>
+        ステージメーカー
+    </div>
 
-<div id="editorScreen" class="screen">
-  <canvas id="editorCanvas"></canvas>
+    <div class="startButtons">
+        <button class="startButton makeButton" id="makeBtn">
+            ステージを作る
+        </button>
 
-  <div id="editorUI">
-    <div class="topbar">
-      <button id="editorBack">← 戻る</button>
-      <input id="stageName" placeholder="ステージ名">
-      <button class="orange" id="saveStage">保存</button>
-      <button id="testStage">▶ 遊ぶ</button>
-      <button id="clearStage">全消去</button>
+        <button class="startButton playButton" id="playBtn">
+            ステージで遊ぶ
+        </button>
     </div>
-    <div class="toolbar">
-      <button class="tool selected" data-tool="wood"><span class="icon">🪵</span>木</button>
-      <button class="tool" data-tool="glass"><span class="icon">▱</span>ガラス</button>
-      <button class="tool" data-tool="stone"><span class="icon">⬛</span>石</button>
-      <button class="tool" data-tool="enemy"><span class="icon">🟢</span>敵</button>
-      <button class="tool" data-tool="bomb"><span class="icon">💣</span>爆弾</button>
-      <button class="tool" data-tool="multiply"><span class="icon">×2</span>増殖</button>
-      <button class="tool" data-tool="bedrock"><span class="icon">▰</span>岩盤</button>
-      <button class="tool" data-tool="erase"><span class="icon">⌫</span>消す</button>
-      <button class="tool" data-tool="move"><span class="icon">✋</span>移動</button>
-      <button class="tool" data-tool="rotate"><span class="icon">↻</span>回転</button>
-      <button class="tool" data-tool="resize"><span class="icon">↔</span>形変更</button>
-    </div>
-  </div>
+</section>
 
-  <div id="propertyPanel">
-    <h3>ブロック設定</h3>
-    <div class="propRow">
-      <label>横幅</label>
-      <input id="propW" type="number" min="10" max="1000">
-    </div>
-    <div class="propRow">
-      <label>高さ</label>
-      <input id="propH" type="number" min="10" max="1000">
-    </div>
-    <div class="propRow">
-      <label>角度</label>
-      <input id="propAngle" type="number" step="1">
-    </div>
-    <div class="propBtns">
-      <button id="rotateL">↶ 90°</button>
-      <button id="rotateR">↷ 90°</button>
-      <button id="thin">細く</button>
-      <button id="thick">太く</button>
-      <button id="applyProp">適用</button>
-      <button id="closeProp">閉じる</button>
-    </div>
-  </div>
+<!-- =========================
+     ステージ選択
+========================= -->
 
-  <div class="hint">タップ：配置・選択　／　ドラッグ：移動　／　回転・形変更で選択中のブロックを編集</div>
-</div>
+<section id="selectScreen" class="screen">
 
-<div id="playScreen" class="screen">
-  <canvas id="playCanvas"></canvas>
-  <div id="playUI">
-    <div class="topbar">
-      <button id="playBack">← 戻る</button>
-      <span id="playStageName"></span>
-      <button id="bombBtn">💣 爆弾を置く</button>
-      <button id="allBomb">💥 全爆破</button>
-      <button id="restartBtn">↻ リセット</button>
+    <div class="header">
+        <button class="headerButton" id="selectBack">
+            戻る
+        </button>
+
+        <h1>ステージを選択</h1>
     </div>
-  </div>
-  <div class="hint">「爆弾を置く」でタップした場所に爆弾を落とせます</div>
-</div>
+
+    <div id="stageList" class="stageList"></div>
+</section>
+
+<!-- =========================
+     エディター
+========================= -->
+
+<section id="editorScreen" class="screen">
+
+    <canvas id="editorCanvas" class="gameCanvas"></canvas>
+
+    <div class="gameUI">
+
+        <div class="topbar">
+
+            <button id="editorBack">
+                ← 戻る
+            </button>
+
+            <input id="stageName" placeholder="ステージ名">
+
+            <button class="orange" id="saveStage">
+                保存
+            </button>
+
+            <button id="testStage">
+                ▶ 遊ぶ
+            </button>
+
+            <button class="red" id="clearStage">
+                全消去
+            </button>
+
+        </div>
+
+        <div class="toolbar">
+
+            <button class="tool selected" data-tool="wood">
+                <span class="toolIcon">🪵</span>
+                木
+            </button>
+
+            <button class="tool" data-tool="glass">
+                <span class="toolIcon">▱</span>
+                ガラス
+            </button>
+
+            <button class="tool" data-tool="stone">
+                <span class="toolIcon">⬛</span>
+                石
+            </button>
+
+            <button class="tool" data-tool="enemy">
+                <span class="toolIcon">🟢</span>
+                敵
+            </button>
+
+            <button class="tool" data-tool="bomb">
+                <span class="toolIcon">💣</span>
+                爆弾
+            </button>
+
+            <button class="tool" data-tool="multiply">
+                <span class="toolIcon">×2</span>
+                増殖
+            </button>
+
+            <button class="tool" data-tool="bedrock">
+                <span class="toolIcon">▰</span>
+                岩盤
+            </button>
+
+            <button class="tool" data-tool="erase">
+                <span class="toolIcon">⌫</span>
+                消す
+            </button>
+
+            <button class="tool" data-tool="move">
+                <span class="toolIcon">✋</span>
+                移動
+            </button>
+
+            <button class="tool" data-tool="rotate">
+                <span class="toolIcon">↻</span>
+                回転
+            </button>
+
+            <button class="tool" data-tool="resize">
+                <span class="toolIcon">↔</span>
+                形変更
+            </button>
+
+        </div>
+
+        <div id="propertyPanel">
+
+            <h3>ブロック設定</h3>
+
+            <div class="propertyRow">
+                <label>横幅</label>
+                <input id="propW" type="number" min="10" max="1000">
+            </div>
+
+            <div class="propertyRow">
+                <label>高さ</label>
+                <input id="propH" type="number" min="10" max="1000">
+            </div>
+
+            <div class="propertyRow">
+                <label>角度</label>
+                <input id="propAngle" type="number" step="1">
+            </div>
+
+            <div class="propertyButtons">
+
+                <button id="rotateL">
+                    ↶ 90°
+                </button>
+
+                <button id="rotateR">
+                    ↷ 90°
+                </button>
+
+                <button id="thin">
+                    細く
+                </button>
+
+                <button id="thick">
+                    太く
+                </button>
+
+                <button id="applyProp">
+                    適用
+                </button>
+
+                <button id="closeProp">
+                    閉じる
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="editorMessage" class="message"></div>
+
+    <div class="help">
+        タップ：配置・選択　ドラッグ：移動　回転・形変更：選択中を編集
+    </div>
+
+</section>
+
+<!-- =========================
+     プレイ
+========================= -->
+
+<section id="playScreen" class="screen">
+
+    <canvas id="playCanvas" class="gameCanvas"></canvas>
+
+    <div class="gameUI">
+
+        <div class="topbar">
+
+            <button id="playBack">
+                ← 戻る
+            </button>
+
+            <span id="playStageName"></span>
+
+            <button id="bombBtn">
+                💣 爆弾を置く
+            </button>
+
+            <button class="red" id="allBomb">
+                💥 全爆破
+            </button>
+
+            <button id="restartBtn">
+                ↻ リセット
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="help">
+        爆弾を置く → 画面をタップ
+    </div>
+
+</section>
+
+<div id="playMessage" class="message"></div>
 
 <script>
 "use strict";
 
-const {
- Engine,Render,Runner,World,Bodies,Body,Composite,Events,Vector
-}=Matter;
+const MatterEngine = Matter.Engine;
+const Runner = Matter.Runner;
+const World = Matter.World;
+const Bodies = Matter.Bodies;
+const Body = Matter.Body;
+const Composite = Matter.Composite;
+const Events = Matter.Events;
+const Bounds = Matter.Bounds;
+const Vertices = Matter.Vertices;
 
-const STORAGE_KEY="slimeCastleMaker_v4";
-const FLOOR_Y=1000;
-const EXPLOSION_RADIUS=110;
-const EXPLOSION_FORCE_RADIUS=150;
-const EXPLOSION_FORCE=.045;
-const EXPLOSION_BLOCK_DAMAGE=150;
-const ENEMY_KILL_IMPACT=9;
+const STORAGE_KEY = "slimeCastleMaker_v4";
 
-const MATERIALS={
- wood:{density:.0035,friction:.4,restitution:.08,hp:2,threshold:16},
- glass:{density:.0028,friction:.15,restitution:.25,hp:1,threshold:10},
- stone:{density:.008,friction:.6,restitution:.02,hp:3,threshold:48}
+const FLOOR_Y = 1000;
+
+const EXPLOSION_RADIUS = 110;
+const EXPLOSION_FORCE_RADIUS = 150;
+const EXPLOSION_FORCE = 0.045;
+const EXPLOSION_BLOCK_DAMAGE = 150;
+
+const ENEMY_FALL_SPEED = 10;
+const ENEMY_CRUSH_SPEED = 3;
+
+const MATERIALS = {
+
+    wood:{
+        density:.0035,
+        friction:.4,
+        restitution:.08,
+        hp:2,
+        threshold:16
+    },
+
+    glass:{
+        density:.0028,
+        friction:.15,
+        restitution:.25,
+        hp:1,
+        threshold:10
+    },
+
+    stone:{
+        density:.008,
+        friction:.6,
+        restitution:.02,
+        hp:3,
+        threshold:48
+    }
+
 };
 
-let currentScreen="start";
-let currentTool="wood";
-let currentStageId=null;
-let editorEngine=null;
-let playEngine=null;
-let editorRunner=null;
-let playRunner=null;
-let editorCamera={x:0,y:350,zoom:.7};
-let playCamera={x:0,y:400,zoom:.75};
-let editorCanvas=document.getElementById("editorCanvas");
-let playCanvas=document.getElementById("playCanvas");
-let selectedBody=null;
-let dragData=null;
-let pointerDown=false;
-let multiplyContacts=new Map();
-let explosionEffects=[];
-let stageObjects=[];
+let currentTool = "wood";
 
-const $=id=>document.getElementById(id);
+let currentStageId = null;
 
-function getStages(){
-  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]")}
-  catch(e){return[]}
+let editorEngine = null;
+let playEngine = null;
+
+let editorRunner = null;
+let playRunner = null;
+
+let editorCamera = {
+    x:0,
+    y:400,
+    zoom:.7
+};
+
+let playCamera = {
+    x:0,
+    y:450,
+    zoom:.75
+};
+
+let selectedBody = null;
+let dragData = null;
+let pointerDown = false;
+
+let stageObjects = [];
+
+let multiplyContacts = new Map();
+
+let explosionEffects = [];
+
+const editorCanvas = document.getElementById("editorCanvas");
+const playCanvas = document.getElementById("playCanvas");
+
+function $(id){
+    return document.getElementById(id);
 }
-function setStages(a){localStorage.setItem(STORAGE_KEY,JSON.stringify(a))}
-function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
+
+/* =========================
+   メッセージ
+========================= */
+
+let messageTimer = null;
+
+function showMessage(text,play=false){
+
+    const el = play ? $("playMessage") : $("editorMessage");
+
+    el.textContent = text;
+    el.classList.add("show");
+
+    clearTimeout(messageTimer);
+
+    messageTimer = setTimeout(()=>{
+        el.classList.remove("show");
+    },1800);
+}
+
+/* =========================
+   画面
+========================= */
 
 function showScreen(id){
-  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
-  $(id).classList.add("active");
-  currentScreen=id.replace("Screen","");
+
+    document.querySelectorAll(".screen").forEach(screen=>{
+        screen.classList.remove("active");
+    });
+
+    $(id).classList.add("active");
 }
 
-function resizeCanvas(c){
-  const r=c.getBoundingClientRect();
-  c.width=Math.max(1,Math.round(r.width));
-  c.height=Math.max(1,Math.round(r.height));
-}
-function resizeAll(){
-  resizeCanvas(editorCanvas);
-  resizeCanvas(playCanvas);
-}
-window.addEventListener("resize",resizeAll);
+/* =========================
+   localStorage
+========================= */
 
-function screenToWorld(c,sx,sy,cam){
-  return{
-    x:(sx-c.clientWidth/2)/cam.zoom+cam.x,
-    y:(sy-c.clientHeight/2)/cam.zoom+cam.y
-  };
-}
-function worldToScreen(c,x,y,cam){
-  return{
-    x:(x-cam.x)*cam.zoom+c.clientWidth/2,
-    y:(y-cam.y)*cam.zoom+c.clientHeight/2
-  };
-}
-function pointerPos(e,c){
-  const r=c.getBoundingClientRect();
-  return{x:e.clientX-r.left,y:e.clientY-r.top};
-}
+function getStages(){
 
-function floorBody(){
-  return Bodies.rectangle(0,FLOOR_Y+50,100000,100,{
-    isStatic:true,label:"floor",
-    plugin:{gameType:"floor",width:100000,height:100}
-  });
-}
-
-function createBlock(type,x,y,w=150,h=35,angle=0){
-  const m=MATERIALS[type];
-  const b=Bodies.rectangle(x,y,w,h,{
-    angle:angle*Math.PI/180,
-    density:m.density,
-    friction:m.friction,
-    restitution:m.restitution,
-    label:"block",
-    plugin:{
-      gameType:"block",material:type,width:w,height:h,
-      hp:m.hp,maxHp:m.hp,damageThreshold:m.threshold,id:uid()
+    try{
+        return JSON.parse(
+            localStorage.getItem(STORAGE_KEY) || "[]"
+        );
+    }catch(e){
+        return [];
     }
-  });
-  return b;
+
+}
+
+function setStages(stages){
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(stages)
+    );
+
+}
+
+function uid(){
+
+    return Math.random().toString(36).slice(2)
+        + Date.now().toString(36);
+
+}
+
+/* =========================
+   Canvas
+========================= */
+
+function resizeCanvas(canvas){
+
+    const rect = canvas.getBoundingClientRect();
+
+    canvas.width = Math.max(
+        1,
+        Math.round(rect.width)
+    );
+
+    canvas.height = Math.max(
+        1,
+        Math.round(rect.height)
+    );
+
+}
+
+function resizeAll(){
+
+    resizeCanvas(editorCanvas);
+    resizeCanvas(playCanvas);
+
+}
+
+window.addEventListener(
+    "resize",
+    resizeAll
+);
+
+function pointerPosition(event,canvas){
+
+    const rect = canvas.getBoundingClientRect();
+
+    return {
+        x:event.clientX - rect.left,
+        y:event.clientY - rect.top
+    };
+
+}
+
+function screenToWorld(canvas,x,y,camera){
+
+    return {
+
+        x:
+            (x - canvas.clientWidth / 2)
+            / camera.zoom
+            + camera.x,
+
+        y:
+            (y - canvas.clientHeight / 2)
+            / camera.zoom
+            + camera.y
+
+    };
+
+}
+
+function worldToScreen(canvas,x,y,camera){
+
+    return {
+
+        x:
+            (x-camera.x)
+            *camera.zoom
+            +canvas.clientWidth/2,
+
+        y:
+            (y-camera.y)
+            *camera.zoom
+            +canvas.clientHeight/2
+
+    };
+
+}
+
+/* =========================
+   オブジェクト
+========================= */
+
+function createFloor(){
+
+    return Bodies.rectangle(
+        0,
+        FLOOR_Y + 50,
+        100000,
+        100,
+        {
+            isStatic:true,
+            label:"floor",
+            plugin:{
+                gameType:"floor"
+            }
+        }
+    );
+
+}
+
+function createBlock(
+    material,
+    x,
+    y,
+    w=150,
+    h=35,
+    angle=0
+){
+
+    const m = MATERIALS[material];
+
+    return Bodies.rectangle(
+        x,
+        y,
+        w,
+        h,
+        {
+
+            angle:angle*Math.PI/180,
+
+            density:m.density,
+            friction:m.friction,
+            restitution:m.restitution,
+
+            label:"block",
+
+            plugin:{
+                gameType:"block",
+                material:material,
+                width:w,
+                height:h,
+                hp:m.hp,
+                maxHp:m.hp,
+                threshold:m.threshold,
+                id:uid()
+            }
+
+        }
+    );
+
 }
 
 function createEnemy(x,y){
-  return Bodies.circle(x,y,22,{
-    density:.0018,
-    friction:.35,
-    restitution:.05,
-    label:"enemy",
-    plugin:{
-      gameType:"enemy",id:uid(),alive:true,
-      hp:1,preVY:0,preY:y
-    }
-  });
+
+    return Bodies.circle(
+        x,
+        y,
+        22,
+        {
+
+            density:.0018,
+            friction:.35,
+            restitution:.05,
+
+            label:"enemy",
+
+            plugin:{
+                gameType:"enemy",
+                id:uid(),
+                alive:true,
+                preVY:0
+            }
+
+        }
+    );
+
 }
 
 function createBomb(x,y){
-  return Bodies.circle(x,y,16,{
-    density:.002,
-    friction:.4,
-    restitution:.15,
-    label:"bomb",
-    plugin:{gameType:"bomb",id:uid(),armed:false}
-  });
-}
 
-function createMultiply(x,y,w=70,h=45){
-  return Bodies.rectangle(x,y,w,h,{
-    isStatic:true,
-    label:"multiply",
-    plugin:{gameType:"multiply",width:w,height:h,id:uid()}
-  });
-}
+    return Bodies.circle(
+        x,
+        y,
+        16,
+        {
 
-function createBedrock(x,y,w=300,h=50,angle=0){
-  return Bodies.rectangle(x,y,w,h,{
-    isStatic:true,
-    angle:0,
-    label:"bedrock",
-    plugin:{gameType:"bedrock",width:w,height:h,id:uid()}
-  });
-}
+            density:.002,
+            friction:.4,
+            restitution:.15,
 
-function addEditorBody(b){
-  World.add(editorEngine.world,b);
-  stageObjects.push(b);
-}
+            /*
+             * 爆弾は必ず動く
+             */
+            isStatic:false,
 
-function removeBody(b,engine){
-  if(!b)return;
-  World.remove(engine.world,b);
-  const i=stageObjects.indexOf(b);
-  if(i>=0)stageObjects.splice(i,1);
-  if(selectedBody===b)selectedBody=null;
-}
+            label:"bomb",
 
-function findBodyAt(engine,p){
-  const bodies=Composite.allBodies(engine.world);
-  for(let i=bodies.length-1;i>=0;i--){
-    const b=bodies[i];
-    if(b.label==="floor")continue;
-    if(Matter.Bounds.contains(b.bounds,p) &&
-       Matter.Vertices.contains(b.vertices,p)) return b;
-  }
-  return null;
-}
+            plugin:{
+                gameType:"bomb",
+                id:uid()
+            }
 
-function selectedEditable(){
-  return selectedBody &&
-    ["block","bedrock","multiply","enemy","bomb"].includes(selectedBody.label);
-}
-
-function openProperty(b){
-  if(!b||!selectedEditable())return;
-  selectedBody=b;
-  const p=b.plugin||{};
-  $("propW").value=Math.round(p.width||b.bounds.max.x-b.bounds.min.x);
-  $("propH").value=Math.round(p.height||b.bounds.max.y-b.bounds.min.y);
-  $("propAngle").value=Math.round((b.angle||0)*180/Math.PI);
-  $("propertyPanel").classList.add("show");
-}
-
-function resizeSelected(w,h){
-  if(!selectedBody||selectedBody.label!=="block")return;
-  const p=selectedBody.plugin;
-  w=Math.max(10,Math.min(1000,w));
-  h=Math.max(10,Math.min(1000,h));
-  const sx=w/p.width;
-  const sy=h/p.height;
-  Body.scale(selectedBody,sx,sy);
-  p.width=w;
-  p.height=h;
-}
-
-function rotateSelected(deg){
-  if(!selectedBody)return;
-  if(selectedBody.label==="bedrock"){
-    Body.setAngle(selectedBody,0);
-    return;
-  }
-  Body.rotate(selectedBody,deg*Math.PI/180);
-}
-
-function applyProperties(){
-  if(!selectedBody)return;
-  if(selectedBody.label==="block"){
-    resizeSelected(Number($("propW").value),Number($("propH").value));
-  }else if(selectedBody.label==="bedrock"){
-    const p=selectedBody.plugin;
-    const w=Number($("propW").value);
-    const h=Number($("propH").value);
-    Body.setVertices(selectedBody,
-      Matter.Vertices.create([
-        {x:-w/2,y:-h/2},{x:w/2,y:-h/2},
-        {x:w/2,y:h/2},{x:-w/2,y:h/2}
-      ],selectedBody)
+        }
     );
-    p.width=w;p.height=h;
-    Body.setAngle(selectedBody,0);
-  }
-  if(selectedBody.label!=="bedrock"){
-    Body.setAngle(selectedBody,Number($("propAngle").value)*Math.PI/180);
-  }
+
 }
 
-$("applyProp").onclick=applyProperties;
-$("rotateL").onclick=()=>{rotateSelected(-90);if(selectedBody)$("propAngle").value=Math.round(selectedBody.angle*180/Math.PI)};
-$("rotateR").onclick=()=>{rotateSelected(90);if(selectedBody)$("propAngle").value=Math.round(selectedBody.angle*180/Math.PI)};
-$("thin").onclick=()=>{
-  if(selectedBody?.label==="block"){
-    resizeSelected(selectedBody.plugin.width*.8,selectedBody.plugin.height*.8);
-    openProperty(selectedBody);
-  }
-};
-$("thick").onclick=()=>{
-  if(selectedBody?.label==="block"){
-    resizeSelected(selectedBody.plugin.width*1.25,selectedBody.plugin.height*1.25);
-    openProperty(selectedBody);
-  }
-};
-$("closeProp").onclick=()=>$("propertyPanel").classList.remove("show");
+function createMultiply(
+    x,
+    y,
+    w=70,
+    h=45
+){
 
-function setupEngineEvents(engine,isEditor){
-  Events.on(engine,"beforeUpdate",()=>{
-    Composite.allBodies(engine.world).forEach(b=>{
-      if(b.label==="enemy"&&b.plugin.alive){
-        b.plugin.preVY=b.velocity.y;
-        b.plugin.preY=b.position.y;
-      }
-    });
-  });
+    return Bodies.rectangle(
+        x,
+        y,
+        w,
+        h,
+        {
 
-  Events.on(engine,"collisionStart",event=>{
-    event.pairs.forEach(pair=>handleCollision(pair,isEditor));
-  });
-  Events.on(engine,"collisionActive",event=>{
-    event.pairs.forEach(pair=>handleActiveCollision(pair,isEditor));
-  });
-  Events.on(engine,"collisionEnd",event=>{
-    event.pairs.forEach(pair=>handleCollisionEnd(pair));
-  });
+            isStatic:true,
+
+            /*
+             * ★重要
+             * 増殖ブロック自体を透過させる
+             * ので爆弾がそこで止まらない。
+             */
+            isSensor:true,
+
+            label:"multiply",
+
+            plugin:{
+                gameType:"multiply",
+                width:w,
+                height:h,
+                id:uid()
+            }
+
+        }
+    );
+
 }
 
-function bodyType(b){return b?.plugin?.gameType||b?.label}
+function createBedrock(
+    x,
+    y,
+    w=300,
+    h=50
+){
 
-function handleCollision(pair,isEditor){
-  const a=pair.bodyA,b=pair.bodyB;
-  const ta=bodyType(a),tb=bodyType(b);
+    return Bodies.rectangle(
+        x,
+        y,
+        w,
+        h,
+        {
 
-  if((ta==="bomb"&&tb==="multiply")||(ta==="multiply"&&tb==="bomb")){
-    const bomb=ta==="bomb"?a:b;
-    const mult=ta==="multiply"?a:b;
-    registerMultiplyContact(mult,bomb,isEditor);
-    return;
-  }
+            isStatic:true,
+            angle:0,
 
-  const enemy=ta==="enemy"?a:(tb==="enemy"?b:null);
-  const other=enemy===a?b:a;
+            label:"bedrock",
 
-  if(enemy&&enemy.plugin.alive){
-    const ot=bodyType(other);
+            plugin:{
+                gameType:"bedrock",
+                width:w,
+                height:h,
+                id:uid()
+            }
 
-    if(ot==="floor"||ot==="bedrock"){
-      if(enemy.plugin.preVY>=10){
-        killEnemy(enemy);
-      }
-    }else if(ot==="block"||ot==="bedrock"){
-      checkCrush(enemy,other,pair);
-    }
-  }
+        }
+    );
 
-  if(ta==="block"&&tb==="block"){
-    blockHitBlock(a,b);
-  }
-
-  if(ta==="bomb"||tb==="bomb"){
-    const bomb=ta==="bomb"?a:b;
-    const otherBody=bomb===a?b:a;
-    if(bodyType(otherBody)==="block"){
-      damageBlock(otherBody,30);
-    }
-  }
 }
 
-function handleActiveCollision(pair,isEditor){
-  const a=pair.bodyA,b=pair.bodyB;
-  const ta=bodyType(a),tb=bodyType(b);
-  const enemy=ta==="enemy"?a:(tb==="enemy"?b:null);
-  const other=enemy===a?b:a;
+/* =========================
+   Engine
+========================= */
 
-  if(enemy&&enemy.plugin.alive){
-    const ot=bodyType(other);
-    if(ot==="block"||ot==="bedrock"){
-      checkCrush(enemy,other,pair);
+function setupEngineEvents(engine){
+
+    Events.on(
+        engine,
+        "beforeUpdate",
+        ()=>{
+            Composite.allBodies(engine.world)
+                .forEach(body=>{
+
+                    if(
+                        body.label==="enemy" &&
+                        body.plugin.alive
+                    ){
+
+                        body.plugin.preVY =
+                            body.velocity.y;
+
+                    }
+
+                });
+        }
+    );
+
+    Events.on(
+        engine,
+        "collisionStart",
+        event=>{
+
+            event.pairs.forEach(
+                pair=>handleCollision(pair)
+            );
+
+        }
+    );
+
+    Events.on(
+        engine,
+        "collisionActive",
+        event=>{
+
+            event.pairs.forEach(
+                pair=>handleActiveCollision(pair)
+            );
+
+        }
+    );
+
+    Events.on(
+        engine,
+        "collisionEnd",
+        event=>{
+
+            event.pairs.forEach(
+                pair=>handleCollisionEnd(pair)
+            );
+
+        }
+    );
+
+}
+
+/* =========================
+   衝突
+========================= */
+
+function typeOf(body){
+
+    return body?.plugin?.gameType || body?.label;
+
+}
+
+function handleCollision(pair){
+
+    const a = pair.bodyA;
+    const b = pair.bodyB;
+
+    const ta = typeOf(a);
+    const tb = typeOf(b);
+
+    /*
+     * 増殖
+     */
+    if(
+        (ta==="bomb" && tb==="multiply") ||
+        (ta==="multiply" && tb==="bomb")
+    ){
+
+        const bomb =
+            ta==="bomb" ? a : b;
+
+        const multiply =
+            ta==="multiply" ? a : b;
+
+        handleMultiply(
+            multiply,
+            bomb
+        );
+
+        return;
+
     }
-  }
+
+    /*
+     * スライム
+     */
+    const enemy =
+        ta==="enemy"
+            ? a
+            : tb==="enemy"
+                ? b
+                : null;
+
+    if(enemy && enemy.plugin.alive){
+
+        const other =
+            enemy===a ? b : a;
+
+        const ot = typeOf(other);
+
+        /*
+         * 床・岩盤への落下
+         */
+        if(
+            ot==="floor" ||
+            ot==="bedrock"
+        ){
+
+            if(
+                enemy.plugin.preVY
+                >= ENEMY_FALL_SPEED
+            ){
+
+                killEnemy(enemy);
+
+                return;
+
+            }
+
+        }
+
+        /*
+         * ブロックによる圧し潰し
+         */
+        if(
+            ot==="block" ||
+            ot==="bedrock"
+        ){
+
+            checkCrush(
+                enemy,
+                other,
+                pair
+            );
+
+        }
+
+    }
+
+    /*
+     * ブロック同士
+     */
+    if(
+        ta==="block" &&
+        tb==="block"
+    ){
+
+        blockHitBlock(a,b);
+
+    }
+
+    /*
+     * 爆弾→ブロック
+     */
+    if(ta==="bomb" || tb==="bomb"){
+
+        const bomb =
+            ta==="bomb" ? a : b;
+
+        const other =
+            bomb===a ? b : a;
+
+        if(typeOf(other)==="block"){
+
+            damageBlock(
+                other,
+                30
+            );
+
+        }
+
+    }
+
+}
+
+function handleActiveCollision(pair){
+
+    const a = pair.bodyA;
+    const b = pair.bodyB;
+
+    const ta = typeOf(a);
+    const tb = typeOf(b);
+
+    const enemy =
+        ta==="enemy"
+            ? a
+            : tb==="enemy"
+                ? b
+                : null;
+
+    if(!enemy || !enemy.plugin.alive){
+        return;
+    }
+
+    const other =
+        enemy===a ? b : a;
+
+    const ot = typeOf(other);
+
+    if(
+        ot==="block" ||
+        ot==="bedrock"
+    ){
+
+        checkCrush(
+            enemy,
+            other,
+            pair
+        );
+
+    }
+
 }
 
 function handleCollisionEnd(pair){
-  const a=pair.bodyA,b=pair.bodyB;
-  const ta=bodyType(a),tb=bodyType(b);
-  if((ta==="bomb"&&tb==="multiply")||(ta==="multiply"&&tb==="bomb")){
-    const bomb=ta==="bomb"?a:b;
-    const mult=ta==="multiply"?a:b;
-    const set=multiplyContacts.get(mult.plugin.id);
-    if(set)set.delete(bomb.plugin.id);
-  }
+
+    const a = pair.bodyA;
+    const b = pair.bodyB;
+
+    const ta = typeOf(a);
+    const tb = typeOf(b);
+
+    if(
+        (ta==="bomb" && tb==="multiply") ||
+        (ta==="multiply" && tb==="bomb")
+    ){
+
+        const bomb =
+            ta==="bomb" ? a : b;
+
+        const multiply =
+            ta==="multiply" ? a : b;
+
+        const set =
+            multiplyContacts.get(
+                multiply.plugin.id
+            );
+
+        if(set){
+
+            set.delete(
+                bomb.plugin.id
+            );
+
+        }
+
+    }
+
 }
 
-function registerMultiplyContact(mult,bomb,isEditor){
-  if(!multiplyContacts.has(mult.plugin.id))
-    multiplyContacts.set(mult.plugin.id,new Set());
+/* =========================
+   増殖
+========================= */
 
-  const set=multiplyContacts.get(mult.plugin.id);
+function handleMultiply(
+    multiply,
+    bomb
+){
 
-  if(set.has(bomb.plugin.id))return;
+    if(!multiplyContacts.has(
+        multiply.plugin.id
+    )){
 
-  set.add(bomb.plugin.id);
+        multiplyContacts.set(
+            multiply.plugin.id,
+            new Set()
+        );
 
-  if(!bomb.plugin.armed){
-    bomb.plugin.armed=true;
-    multiplyBomb(mult,bomb,isEditor);
-  }
+    }
+
+    const set =
+        multiplyContacts.get(
+            multiply.plugin.id
+        );
+
+    /*
+     * まだ接触中なら何もしない。
+     */
+    if(set.has(
+        bomb.plugin.id
+    )){
+
+        return;
+
+    }
+
+    /*
+     * 今回の接触を登録
+     */
+    set.add(
+        bomb.plugin.id
+    );
+
+    /*
+     * 1接触につき1個だけ増殖
+     */
+    multiplyBomb(
+        multiply,
+        bomb
+    );
+
 }
 
-function multiplyBomb(mult,bomb,isEditor){
-  const engine=isEditor?editorEngine:playEngine;
-  if(!engine||!bomb) return;
+function multiplyBomb(
+    multiply,
+    bomb
+){
 
-  const p=mult.position;
-  const x=p.x;
-  const y=p.y+Math.max(mult.plugin.height||45,40)+45;
+    const engine =
+        currentScreenIsEditor()
+            ? editorEngine
+            : playEngine;
 
-  const b=createBomb(x,y);
+    if(!engine){
+        return;
+    }
 
-  /*
-    新しく作った爆弾は増殖ブロックの下側へ。
-    元の爆弾と同じIDにはしない。
-    さらに少し左右へずらして重なりを防ぐ。
-  */
-  b.position.x=x+(Math.random()-.5)*45;
-  b.position.y=y+Math.random()*20;
+    const p = multiply.position;
 
-  World.add(engine.world,b);
+    const height =
+        multiply.plugin.height || 45;
 
-  if(isEditor)stageObjects.push(b);
+    /*
+     * ★増殖した爆弾は必ず下側
+     */
+    const newBomb = createBomb(
+        p.x + (Math.random()-.5)*50,
+        p.y + height/2 + 45
+    );
 
-  Body.setVelocity(b,{
-    x:(Math.random()-.5)*1.5,
-    y:1
-  });
+    World.add(
+        engine.world,
+        newBomb
+    );
 
-  /*
-    新しい爆弾は現在の接触判定には入れない。
-    一度増殖ブロックから離れてから再接触したときだけ
-    次の増殖が可能。
-  */
-  b.plugin.armed=false;
+    if(currentScreenIsEditor()){
+        stageObjects.push(newBomb);
+    }
+
+    Body.setVelocity(
+        newBomb,
+        {
+            x:(Math.random()-.5)*1.5,
+            y:1
+        }
+    );
+
 }
+
+/* =========================
+   ブロックダメージ
+========================= */
 
 function blockHitBlock(a,b){
-  const va=a.velocity;
-  const vb=b.velocity;
-  const impact=Math.abs(va.y-vb.y)+Math.abs(va.x-vb.x);
-  if(impact>1) {
-    damageBlock(a,impact*3);
-    damageBlock(b,impact*3);
-  }
-}
 
-function damageBlock(b,damage){
-  if(!b||b.label!=="block")return;
-  const p=b.plugin;
-  const m=MATERIALS[p.material];
-  if(!m)return;
-  if(damage<m.threshold)return;
-  p.hp-=1;
-  if(p.hp<=0){
-    const engine=currentScreen==="editor"?editorEngine:playEngine;
-    removeBody(b,engine);
-  }
-}
+    const impact =
+        Math.abs(a.velocity.y-b.velocity.y)
+        +
+        Math.abs(a.velocity.x-b.velocity.x);
 
-function checkCrush(enemy,other,pair){
-  if(!enemy.plugin.alive)return;
-  const ot=bodyType(other);
+    if(impact>1){
 
-  const depth=pair.collision?.depth||0;
-  const enemyTop=enemy.bounds.min.y;
-  const enemyBottom=enemy.bounds.max.y;
-  const otherTop=other.bounds.min.y;
-  const otherBottom=other.bounds.max.y;
+        damageBlock(
+            a,
+            impact*3
+        );
 
-  /*
-    上からブロックが落ちてきてスライムと重なった場合。
-  */
-  const above=other.position.y<enemy.position.y;
-  const movingDown=other.isStatic||other.velocity.y>1.5;
-  const compressed=depth>5 && otherBottom>enemyTop && otherTop<enemyBottom;
+        damageBlock(
+            b,
+            impact*3
+        );
 
-  if(above&&movingDown&&compressed){
-    if(other.isStatic||Math.abs(other.velocity.y)+Math.abs(enemy.velocity.y)>3){
-      killEnemy(enemy);
-      return;
     }
-  }
 
-  /*
-    高速衝突。
-  */
-  const relative=Math.abs(enemy.plugin.preVY-(other.velocity?.y||0));
-  if(relative>=ENEMY_KILL_IMPACT){
-    killEnemy(enemy);
-  }
+}
+
+function damageBlock(
+    block,
+    damage
+){
+
+    if(
+        !block ||
+        block.label!=="block"
+    ){
+        return;
+    }
+
+    const p = block.plugin;
+
+    if(
+        damage <
+        p.threshold
+    ){
+        return;
+    }
+
+    p.hp--;
+
+    if(p.hp<=0){
+
+        const engine =
+            currentScreenIsEditor()
+                ? editorEngine
+                : playEngine;
+
+        World.remove(
+            engine.world,
+            block
+        );
+
+        const index =
+            stageObjects.indexOf(block);
+
+        if(index>=0){
+            stageObjects.splice(index,1);
+        }
+
+        if(selectedBody===block){
+            selectedBody=null;
+        }
+
+    }
+
+}
+
+/* =========================
+   スライム
+========================= */
+
+function checkCrush(
+    enemy,
+    other,
+    pair
+){
+
+    if(!enemy.plugin.alive){
+        return;
+    }
+
+    const depth =
+        pair.collision?.depth || 0;
+
+    const above =
+        other.position.y <
+        enemy.position.y;
+
+    const downward =
+        other.isStatic ||
+        other.velocity.y >
+        ENEMY_CRUSH_SPEED;
+
+    const relativeSpeed =
+        Math.abs(
+            enemy.plugin.preVY
+            -
+            (other.velocity?.y || 0)
+        );
+
+    /*
+     * 上から落下して潰した
+     */
+    if(
+        above &&
+        downward &&
+        depth>5
+    ){
+
+        if(
+            other.isStatic ||
+            relativeSpeed>ENEMY_CRUSH_SPEED
+        ){
+
+            killEnemy(enemy);
+            return;
+
+        }
+
+    }
+
+    /*
+     * 高速衝突
+     */
+    if(
+        relativeSpeed>=9
+    ){
+
+        killEnemy(enemy);
+
+    }
+
 }
 
 function killEnemy(enemy){
-  if(!enemy||!enemy.plugin.alive)return;
-  enemy.plugin.alive=false;
-  const engine=currentScreen==="editor"?editorEngine:playEngine;
-  World.remove(engine.world,enemy);
-  const i=stageObjects.indexOf(enemy);
-  if(i>=0)stageObjects.splice(i,1);
-  if(selectedBody===enemy)selectedBody=null;
+
+    if(
+        !enemy ||
+        !enemy.plugin.alive
+    ){
+        return;
+    }
+
+    enemy.plugin.alive=false;
+
+    const engine =
+        currentScreenIsEditor()
+            ? editorEngine
+            : playEngine;
+
+    World.remove(
+        engine.world,
+        enemy
+    );
+
+    const index =
+        stageObjects.indexOf(enemy);
+
+    if(index>=0){
+        stageObjects.splice(index,1);
+    }
+
+    if(selectedBody===enemy){
+        selectedBody=null;
+    }
+
 }
 
-function explodeAt(engine,x,y){
-  explosionEffects.push({
-    x,y,time:performance.now(),engine
-  });
+/* =========================
+   爆発
+========================= */
 
-  const bodies=Composite.allBodies(engine.world);
+function explodeAt(
+    engine,
+    x,
+    y
+){
 
-  bodies.forEach(b=>{
-    if(b.label==="floor"||b.label==="bedrock")return;
-
-    const dx=b.position.x-x;
-    const dy=b.position.y-y;
-    const d=Math.sqrt(dx*dx+dy*dy);
-
-    if(d>EXPLOSION_FORCE_RADIUS)return;
-
-    const power=1-d/EXPLOSION_FORCE_RADIUS;
-    if(power<=0)return;
-
-    const len=Math.max(d,1);
-    const nx=dx/len;
-    const ny=dy/len;
-
-    if(!b.isStatic){
-      Body.applyForce(b,b.position,{
-        x:nx*EXPLOSION_FORCE*power,
-        y:ny*EXPLOSION_FORCE*power
-      });
-    }
-
-    if(b.label==="block"){
-      damageBlock(b,EXPLOSION_BLOCK_DAMAGE*power);
-    }
-
-    if(b.label==="enemy"&&b.plugin.alive&&d<EXPLOSION_RADIUS){
-      killEnemy(b);
-    }
-  });
-}
-
-function explodeAllBombs(engine){
-  const bombs=Composite.allBodies(engine.world)
-    .filter(b=>bodyType(b)==="bomb");
-
-  bombs.forEach(b=>explodeAt(engine,b.position.x,b.position.y));
-  bombs.forEach(b=>World.remove(engine.world,b));
-
-  if(engine===editorEngine){
-    stageObjects=stageObjects.filter(b=>bodyType(b)!=="bomb");
-  }
-}
-
-function editorMouseDown(e){
-  const p=pointerPos(e,editorCanvas);
-  const w=screenToWorld(editorCanvas,p.x,p.y,editorCamera);
-
-  pointerDown=true;
-
-  if(currentTool==="move"){
-    const b=findBodyAt(editorEngine,w);
-    if(b){
-      selectedBody=b;
-      dragData={body:b,dx:b.position.x-w.x,dy:b.position.y-w.y};
-    }
-    return;
-  }
-
-  if(currentTool==="erase"){
-    const b=findBodyAt(editorEngine,w);
-    if(b)removeBody(b,editorEngine);
-    return;
-  }
-
-  if(currentTool==="rotate"){
-    const b=findBodyAt(editorEngine,w);
-    if(b){
-      selectedBody=b;
-      if(b.label!=="bedrock")Body.rotate(b,15*Math.PI/180);
-      openProperty(b);
-    }
-    return;
-  }
-
-  if(currentTool==="resize"){
-    const b=findBodyAt(editorEngine,w);
-    if(b)openProperty(b);
-    return;
-  }
-
-  const b=findBodyAt(editorEngine,w);
-
-  if(b&&["block","bedrock","multiply","enemy","bomb"].includes(b.label)){
-    selectedBody=b;
-    if(currentTool==="wood"||currentTool==="glass"||currentTool==="stone"){
-      return;
-    }
-  }
-
-  if(currentTool==="wood"||currentTool==="glass"||currentTool==="stone"){
-    addEditorBody(createBlock(currentTool,w.x,w.y,150,35,0));
-  }else if(currentTool==="enemy"){
-    addEditorBody(createEnemy(w.x,w.y));
-  }else if(currentTool==="bomb"){
-    addEditorBody(createBomb(w.x,w.y));
-  }else if(currentTool==="multiply"){
-    addEditorBody(createMultiply(w.x,w.y));
-  }else if(currentTool==="bedrock"){
-    addEditorBody(createBedrock(w.x,w.y));
-  }
-}
-
-function editorMove(e){
-  if(!pointerDown||!dragData)return;
-  const p=pointerPos(e,editorCanvas);
-  const w=screenToWorld(editorCanvas,p.x,p.y,editorCamera);
-  const b=dragData.body;
-
-  Body.setPosition(b,{
-    x:w.x+dragData.dx,
-    y:w.y+dragData.dy
-  });
-
-  if(b.label==="bedrock")Body.setAngle(b,0);
-}
-
-function editorUp(){
-  pointerDown=false;
-  dragData=null;
-}
-
-editorCanvas.addEventListener("pointerdown",editorMouseDown);
-editorCanvas.addEventListener("pointermove",editorMove);
-editorCanvas.addEventListener("pointerup",editorUp);
-editorCanvas.addEventListener("pointercancel",editorUp);
-
-editorCanvas.addEventListener("wheel",e=>{
-  e.preventDefault();
-  const old=editorCamera.zoom;
-  editorCamera.zoom*=e.deltaY<0?1.1:.9;
-  editorCamera.zoom=Math.max(.15,Math.min(3,editorCamera.zoom));
-  if(old!==editorCamera.zoom){
-    // ズーム中心は画面中央
-  }
-},{passive:false});
-
-document.querySelectorAll(".tool").forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll(".tool").forEach(x=>x.classList.remove("selected"));
-    btn.classList.add("selected");
-    currentTool=btn.dataset.tool;
-
-    if(currentTool!=="resize"){
-      $("propertyPanel").classList.remove("show");
-    }
-  };
-});
-
-function serializeStage(){
-  const objects=stageObjects
-    .filter(b=>["block","enemy","multiply","bedrock"].includes(bodyType(b)))
-    .map(b=>{
-      const p=b.plugin||{};
-      if(b.label==="block"){
-        return{
-          type:"block",
-          material:p.material,
-          x:b.position.x,y:b.position.y,
-          w:p.width,h:p.height,
-          angle:b.angle*180/Math.PI
-        };
-      }
-      if(b.label==="enemy"){
-        return{type:"enemy",x:b.position.x,y:b.position.y};
-      }
-      if(b.label==="multiply"){
-        return{
-          type:"multiply",x:b.position.x,y:b.position.y,
-          w:p.width,h:p.height
-        };
-      }
-      if(b.label==="bedrock"){
-        return{
-          type:"bedrock",x:b.position.x,y:b.position.y,
-          w:p.width,h:p.height,angle:0
-        };
-      }
+    explosionEffects.push({
+        engine:engine,
+        x:x,
+        y:y,
+        time:performance.now()
     });
 
-  return{
-    id:currentStageId||uid(),
-    name:$("stageName").value.trim()||"無題のステージ",
-    objects
-  };
+    Composite.allBodies(
+        engine.world
+    ).forEach(body=>{
+
+        const type =
+            typeOf(body);
+
+        /*
+         * 岩盤には何もしない
+         */
+        if(
+            type==="floor" ||
+            type==="bedrock"
+        ){
+            return;
+        }
+
+        const dx =
+            body.position.x-x;
+
+        const dy =
+            body.position.y-y;
+
+        const distance =
+            Math.sqrt(dx*dx+dy*dy);
+
+        if(
+            distance>
+            EXPLOSION_FORCE_RADIUS
+        ){
+            return;
+        }
+
+        const power =
+            1 -
+            distance/
+            EXPLOSION_FORCE_RADIUS;
+
+        const length =
+            Math.max(distance,1);
+
+        const nx =
+            dx/length;
+
+        const ny =
+            dy/length;
+
+        if(!body.isStatic){
+
+            Body.applyForce(
+                body,
+                body.position,
+                {
+                    x:nx*
+                      EXPLOSION_FORCE*
+                      power,
+
+                    y:ny*
+                      EXPLOSION_FORCE*
+                      power
+                }
+            );
+
+        }
+
+        if(type==="block"){
+
+            damageBlock(
+                body,
+                EXPLOSION_BLOCK_DAMAGE*
+                power
+            );
+
+        }
+
+        if(
+            type==="enemy" &&
+            body.plugin.alive &&
+            distance<EXPLOSION_RADIUS
+        ){
+
+            killEnemy(body);
+
+        }
+
+    });
+
+}
+
+function explodeAllBombs(
+    engine
+){
+
+    const bombs =
+        Composite.allBodies(
+            engine.world
+        ).filter(
+            b=>typeOf(b)==="bomb"
+        );
+
+    bombs.forEach(
+        bomb=>{
+            explodeAt(
+                engine,
+                bomb.position.x,
+                bomb.position.y
+            );
+        }
+    );
+
+    bombs.forEach(
+        bomb=>{
+            World.remove(
+                engine.world,
+                bomb
+            );
+        }
+    );
+
+    if(
+        engine===editorEngine
+    ){
+
+        stageObjects =
+            stageObjects.filter(
+                b=>typeOf(b)!=="bomb"
+            );
+
+    }
+
+}
+
+/* =========================
+   エディター操作
+========================= */
+
+function findBodyAt(
+    engine,
+    point
+){
+
+    const bodies =
+        Composite.allBodies(
+            engine.world
+        );
+
+    for(
+        let i=bodies.length-1;
+        i>=0;
+        i--
+    ){
+
+        const body=bodies[i];
+
+        if(
+            typeOf(body)==="floor"
+        ){
+            continue;
+        }
+
+        if(
+            Bounds.contains(
+                body.bounds,
+                point
+            ) &&
+            Vertices.contains(
+                body.vertices,
+                point
+            )
+        ){
+
+            return body;
+
+        }
+
+    }
+
+    return null;
+
+}
+
+function addEditorBody(
+    body
+){
+
+    World.add(
+        editorEngine.world,
+        body
+    );
+
+    stageObjects.push(body);
+
+}
+
+function removeEditorBody(
+    body
+){
+
+    if(!body){
+        return;
+    }
+
+    World.remove(
+        editorEngine.world,
+        body
+    );
+
+    const index =
+        stageObjects.indexOf(body);
+
+    if(index>=0){
+        stageObjects.splice(index,1);
+    }
+
+    if(selectedBody===body){
+        selectedBody=null;
+    }
+
+}
+
+function editorPointerDown(event){
+
+    if(!editorEngine){
+        return;
+    }
+
+    const screen =
+        pointerPosition(
+            event,
+            editorCanvas
+        );
+
+    const world =
+        screenToWorld(
+            editorCanvas,
+            screen.x,
+            screen.y,
+            editorCamera
+        );
+
+    pointerDown=true;
+
+    /*
+     * 移動
+     */
+    if(currentTool==="move"){
+
+        const body =
+            findBodyAt(
+                editorEngine,
+                world
+            );
+
+        if(body){
+
+            selectedBody=body;
+
+            dragData={
+                body:body,
+                dx:body.position.x-world.x,
+                dy:body.position.y-world.y
+            };
+
+        }
+
+        return;
+    }
+
+    /*
+     * 消去
+     */
+    if(currentTool==="erase"){
+
+        const body =
+            findBodyAt(
+                editorEngine,
+                world
+            );
+
+        if(body){
+            removeEditorBody(body);
+        }
+
+        return;
+    }
+
+    /*
+     * 回転
+     */
+    if(currentTool==="rotate"){
+
+        const body =
+            findBodyAt(
+                editorEngine,
+                world
+            );
+
+        if(body){
+
+            selectedBody=body;
+
+            if(
+                body.label!=="bedrock"
+            ){
+
+                Body.rotate(
+                    body,
+                    15*Math.PI/180
+                );
+
+            }
+
+            openProperty(body);
+
+        }
+
+        return;
+    }
+
+    /*
+     * 形変更
+     */
+    if(currentTool==="resize"){
+
+        const body =
+            findBodyAt(
+                editorEngine,
+                world
+            );
+
+        if(body){
+            openProperty(body);
+        }
+
+        return;
+    }
+
+    /*
+     * 既存物体をタップした場合は選択
+     */
+    const existing =
+        findBodyAt(
+            editorEngine,
+            world
+        );
+
+    if(
+        existing &&
+        [
+            "block",
+            "enemy",
+            "bomb",
+            "multiply",
+            "bedrock"
+        ].includes(existing.label)
+    ){
+
+        selectedBody=existing;
+
+        if(
+            ["wood","glass","stone"]
+            .includes(currentTool)
+        ){
+
+            return;
+
+        }
+
+    }
+
+    /*
+     * 新規配置
+     */
+    if(
+        ["wood","glass","stone"]
+        .includes(currentTool)
+    ){
+
+        addEditorBody(
+            createBlock(
+                currentTool,
+                world.x,
+                world.y,
+                150,
+                35,
+                0
+            )
+        );
+
+        return;
+    }
+
+    if(currentTool==="enemy"){
+
+        addEditorBody(
+            createEnemy(
+                world.x,
+                world.y
+            )
+        );
+
+        return;
+    }
+
+    if(currentTool==="bomb"){
+
+        addEditorBody(
+            createBomb(
+                world.x,
+                world.y
+            )
+        );
+
+        return;
+    }
+
+    if(currentTool==="multiply"){
+
+        addEditorBody(
+            createMultiply(
+                world.x,
+                world.y
+            )
+        );
+
+        return;
+    }
+
+    if(currentTool==="bedrock"){
+
+        addEditorBody(
+            createBedrock(
+                world.x,
+                world.y
+            )
+        );
+
+    }
+
+}
+
+function editorPointerMove(event){
+
+    if(
+        !pointerDown ||
+        !dragData
+    ){
+        return;
+    }
+
+    const screen =
+        pointerPosition(
+            event,
+            editorCanvas
+        );
+
+    const world =
+        screenToWorld(
+            editorCanvas,
+            screen.x,
+            screen.y,
+            editorCamera
+        );
+
+    const body =
+        dragData.body;
+
+    Body.setPosition(
+        body,
+        {
+            x:world.x+dragData.dx,
+            y:world.y+dragData.dy
+        }
+    );
+
+    if(
+        body.label==="bedrock"
+    ){
+
+        Body.setAngle(
+            body,
+            0
+        );
+
+    }
+
+}
+
+function editorPointerUp(){
+
+    pointerDown=false;
+    dragData=null;
+
+}
+
+editorCanvas.addEventListener(
+    "pointerdown",
+    editorPointerDown
+);
+
+editorCanvas.addEventListener(
+    "pointermove",
+    editorPointerMove
+);
+
+editorCanvas.addEventListener(
+    "pointerup",
+    editorPointerUp
+);
+
+editorCanvas.addEventListener(
+    "pointercancel",
+    editorPointerUp
+);
+
+editorCanvas.addEventListener(
+    "wheel",
+    event=>{
+
+        event.preventDefault();
+
+        editorCamera.zoom *=
+            event.deltaY<0
+                ? 1.1
+                : .9;
+
+        editorCamera.zoom =
+            Math.max(
+                .15,
+                Math.min(
+                    3,
+                    editorCamera.zoom
+                )
+            );
+
+    },
+    {passive:false}
+);
+
+/* =========================
+   プロパティ
+========================= */
+
+function openProperty(body){
+
+    if(!body){
+        return;
+    }
+
+    selectedBody=body;
+
+    const p=body.plugin||{};
+
+    $("propW").value =
+        Math.round(
+            p.width ||
+            body.bounds.max.x-
+            body.bounds.min.x
+        );
+
+    $("propH").value =
+        Math.round(
+            p.height ||
+            body.bounds.max.y-
+            body.bounds.min.y
+        );
+
+    $("propAngle").value =
+        Math.round(
+            body.angle*180/Math.PI
+        );
+
+    $("propertyPanel")
+        .classList.add("show");
+
+}
+
+function resizeSelected(
+    width,
+    height
+){
+
+    if(
+        !selectedBody ||
+        selectedBody.label!=="block"
+    ){
+        return;
+    }
+
+    const p =
+        selectedBody.plugin;
+
+    width =
+        Math.max(
+            10,
+            Math.min(
+                1000,
+                width
+            )
+        );
+
+    height =
+        Math.max(
+            10,
+            Math.min(
+                1000,
+                height
+            )
+        );
+
+    Body.scale(
+        selectedBody,
+        width/p.width,
+        height/p.height
+    );
+
+    p.width=width;
+    p.height=height;
+
+}
+
+function rotateSelected(
+    degrees
+){
+
+    if(!selectedBody){
+        return;
+    }
+
+    if(
+        selectedBody.label==="bedrock"
+    ){
+        Body.setAngle(
+            selectedBody,
+            0
+        );
+        return;
+    }
+
+    Body.rotate(
+        selectedBody,
+        degrees*Math.PI/180
+    );
+
+}
+
+$("applyProp").onclick=()=>{
+
+    if(!selectedBody){
+        return;
+    }
+
+    if(
+        selectedBody.label==="block"
+    ){
+
+        resizeSelected(
+            Number($("propW").value),
+            Number($("propH").value)
+        );
+
+    }
+
+    if(
+        selectedBody.label==="bedrock"
+    ){
+
+        const p =
+            selectedBody.plugin;
+
+        const w =
+            Math.max(
+                10,
+                Number($("propW").value)
+            );
+
+        const h =
+            Math.max(
+                10,
+                Number($("propH").value)
+            );
+
+        Body.scale(
+            selectedBody,
+            w/p.width,
+            h/p.height
+        );
+
+        p.width=w;
+        p.height=h;
+
+        Body.setAngle(
+            selectedBody,
+            0
+        );
+
+    }
+
+    if(
+        selectedBody.label!=="bedrock"
+    ){
+
+        Body.setAngle(
+            selectedBody,
+            Number(
+                $("propAngle").value
+            )*Math.PI/180
+        );
+
+    }
+
+    showMessage(
+        "変更しました"
+    );
+
+};
+
+$("rotateL").onclick=()=>{
+
+    rotateSelected(-90);
+
+    if(selectedBody){
+
+        $("propAngle").value =
+            Math.round(
+                selectedBody.angle*
+                180/Math.PI
+            );
+
+    }
+
+};
+
+$("rotateR").onclick=()=>{
+
+    rotateSelected(90);
+
+    if(selectedBody){
+
+        $("propAngle").value =
+            Math.round(
+                selectedBody.angle*
+                180/Math.PI
+            );
+
+    }
+
+};
+
+$("thin").onclick=()=>{
+
+    if(
+        selectedBody &&
+        selectedBody.label==="block"
+    ){
+
+        resizeSelected(
+            selectedBody.plugin.width*.8,
+            selectedBody.plugin.height*.8
+        );
+
+        openProperty(
+            selectedBody
+        );
+
+    }
+
+};
+
+$("thick").onclick=()=>{
+
+    if(
+        selectedBody &&
+        selectedBody.label==="block"
+    ){
+
+        resizeSelected(
+            selectedBody.plugin.width*1.25,
+            selectedBody.plugin.height*1.25
+        );
+
+        openProperty(
+            selectedBody
+        );
+
+    }
+
+};
+
+$("closeProp").onclick=()=>{
+
+    $("propertyPanel")
+        .classList.remove("show");
+
+};
+
+/* =========================
+   ツール
+========================= */
+
+document.querySelectorAll(".tool")
+.forEach(button=>{
+
+    button.addEventListener(
+        "click",
+        event=>{
+
+            event.stopPropagation();
+
+            document
+                .querySelectorAll(".tool")
+                .forEach(x=>{
+                    x.classList.remove(
+                        "selected"
+                    );
+                });
+
+            button.classList.add(
+                "selected"
+            );
+
+            currentTool =
+                button.dataset.tool;
+
+            if(
+                currentTool!=="resize" &&
+                currentTool!=="rotate"
+            ){
+
+                $("propertyPanel")
+                    .classList.remove(
+                        "show"
+                    );
+
+            }
+
+        }
+    );
+
+});
+
+/* =========================
+   保存
+========================= */
+
+function serializeStage(){
+
+    return {
+
+        id:
+            currentStageId ||
+            uid(),
+
+        name:
+            $("stageName").value.trim()
+            ||
+            "無題のステージ",
+
+        objects:
+            stageObjects
+            .filter(body=>{
+
+                return [
+                    "block",
+                    "enemy",
+                    "multiply",
+                    "bedrock"
+                ].includes(
+                    typeOf(body)
+                );
+
+            })
+            .map(body=>{
+
+                const p=body.plugin;
+
+                if(
+                    body.label==="block"
+                ){
+
+                    return {
+
+                        type:"block",
+                        material:p.material,
+
+                        x:body.position.x,
+                        y:body.position.y,
+
+                        w:p.width,
+                        h:p.height,
+
+                        angle:
+                            body.angle*
+                            180/Math.PI
+
+                    };
+
+                }
+
+                if(
+                    body.label==="enemy"
+                ){
+
+                    return {
+
+                        type:"enemy",
+
+                        x:body.position.x,
+                        y:body.position.y
+
+                    };
+
+                }
+
+                if(
+                    body.label==="multiply"
+                ){
+
+                    return {
+
+                        type:"multiply",
+
+                        x:body.position.x,
+                        y:body.position.y,
+
+                        w:p.width,
+                        h:p.height
+
+                    };
+
+                }
+
+                if(
+                    body.label==="bedrock"
+                ){
+
+                    return {
+
+                        type:"bedrock",
+
+                        x:body.position.x,
+                        y:body.position.y,
+
+                        w:p.width,
+                        h:p.height,
+
+                        angle:0
+
+                    };
+
+                }
+
+            })
+
+    };
+
 }
 
 function saveCurrentStage(){
-  const stage=serializeStage();
-  currentStageId=stage.id;
 
-  const stages=getStages();
-  const i=stages.findIndex(s=>s.id===stage.id);
-  if(i>=0)stages[i]=stage;
-  else stages.push(stage);
+    const stage =
+        serializeStage();
 
-  setStages(stages);
-  alert("ステージを保存しました");
+    currentStageId =
+        stage.id;
+
+    const stages =
+        getStages();
+
+    const index =
+        stages.findIndex(
+            x=>x.id===stage.id
+        );
+
+    if(index>=0){
+
+        stages[index]=stage;
+
+    }else{
+
+        stages.push(stage);
+
+    }
+
+    setStages(stages);
+
+    showMessage(
+        "ステージを保存しました"
+    );
+
 }
 
-function loadStageIntoEditor(stage){
-  stopEditor();
+/* =========================
+   エディター起動
+========================= */
 
-  currentStageId=stage.id;
-  $("stageName").value=stage.name||"";
-  stageObjects=[];
+function stopEditor(){
 
-  editorEngine=Engine.create();
-  editorEngine.gravity.y=1;
-  World.add(editorEngine.world,floorBody());
-  setupCollisionEvents(editorEngine,true);
+    if(
+        editorRunner &&
+        editorEngine
+    ){
 
-  (stage.objects||[]).forEach(o=>{
-    let b=null;
+        Runner.stop(
+            editorRunner
+        );
 
-    if(o.type==="block")
-      b=createBlock(o.material,o.x,o.y,o.w,o.h,o.angle||0);
-
-    if(o.type==="enemy")
-      b=createEnemy(o.x,o.y);
-
-    if(o.type==="multiply")
-      b=createMultiply(o.x,o.y,o.w,o.h);
-
-    if(o.type==="bedrock")
-      b=createBedrock(o.x,o.y,o.w,o.h,0);
-
-    if(b){
-      World.add(editorEngine.world,b);
-      stageObjects.push(b);
     }
-  });
 
-  editorRunner=Runner.create();
-  Runner.run(editorRunner,editorEngine);
+    editorRunner=null;
+    editorEngine=null;
 
-  showScreen("editorScreen");
-  resizeAll();
+    selectedBody=null;
+    dragData=null;
+    stageObjects=[];
+
+    multiplyContacts.clear();
+
+}
+
+function createEditorEngine(){
+
+    editorEngine =
+        MatterEngine.create();
+
+    editorEngine.gravity.y=1;
+
+    World.add(
+        editorEngine.world,
+        createFloor()
+    );
+
+    setupEngineEvents(
+        editorEngine
+    );
+
+    editorRunner =
+        Runner.create();
+
+    Runner.run(
+        editorRunner,
+        editorEngine
+    );
+
 }
 
 function newEditor(){
-  stopEditor();
 
-  currentStageId=uid();
-  $("stageName").value="新しいステージ";
-  stageObjects=[];
+    stopEditor();
 
-  editorEngine=Engine.create();
-  editorEngine.gravity.y=1;
-  World.add(editorEngine.world,floorBody());
-  setupCollisionEvents(editorEngine,true);
+    currentStageId=uid();
 
-  editorRunner=Runner.create();
-  Runner.run(editorRunner,editorEngine);
+    $("stageName").value =
+        "新しいステージ";
 
-  editorCamera={x:0,y:400,zoom:.7};
-  showScreen("editorScreen");
-  resizeAll();
+    createEditorEngine();
+
+    editorCamera={
+        x:0,
+        y:400,
+        zoom:.7
+    };
+
+    showScreen(
+        "editorScreen"
+    );
+
+    resizeAll();
+
 }
 
-function stopEditor(){
-  if(editorRunner&&editorEngine){
-    Runner.stop(editorRunner);
-  }
-  editorRunner=null;
-  editorEngine=null;
-  selectedBody=null;
-  stageObjects=[];
-  multiplyContacts.clear();
+function loadStageIntoEditor(
+    stage
+){
+
+    stopEditor();
+
+    currentStageId=stage.id;
+
+    $("stageName").value =
+        stage.name || "";
+
+    createEditorEngine();
+
+    stageObjects=[];
+
+    (stage.objects||[])
+    .forEach(object=>{
+
+        let body=null;
+
+        if(
+            object.type==="block"
+        ){
+
+            body=createBlock(
+                object.material,
+                object.x,
+                object.y,
+                object.w,
+                object.h,
+                object.angle||0
+            );
+
+        }
+
+        if(
+            object.type==="enemy"
+        ){
+
+            body=createEnemy(
+                object.x,
+                object.y
+            );
+
+        }
+
+        if(
+            object.type==="multiply"
+        ){
+
+            body=createMultiply(
+                object.x,
+                object.y,
+                object.w,
+                object.h
+            );
+
+        }
+
+        if(
+            object.type==="bedrock"
+        ){
+
+            body=createBedrock(
+                object.x,
+                object.y,
+                object.w,
+                object.h
+            );
+
+        }
+
+        if(body){
+
+            World.add(
+                editorEngine.world,
+                body
+            );
+
+            stageObjects.push(body);
+
+        }
+
+    });
+
+    showScreen(
+        "editorScreen"
+    );
+
+    resizeAll();
+
+}
+
+/* =========================
+   プレイ
+========================= */
+
+function stopPlay(){
+
+    if(
+        playRunner &&
+        playEngine
+    ){
+
+        Runner.stop(
+            playRunner
+        );
+
+    }
+
+    playRunner=null;
+    playEngine=null;
+
+    multiplyContacts.clear();
+    explosionEffects=[];
+
 }
 
 function startPlay(stage){
-  stopPlay();
 
-  currentStageId=stage.id;
-  $("playStageName").textContent=stage.name;
+    stopPlay();
 
-  playEngine=Engine.create();
-  playEngine.gravity.y=1;
-  World.add(playEngine.world,floorBody());
-  setupCollisionEvents(playEngine,false);
+    currentStageId =
+        stage.id;
 
-  (stage.objects||[]).forEach(o=>{
-    let b=null;
+    $("playStageName")
+        .textContent =
+        stage.name;
 
-    if(o.type==="block")
-      b=createBlock(o.material,o.x,o.y,o.w,o.h,o.angle||0);
+    playEngine =
+        MatterEngine.create();
 
-    if(o.type==="enemy")
-      b=createEnemy(o.x,o.y);
+    playEngine.gravity.y=1;
 
-    if(o.type==="multiply")
-      b=createMultiply(o.x,o.y,o.w,o.h);
+    World.add(
+        playEngine.world,
+        createFloor()
+    );
 
-    if(o.type==="bedrock")
-      b=createBedrock(o.x,o.y,o.w,o.h,0);
+    setupEngineEvents(
+        playEngine
+    );
 
-    if(b)World.add(playEngine.world,b);
-  });
+    (stage.objects||[])
+    .forEach(object=>{
 
-  playRunner=Runner.create();
-  Runner.run(playRunner,playEngine);
+        let body=null;
 
-  playCamera={x:0,y:450,zoom:.75};
+        if(
+            object.type==="block"
+        ){
 
-  showScreen("playScreen");
-  resizeAll();
+            body=createBlock(
+                object.material,
+                object.x,
+                object.y,
+                object.w,
+                object.h,
+                object.angle||0
+            );
+
+        }
+
+        if(
+            object.type==="enemy"
+        ){
+
+            body=createEnemy(
+                object.x,
+                object.y
+            );
+
+        }
+
+        if(
+            object.type==="multiply"
+        ){
+
+            body=createMultiply(
+                object.x,
+                object.y,
+                object.w,
+                object.h
+            );
+
+        }
+
+        if(
+            object.type==="bedrock"
+        ){
+
+            body=createBedrock(
+                object.x,
+                object.y,
+                object.w,
+                object.h
+            );
+
+        }
+
+        if(body){
+
+            World.add(
+                playEngine.world,
+                body
+            );
+
+        }
+
+    });
+
+    playRunner =
+        Runner.create();
+
+    Runner.run(
+        playRunner,
+        playEngine
+    );
+
+    playCamera={
+        x:0,
+        y:450,
+        zoom:.75
+    };
+
+    showScreen(
+        "playScreen"
+    );
+
+    resizeAll();
+
 }
 
-function stopPlay(){
-  if(playRunner&&playEngine)Runner.stop(playRunner);
-  playRunner=null;
-  playEngine=null;
-  multiplyContacts.clear();
-  explosionEffects=[];
-}
+/* =========================
+   ステージ一覧
+========================= */
 
-function renderEngine(c,ctx,engine,cam){
-  ctx.clearRect(0,0,c.width,c.height);
+function renderStageList(){
 
-  ctx.save();
-  ctx.translate(c.clientWidth/2,c.clientHeight/2);
-  ctx.scale(cam.zoom,cam.zoom);
-  ctx.translate(-cam.x,-cam.y);
+    const list =
+        $("stageList");
 
-  ctx.fillStyle="#dceeff";
-  ctx.fillRect(cam.x-c.clientWidth/(2*cam.zoom)-100,
-               cam.y-c.clientHeight/(2*cam.zoom)-100,
-               c.clientWidth/cam.zoom+200,
-               c.clientHeight/cam.zoom+200);
+    list.innerHTML="";
 
-  const bodies=Composite.allBodies(engine.world);
+    const stages =
+        getStages();
 
-  bodies.forEach(b=>{
-    const t=bodyType(b);
-    if(t==="floor"){
-      ctx.fillStyle="#777";
-      ctx.fillRect(b.bounds.min.x,b.bounds.min.y,
-                   b.bounds.max.x-b.bounds.min.x,
-                   b.bounds.max.y-b.bounds.min.y);
-      return;
+    if(!stages.length){
+
+        list.innerHTML =
+            '<div class="empty">保存されたステージがありません。</div>';
+
+        return;
+
     }
+
+    stages.forEach(stage=>{
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+        card.className="stageCard";
+
+        const name =
+            document.createElement(
+                "div"
+            );
+
+        name.className="stageName";
+
+        name.textContent =
+            stage.name;
+
+        const play =
+            document.createElement(
+                "button"
+            );
+
+        play.textContent =
+            "▶ 遊ぶ";
+
+        play.onclick=()=>{
+            startPlay(stage);
+        };
+
+        const edit =
+            document.createElement(
+                "button"
+            );
+
+        edit.textContent =
+            "✎ 編集";
+
+        edit.onclick=()=>{
+            loadStageIntoEditor(
+                stage
+            );
+        };
+
+        const del =
+            document.createElement(
+                "button"
+            );
+
+        del.textContent =
+            "削除";
+
+        del.className="delete";
+
+        del.onclick=()=>{
+
+            const newStages =
+                getStages()
+                .filter(
+                    x=>x.id!==stage.id
+                );
+
+            setStages(
+                newStages
+            );
+
+            renderStageList();
+
+        };
+
+        card.append(
+            name,
+            play,
+            edit,
+            del
+        );
+
+        list.appendChild(
+            card
+        );
+
+    });
+
+}
+
+/* =========================
+   プレイ爆弾
+========================= */
+
+$("bombBtn").onclick=event=>{
+
+    event.stopPropagation();
+
+    $("bombBtn")
+        .classList.toggle(
+            "active"
+        );
+
+    const active =
+        $("bombBtn")
+        .classList.contains(
+            "active"
+        );
+
+    $("bombBtn").textContent =
+        active
+            ? "💣 爆弾設置中"
+            : "💣 爆弾を置く";
+
+};
+
+playCanvas.addEventListener(
+    "pointerdown",
+    event=>{
+
+        if(
+            !playEngine ||
+            !$("bombBtn")
+                .classList
+                .contains("active")
+        ){
+
+            return;
+
+        }
+
+        const screen =
+            pointerPosition(
+                event,
+                playCanvas
+            );
+
+        const world =
+            screenToWorld(
+                playCanvas,
+                screen.x,
+                screen.y,
+                playCamera
+            );
+
+        const bomb =
+            createBomb(
+                world.x,
+                world.y
+            );
+
+        World.add(
+            playEngine.world,
+            bomb
+        );
+
+        Body.setVelocity(
+            bomb,
+            {
+                x:0,
+                y:1
+            }
+        );
+
+    }
+);
+
+$("allBomb").onclick=event=>{
+
+    event.stopPropagation();
+
+    if(playEngine){
+
+        explodeAllBombs(
+            playEngine
+        );
+
+    }
+
+};
+
+$("restartBtn").onclick=event=>{
+
+    event.stopPropagation();
+
+    const stage =
+        getStages()
+        .find(
+            x=>x.id===currentStageId
+        );
+
+    if(stage){
+        startPlay(stage);
+    }
+
+};
+
+/* =========================
+   ボタン
+========================= */
+
+$("makeBtn").onclick=event=>{
+
+    event.stopPropagation();
+
+    newEditor();
+
+};
+
+$("playBtn").onclick=event=>{
+
+    event.stopPropagation();
+
+    renderStageList();
+
+    showScreen(
+        "selectScreen"
+    );
+
+};
+
+$("selectBack").onclick=event=>{
+
+    event.stopPropagation();
+
+    showScreen(
+        "startScreen"
+    );
+
+};
+
+$("editorBack").onclick=event=>{
+
+    event.stopPropagation();
+
+    stopEditor();
+
+    showScreen(
+        "startScreen"
+    );
+
+};
+
+$("saveStage").onclick=event=>{
+
+    event.stopPropagation();
+
+    saveCurrentStage();
+
+};
+
+$("testStage").onclick=event=>{
+
+    event.stopPropagation();
+
+    saveCurrentStage();
+
+    const stage =
+        getStages()
+        .find(
+            x=>x.id===currentStageId
+        );
+
+    if(stage){
+        startPlay(stage);
+    }
+
+};
+
+$("clearStage").onclick=event=>{
+
+    event.stopPropagation();
+
+    stageObjects
+        .slice()
+        .forEach(
+            body=>{
+                removeEditorBody(
+                    body
+                );
+            }
+        );
+
+    selectedBody=null;
+
+    showMessage(
+        "ステージを全消去しました"
+    );
+
+};
+
+$("playBack").onclick=event=>{
+
+    event.stopPropagation();
+
+    stopPlay();
+
+    renderStageList();
+
+    showScreen(
+        "selectScreen"
+    );
+
+};
+
+/* =========================
+   描画
+========================= */
+
+function drawEngine(
+    canvas,
+    ctx,
+    engine,
+    camera,
+    editor
+){
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
     ctx.save();
-    ctx.translate(b.position.x,b.position.y);
-    ctx.rotate(b.angle);
 
-    if(t==="block"){
-      const w=b.plugin.width,h=b.plugin.height;
-      if(b.plugin.material==="wood")ctx.fillStyle="#c98945";
-      if(b.plugin.material==="glass")ctx.fillStyle="#8de5f5";
-      if(b.plugin.material==="stone")ctx.fillStyle="#777";
-      ctx.fillRect(-w/2,-h/2,w,h);
+    ctx.translate(
+        canvas.clientWidth/2,
+        canvas.clientHeight/2
+    );
 
-      ctx.strokeStyle="#333";
-      ctx.lineWidth=2;
-      ctx.strokeRect(-w/2,-h/2,w,h);
+    ctx.scale(
+        camera.zoom,
+        camera.zoom
+    );
 
-      if(b.plugin.hp<b.plugin.maxHp){
-        ctx.fillStyle="#e22";
-        ctx.fillRect(-w/2,-h/2,w*(b.plugin.hp/b.plugin.maxHp),5);
-      }
-    }
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
 
-    if(t==="bedrock"){
-      const w=b.plugin.width,h=b.plugin.height;
-      ctx.fillStyle="#30343a";
-      ctx.fillRect(-w/2,-h/2,w,h);
-      ctx.strokeStyle="#111";
-      ctx.lineWidth=3;
-      ctx.strokeRect(-w/2,-h/2,w,h);
-      for(let x=-w/2;x<w/2;x+=35){
-        ctx.beginPath();
-        ctx.moveTo(x,-h/2);
-        ctx.lineTo(x+20,h/2);
-        ctx.strokeStyle="#555";
-        ctx.stroke();
-      }
-    }
+    /*
+     * 背景
+     */
+    ctx.fillStyle="#dceeff";
 
-    if(t==="enemy"){
-      ctx.fillStyle=b.plugin.alive?"#55c94a":"#999";
-      ctx.beginPath();
-      ctx.arc(0,0,22,0,Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle="#fff";
-      ctx.beginPath();
-      ctx.arc(-7,-4,5,0,Math.PI*2);
-      ctx.arc(7,-4,5,0,Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle="#222";
-      ctx.beginPath();
-      ctx.arc(-7,-4,2,0,Math.PI*2);
-      ctx.arc(7,-4,2,0,Math.PI*2);
-      ctx.fill();
-    }
+    ctx.fillRect(
+        camera.x -
+            canvas.clientWidth/
+            (2*camera.zoom)-200,
 
-    if(t==="bomb"){
-      ctx.fillStyle="#222";
-      ctx.beginPath();
-      ctx.arc(0,0,16,0,Math.PI*2);
-      ctx.fill();
-      ctx.strokeStyle="#333";
-      ctx.lineWidth=4;
-      ctx.beginPath();
-      ctx.moveTo(8,-12);
-      ctx.quadraticCurveTo(17,-22,20,-13);
-      ctx.stroke();
-    }
+        camera.y -
+            canvas.clientHeight/
+            (2*camera.zoom)-200,
 
-    if(t==="multiply"){
-      const w=b.plugin.width,h=b.plugin.height;
-      ctx.fillStyle="#ffcc33";
-      ctx.fillRect(-w/2,-h/2,w,h);
-      ctx.strokeStyle="#b57900";
-      ctx.lineWidth=3;
-      ctx.strokeRect(-w/2,-h/2,w,h);
-      ctx.fillStyle="#222";
-      ctx.font="bold 28px Arial";
-      ctx.textAlign="center";
-      ctx.textBaseline="middle";
-      ctx.fillText("×2",0,0);
+        canvas.clientWidth/
+            camera.zoom+400,
+
+        canvas.clientHeight/
+            camera.zoom+400
+    );
+
+    const bodies =
+        Composite.allBodies(
+            engine.world
+        );
+
+    bodies.forEach(body=>{
+
+        const type =
+            typeOf(body);
+
+        if(type==="floor"){
+
+            ctx.fillStyle="#777";
+
+            ctx.fillRect(
+                body.bounds.min.x,
+                body.bounds.min.y,
+                body.bounds.max.x-
+                    body.bounds.min.x,
+                body.bounds.max.y-
+                    body.bounds.min.y
+            );
+
+            return;
+        }
+
+        ctx.save();
+
+        ctx.translate(
+            body.position.x,
+            body.position.y
+        );
+
+        ctx.rotate(
+            body.angle
+        );
+
+        if(type==="block"){
+
+            const w =
+                body.plugin.width;
+
+            const h =
+                body.plugin.height;
+
+            if(
+                body.plugin.material==="wood"
+            ){
+                ctx.fillStyle="#c98a46";
+            }
+
+            if(
+                body.plugin.material==="glass"
+            ){
+                ctx.fillStyle="#83ddec";
+            }
+
+            if(
+                body.plugin.material==="stone"
+            ){
+                ctx.fillStyle="#777";
+            }
+
+            ctx.fillRect(
+                -w/2,
+                -h/2,
+                w,
+                h
+            );
+
+            ctx.strokeStyle="#333";
+            ctx.lineWidth=2;
+
+            ctx.strokeRect(
+                -w/2,
+                -h/2,
+                w,
+                h
+            );
+
+        }
+
+        if(type==="bedrock"){
+
+            const w =
+                body.plugin.width;
+
+            const h =
+                body.plugin.height;
+
+            ctx.fillStyle="#30343a";
+
+            ctx.fillRect(
+                -w/2,
+                -h/2,
+                w,
+                h
+            );
+
+            ctx.strokeStyle="#111";
+            ctx.lineWidth=3;
+
+            ctx.strokeRect(
+                -w/2,
+                -h/2,
+                w,
+                h
+            );
+
+            ctx.strokeStyle="#555";
+            ctx.lineWidth=2;
+
+            for(
+                let x=-w/2;
+                x<w/2;
+                x+=35
+            ){
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    x,
+                    -h/2
+                );
+
+                ctx.lineTo(
+                    x+20,
+                    h/2
+                );
+
+                ctx.stroke();
+
+            }
+
+        }
+
+        if(type==="multiply"){
+
+            const w =
+                body.plugin.width;
+
+            const h =
+                body.plugin.height;
+
+            /*
+             * センサーなので半透明で表示
+             */
+            ctx.fillStyle=
+                "rgba(255,204,51,.55)";
+
+            ctx.fillRect(
+                -w/2,
+                -h/2,
+                w,
+                h
+            );
+
+            ctx.strokeStyle="#b57900";
+            ctx.lineWidth=3;
+
+            ctx.strokeRect(
+                -w/2,
+                -h/2,
+                w,
+                h
+            );
+
+            ctx.fillStyle="#222";
+            ctx.font="bold 28px Arial";
+            ctx.textAlign="center";
+            ctx.textBaseline="middle";
+
+            ctx.fillText(
+                "×2",
+                0,
+                0
+            );
+
+        }
+
+        if(type==="enemy"){
+
+            ctx.fillStyle="#55c94a";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                0,
+                0,
+                22,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+
+            ctx.fillStyle="#fff";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                -7,
+                -4,
+                5,
+                0,
+                Math.PI*2
+            );
+
+            ctx.arc(
+                7,
+                -4,
+                5,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+
+            ctx.fillStyle="#222";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                -7,
+                -4,
+                2,
+                0,
+                Math.PI*2
+            );
+
+            ctx.arc(
+                7,
+                -4,
+                2,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+
+        }
+
+        if(type==="bomb"){
+
+            ctx.fillStyle="#222";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                0,
+                0,
+                16,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+
+            ctx.strokeStyle="#333";
+            ctx.lineWidth=4;
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                8,
+                -12
+            );
+
+            ctx.quadraticCurveTo(
+                17,
+                -22,
+                20,
+                -13
+            );
+
+            ctx.stroke();
+
+        }
+
+        ctx.restore();
+
+    });
+
+    /*
+     * 選択枠
+     */
+    if(
+        editor &&
+        selectedBody
+    ){
+
+        const body =
+            selectedBody;
+
+        const w =
+            body.plugin?.width ||
+            45;
+
+        const h =
+            body.plugin?.height ||
+            45;
+
+        ctx.save();
+
+        ctx.translate(
+            body.position.x,
+            body.position.y
+        );
+
+        ctx.rotate(
+            body.angle
+        );
+
+        ctx.strokeStyle="#ff8800";
+        ctx.lineWidth=
+            4/camera.zoom;
+
+        ctx.setLineDash([
+            9/camera.zoom,
+            6/camera.zoom
+        ]);
+
+        ctx.strokeRect(
+            -w/2-5,
+            -h/2-5,
+            w+10,
+            h+10
+        );
+
+        ctx.restore();
+
     }
 
     ctx.restore();
-  });
 
-  if(selectedBody&&currentScreen==="editor"){
-    const b=selectedBody;
-    if(b.position){
-      ctx.save();
-      ctx.translate(b.position.x,b.position.y);
-      ctx.rotate(b.angle);
-      const w=b.plugin?.width||40;
-      const h=b.plugin?.height||40;
-      ctx.strokeStyle="#f80";
-      ctx.lineWidth=5/cam.zoom;
-      ctx.setLineDash([10/cam.zoom,7/cam.zoom]);
-      ctx.strokeRect(-w/2-5,-h/2-5,w+10,h+10);
-      ctx.restore();
+    /*
+     * 爆発
+     */
+    const now =
+        performance.now();
+
+    explosionEffects =
+        explosionEffects.filter(
+            effect=>
+                now-effect.time<300
+        );
+
+    explosionEffects.forEach(
+        effect=>{
+
+            if(
+                effect.engine!==engine
+            ){
+                return;
+            }
+
+            const s =
+                worldToScreen(
+                    canvas,
+                    effect.x,
+                    effect.y,
+                    camera
+                );
+
+            const progress =
+                (now-effect.time)/300;
+
+            ctx.beginPath();
+
+            ctx.arc(
+                s.x,
+                s.y,
+                progress*
+                    130*
+                    camera.zoom,
+                0,
+                Math.PI*2
+            );
+
+            ctx.strokeStyle="#ff8800";
+            ctx.lineWidth=8;
+
+            ctx.globalAlpha=
+                1-progress;
+
+            ctx.stroke();
+
+            ctx.globalAlpha=1;
+
+        }
+    );
+
+}
+
+/* =========================
+   描画ループ
+========================= */
+
+function editorLoop(){
+
+    if(
+        editorEngine &&
+        $("editorScreen")
+            .classList
+            .contains("active")
+    ){
+
+        drawEngine(
+            editorCanvas,
+            editorCanvas.getContext("2d"),
+            editorEngine,
+            editorCamera,
+            true
+        );
+
     }
-  }
 
-  ctx.restore();
+    requestAnimationFrame(
+        editorLoop
+    );
 
-  const now=performance.now();
-  explosionEffects=explosionEffects.filter(e=>now-e.time<300);
-  explosionEffects.forEach(e=>{
-    if(e.engine!==engine)return;
-    const s=worldToScreen(c,e.x,e.y,cam);
-    const r=(now-e.time)/300*130*cam.zoom;
-    ctx.beginPath();
-    ctx.arc(s.x,s.y,r,0,Math.PI*2);
-    ctx.strokeStyle="#f80";
-    ctx.lineWidth=8;
-    ctx.globalAlpha=1-(now-e.time)/300;
-    ctx.stroke();
-    ctx.globalAlpha=1;
-  });
 }
 
-function editorRenderLoop(){
-  if(!editorEngine||!document.getElementById("editorScreen").classList.contains("active")){
-    requestAnimationFrame(editorRenderLoop);
-    return;
-  }
-  const ctx=editorCanvas.getContext("2d");
-  renderEngine(editorCanvas,ctx,editorEngine,editorCamera);
-  requestAnimationFrame(editorRenderLoop);
-}
-editorRenderLoop();
+function playLoop(){
 
-function playRenderLoop(){
-  if(playEngine&&document.getElementById("playScreen").classList.contains("active")){
-    const ctx=playCanvas.getContext("2d");
-    renderEngine(playCanvas,ctx,playEngine,playCamera);
-  }
-  requestAnimationFrame(playRenderLoop);
-}
-playRenderLoop();
+    if(
+        playEngine &&
+        $("playScreen")
+            .classList
+            .contains("active")
+    ){
 
-function renderStageList(){
-  const list=$("stageList");
-  const stages=getStages();
-  list.innerHTML="";
+        drawEngine(
+            playCanvas,
+            playCanvas.getContext("2d"),
+            playEngine,
+            playCamera,
+            false
+        );
 
-  if(!stages.length){
-    list.innerHTML='<div class="empty">保存されたステージがありません。</div>';
-    return;
-  }
+    }
 
-  stages.forEach(stage=>{
-    const card=document.createElement("div");
-    card.className="stageCard";
+    requestAnimationFrame(
+        playLoop
+    );
 
-    const name=document.createElement("div");
-    name.className="stageName";
-    name.textContent=stage.name;
-
-    const play=document.createElement("button");
-    play.textContent="▶ 遊ぶ";
-    play.onclick=()=>startPlay(stage);
-
-    const edit=document.createElement("button");
-    edit.textContent="✎ 編集";
-    edit.onclick=()=>loadStageIntoEditor(stage);
-
-    const del=document.createElement("button");
-    del.textContent="削除";
-    del.style.background="#e33";
-    del.onclick=()=>{
-      if(confirm("このステージを削除しますか？")){
-        setStages(getStages().filter(x=>x.id!==stage.id));
-        renderStageList();
-      }
-    };
-
-    card.append(name,play,edit,del);
-    list.appendChild(card);
-  });
 }
 
-$("makeBtn").onclick=()=>newEditor();
-
-$("playBtn").onclick=()=>{
-  renderStageList();
-  showScreen("selectScreen");
-};
-
-$("selectBack").onclick=()=>showScreen("startScreen");
-
-$("editorBack").onclick=()=>{
-  stopEditor();
-  showScreen("startScreen");
-};
-
-$("saveStage").onclick=saveCurrentStage;
-
-$("testStage").onclick=()=>{
-  saveCurrentStage();
-  const stage=getStages().find(x=>x.id===currentStageId);
-  if(stage)startPlay(stage);
-};
-
-$("clearStage").onclick=()=>{
-  if(!confirm("ステージ内の物体をすべて消しますか？"))return;
-  stageObjects.slice().forEach(b=>removeBody(b,editorEngine));
-  selectedBody=null;
-};
-
-$("playBack").onclick=()=>{
-  stopPlay();
-  renderStageList();
-  showScreen("selectScreen");
-};
-
-$("restartBtn").onclick=()=>{
-  const stage=getStages().find(x=>x.id===currentStageId);
-  if(stage)startPlay(stage);
-};
-
-$("bombBtn").onclick=()=>{
-  $("bombBtn").classList.toggle("active");
-  $("bombBtn").textContent=
-    $("bombBtn").classList.contains("active")
-    ?"💣 爆弾設置中":"💣 爆弾を置く";
-};
-
-playCanvas.addEventListener("pointerdown",e=>{
-  if(!$("bombBtn").classList.contains("active")||!playEngine)return;
-
-  const p=pointerPos(e,playCanvas);
-  const w=screenToWorld(playCanvas,p.x,p.y,playCamera);
-
-  const bomb=createBomb(w.x,w.y);
-  World.add(playEngine.world,bomb);
-
-  /*
-    最初から少しだけ下向き速度を与えて、
-    「置いた瞬間から落下している」ようにする。
-  */
-  Body.setVelocity(bomb,{x:0,y:1});
-});
-
-$("allBomb").onclick=()=>{
-  if(playEngine)explodeAllBombs(playEngine);
-};
+/* =========================
+   岩盤の角度固定
+========================= */
 
 setInterval(()=>{
-  if(editorEngine){
-    const bodies=Composite.allBodies(editorEngine.world);
-    bodies.forEach(b=>{
-      if(b.label==="bedrock")Body.setAngle(b,0);
+
+    [
+        editorEngine,
+        playEngine
+    ].forEach(engine=>{
+
+        if(!engine){
+            return;
+        }
+
+        Composite.allBodies(
+            engine.world
+        ).forEach(body=>{
+
+            if(
+                body.label==="bedrock"
+            ){
+
+                Body.setAngle(
+                    body,
+                    0
+                );
+
+            }
+
+        });
+
     });
-  }
-  if(playEngine){
-    const bodies=Composite.allBodies(playEngine.world);
-    bodies.forEach(b=>{
-      if(b.label==="bedrock")Body.setAngle(b,0);
-    });
-  }
+
 },100);
 
+/* =========================
+   初期化
+========================= */
+
 resizeAll();
+
+editorLoop();
+playLoop();
+
 </script>
+
 </body>
 </html>
