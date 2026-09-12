@@ -5,262 +5,369 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>スライム城くずし ステージメーカー</title>
 <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
+
 <style>
 *{
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
 }
+
 html,body{
   margin:0;
   width:100%;
   height:100%;
   overflow:hidden;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:#eee;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+  background:#eef1f5;
+  color:#222;
 }
+
 button{
   border:0;
-  border-radius:12px;
-  padding:10px 16px;
+  border-radius:10px;
+  padding:10px 14px;
   font-size:15px;
-  font-weight:bold;
+  font-weight:700;
   background:#fff;
   color:#222;
-  box-shadow:0 2px 6px #0002;
+  box-shadow:0 2px 7px rgba(0,0,0,.15);
   cursor:pointer;
+  touch-action:manipulation;
 }
+
 button:active{
-  transform:scale(.96);
+  transform:scale(.97);
 }
+
 #app{
-  position:fixed;
-  inset:0;
-}
-#canvas{
-  position:absolute;
-  inset:0;
   width:100%;
   height:100%;
-  touch-action:none;
+  position:relative;
 }
-#startScreen{
+
+.screen{
   position:absolute;
   inset:0;
-  background:linear-gradient(#f7f7f7,#ddd);
-  display:flex;
+  display:none;
+}
+
+.screen.active{
+  display:block;
+}
+
+#startScreen{
+  background:linear-gradient(#f7f9fc,#e5eaf1);
+  display:none;
   align-items:center;
   justify-content:center;
-  z-index:20;
 }
+
+#startScreen.active{
+  display:flex;
+}
+
 .startBox{
-  width:min(420px,90vw);
-  padding:30px 20px;
-  background:#fff;
-  border-radius:24px;
-  box-shadow:0 8px 30px #0003;
+  width:min(92%,500px);
   text-align:center;
+  background:white;
+  padding:35px 25px;
+  border-radius:22px;
+  box-shadow:0 8px 30px rgba(0,0,0,.15);
 }
+
 .startBox h1{
-  margin:0 0 25px;
-  font-size:25px;
+  margin:0 0 28px;
+  font-size:28px;
 }
-.startBtn{
-  display:block;
-  width:100%;
-  margin:12px 0;
-  padding:16px;
+
+.startButtons{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.startButtons button{
+  padding:17px;
   font-size:18px;
 }
-.createBtn{
-  background:#f80;
-  color:#fff;
-}
-.playBtn{
-  background:#222;
-  color:#fff;
-}
+
 #stageScreen{
-  position:absolute;
-  inset:0;
-  z-index:20;
-  background:#eee;
-  display:none;
+  background:#eef1f5;
+  padding:20px;
   overflow:auto;
 }
-.stageHead{
-  position:sticky;
-  top:0;
-  z-index:5;
-  padding:14px;
-  background:#222;
-  color:#fff;
+
+.stageHeader{
+  max-width:900px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.stageHeader h2{
+  flex:1;
+  margin:0;
+}
+
+#stageList{
+  max-width:900px;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.stageCard{
+  background:white;
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 3px 12px rgba(0,0,0,.1);
   display:flex;
   align-items:center;
   gap:10px;
 }
-.stageHead h2{
-  margin:0;
-  flex:1;
-  font-size:19px;
-}
-.stageList{
-  padding:15px;
-}
-.stageItem{
-  background:#fff;
-  border-radius:16px;
-  padding:15px;
-  margin-bottom:12px;
-  box-shadow:0 3px 10px #0002;
-}
+
 .stageName{
-  font-weight:bold;
-  font-size:18px;
-  margin-bottom:10px;
+  flex:1;
+  font-weight:700;
+  font-size:17px;
 }
-.stageBtns{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
+
+.stageCard button{
+  padding:8px 11px;
+  font-size:13px;
 }
-#editorUI,#playUI{
+
+#gameScreen{
+  background:#dfe5eb;
+}
+
+#gameCanvas{
   position:absolute;
   inset:0;
-  z-index:10;
-  display:none;
-  pointer-events:none;
+  width:100%;
+  height:100%;
+  display:block;
+  touch-action:none;
 }
+
 .topbar{
   position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:58px;
-  background:#fff;
+  z-index:50;
+  left:10px;
+  right:10px;
+  top:10px;
+  min-height:50px;
+  background:rgba(255,255,255,.94);
+  border-radius:14px;
+  box-shadow:0 3px 15px rgba(0,0,0,.16);
   display:flex;
   align-items:center;
-  gap:7px;
+  gap:8px;
   padding:7px;
-  box-shadow:0 2px 8px #0002;
   pointer-events:auto;
 }
-.topbar button{
-  padding:8px 11px;
-}
-.title{
+
+.topbar .title{
   flex:1;
   min-width:0;
   text-align:center;
-  font-weight:bold;
-  white-space:nowrap;
+  font-weight:800;
   overflow:hidden;
+  white-space:nowrap;
   text-overflow:ellipsis;
 }
-.toolbar{
+
+.topbar button{
+  padding:8px 11px;
+  font-size:13px;
+}
+
+#editorTools{
   position:absolute;
-  top:66px;
-  left:8px;
-  right:8px;
+  z-index:50;
+  left:10px;
+  right:10px;
+  bottom:10px;
   display:flex;
-  gap:6px;
-  overflow-x:auto;
-  padding:3px;
-  pointer-events:auto;
-}
-.tool{
-  flex:none;
-  padding:9px 12px;
-}
-.tool.active{
-  background:#f80;
-  color:#fff;
-}
-.playTools{
-  position:absolute;
-  left:8px;
-  right:8px;
-  top:66px;
-  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
   gap:7px;
   pointer-events:auto;
 }
-#bombBtn{
+
+.tool{
+  padding:9px 11px;
+  font-size:13px;
+}
+
+.tool.selected{
   background:#222;
-  color:#fff;
+  color:white;
 }
-#allBombBtn{
-  background:#f80;
-  color:#fff;
-}
-#editorModeText{
+
+#playTools{
   position:absolute;
+  z-index:50;
+  left:10px;
   right:10px;
   bottom:10px;
-  background:#fff;
-  padding:8px 12px;
-  border-radius:12px;
-  box-shadow:0 2px 8px #0002;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+
+#playTools button{
+  padding:13px 18px;
+}
+
+#message{
+  position:absolute;
+  z-index:60;
+  top:72px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,.75);
+  color:white;
+  border-radius:20px;
+  padding:8px 15px;
+  font-size:13px;
   pointer-events:none;
+  opacity:0;
+  transition:opacity .2s;
+}
+
+#message.show{
+  opacity:1;
+}
+
+#stageNameInput{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:10px;
+  font-size:16px;
+  margin-bottom:14px;
+}
+
+.dialogBg{
+  position:absolute;
+  z-index:100;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+.dialogBg.active{
+  display:flex;
+}
+
+.dialog{
+  width:min(90%,430px);
+  background:white;
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 10px 35px rgba(0,0,0,.25);
+}
+
+.dialog h3{
+  margin-top:0;
+}
+
+.dialogButtons{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+@media(max-width:600px){
+  .tool{
+    font-size:12px;
+    padding:8px 9px;
+  }
+
+  .topbar button{
+    font-size:12px;
+  }
 }
 </style>
 </head>
 
 <body>
+
 <div id="app">
 
-<canvas id="canvas"></canvas>
-
-<div id="startScreen">
-  <div class="startBox">
-    <h1>スライム城くずし<br>ステージメーカー</h1>
-    <button class="startBtn createBtn" id="createBtn">ステージを作る</button>
-    <button class="startBtn playBtn" id="selectBtn">ステージで遊ぶ</button>
-  </div>
-</div>
-
-<div id="stageScreen">
-  <div class="stageHead">
-    <button id="stageBack">戻る</button>
-    <h2>ステージを選択</h2>
-  </div>
-  <div class="stageList" id="stageList"></div>
-</div>
-
-<div id="editorUI">
-  <div class="topbar">
-    <button id="editorBack">←</button>
-    <div class="title" id="editorTitle">ステージ</div>
-    <button id="saveBtn">保存</button>
-    <button id="testBtn">遊ぶ</button>
-    <button id="clearBtn">全消去</button>
+  <div id="startScreen" class="screen active">
+    <div class="startBox">
+      <h1>スライム城くずし</h1>
+      <div class="startButtons">
+        <button id="makeStageButton">ステージを作る</button>
+        <button id="playStageButton">ステージで遊ぶ</button>
+      </div>
+    </div>
   </div>
 
-  <div class="toolbar">
-    <button class="tool active" data-tool="move">移動</button>
-    <button class="tool" data-tool="wood">木</button>
-    <button class="tool" data-tool="glass">ガラス</button>
-    <button class="tool" data-tool="stone">石</button>
-    <button class="tool" data-tool="enemy">スライム</button>
-    <button class="tool" data-tool="bomb">爆弾</button>
-    <button class="tool" data-tool="multiply">増殖</button>
-    <button class="tool" data-tool="bedrock">岩盤</button>
-    <button class="tool" data-tool="erase">消去</button>
-    <button class="tool" data-tool="rotate">回転</button>
-    <button class="tool" data-tool="shape">形変更</button>
+  <div id="stageScreen" class="screen">
+    <div class="stageHeader">
+      <button id="stageBackButton">← 戻る</button>
+      <h2>ステージを選ぶ</h2>
+    </div>
+    <div id="stageList"></div>
   </div>
 
-  <div id="editorModeText">編集中：ブロックは壊れません</div>
-</div>
+  <div id="gameScreen" class="screen">
+    <canvas id="gameCanvas"></canvas>
 
-<div id="playUI">
-  <div class="topbar">
-    <button id="playBack">←</button>
-    <div class="title" id="playTitle">ステージ</div>
-    <button id="bombBtn">爆弾</button>
-    <button id="allBombBtn">全爆破</button>
-    <button id="restartBtn">リスタート</button>
+    <div id="editorTop" class="topbar" style="display:none">
+      <button id="editorBack">←</button>
+      <div class="title" id="editorTitle">新しいステージ</div>
+      <button id="saveButton">保存</button>
+      <button id="testButton">テスト</button>
+      <button id="clearButton">全消去</button>
+    </div>
+
+    <div id="playTop" class="topbar" style="display:none">
+      <button id="playBack">←</button>
+      <div class="title" id="playTitle">ステージ</div>
+      <button id="restartButton">やり直す</button>
+    </div>
+
+    <div id="editorTools" style="display:none">
+      <button class="tool selected" data-tool="move">移動</button>
+      <button class="tool" data-tool="wood">木</button>
+      <button class="tool" data-tool="glass">ガラス</button>
+      <button class="tool" data-tool="stone">石</button>
+      <button class="tool" data-tool="enemy">スライム</button>
+      <button class="tool" data-tool="bomb">爆弾</button>
+      <button class="tool" data-tool="multiply">増殖</button>
+      <button class="tool" data-tool="bedrock">岩盤</button>
+      <button class="tool" data-tool="delete">消去</button>
+      <button class="tool" data-tool="rotate">回転</button>
+      <button class="tool" data-tool="shape">形変更</button>
+    </div>
+
+    <div id="playTools" style="display:none">
+      <button id="bombModeButton">💣 爆弾を置く</button>
+      <button id="explodeButton">💥 全爆破</button>
+    </div>
+
+    <div id="message"></div>
   </div>
-</div>
+
+  <div id="nameDialog" class="dialogBg">
+    <div class="dialog">
+      <h3>ステージ名</h3>
+      <input id="stageNameInput" maxlength="40" placeholder="ステージ名">
+      <div class="dialogButtons">
+        <button id="nameCancel">キャンセル</button>
+        <button id="nameOK">決定</button>
+      </div>
+    </div>
+  </div>
 
 </div>
 
@@ -273,79 +380,117 @@ const {
   Bodies,
   Body,
   Events,
-  Vector
-}=Matter;
+  Vector,
+  Composite
+} = Matter;
 
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-const FLOOR_Y=1000;
-const SAVE_KEY="slimeCastleMaker_v5";
+const FLOOR_Y = 850;
+const SAVE_KEY = "slimeCastleMaker_v7";
 
-let editorEngine=null;
-let playEngine=null;
-let currentMode="none";
+let currentMode = "none";
+let currentTool = "move";
 
-let currentTool="move";
-let selectedBody=null;
+let engine = null;
+let selectedBody = null;
 
-let rotateDragging=false;
-let shapeDragging=null;
-let movingBody=null;
-let moveOffset={x:0,y:0};
+let movingBody = null;
+let moveOffset = {x:0,y:0};
 
-let currentStageId=null;
-let currentStageName="新しいステージ";
+let rotatingBody = null;
 
-let newlyPlacedBodies=new Map();
-let multiplyContacts=new Map();
-let nextBodyId=1;
+let resizing = null;
 
-const camera={
+let stageId = null;
+let stageName = "新しいステージ";
+let currentStageObjects = [];
+
+let bombMode = false;
+
+let nextId = 1;
+
+const camera = {
   x:0,
-  y:620,
-  zoom:.7
+  y:540,
+  zoom:.72
 };
 
-const $=id=>document.getElementById(id);
+let canvasWidth = 0;
+let canvasHeight = 0;
+
+const colors = {
+  wood:"#a86b32",
+  glass:"#72c9e8",
+  stone:"#777",
+  bedrock:"#30343b",
+  enemy:"#56c94d",
+  multiply:"#b17cff",
+  bomb:"#222",
+  floor:"#3b4148"
+};
 
 function resizeCanvas(){
-  canvas.width=canvas.clientWidth;
-  canvas.height=canvas.clientHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1,2);
+
+  canvasWidth = canvas.clientWidth;
+  canvasHeight = canvas.clientHeight;
+
+  canvas.width = Math.floor(canvasWidth*dpr);
+  canvas.height = Math.floor(canvasHeight*dpr);
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
 }
 
 window.addEventListener("resize",resizeCanvas);
 resizeCanvas();
 
-function gameType(body){
-  return body&&body.plugin
-    ?body.plugin.gameType
-    :null;
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(x=>{
+    x.classList.remove("active");
+  });
+  document.getElementById(id).classList.add("active");
 }
 
-function isBlock(body){
-  return gameType(body)==="block";
+function showMessage(text){
+  const el = document.getElementById("message");
+  el.textContent = text;
+  el.classList.add("show");
+
+  clearTimeout(showMessage.timer);
+
+  showMessage.timer = setTimeout(()=>{
+    el.classList.remove("show");
+  },1400);
 }
 
 function screenToWorld(x,y){
   return {
-    x:(x-canvas.clientWidth/2)/camera.zoom+camera.x,
-    y:(y-canvas.clientHeight/2)/camera.zoom+camera.y
+    x:(x-canvasWidth/2)/camera.zoom+camera.x,
+    y:(y-canvasHeight/2)/camera.zoom+camera.y
+  };
+}
+
+function worldToScreen(x,y){
+  return {
+    x:(x-camera.x)*camera.zoom+canvasWidth/2,
+    y:(y-camera.y)*camera.zoom+canvasHeight/2
   };
 }
 
 function createEngine(){
-  const engine=Engine.create({
+  const e = Engine.create({
     enableSleeping:true
   });
 
-  engine.gravity.y=1;
+  e.gravity.y = 1;
 
-  const floor=Bodies.rectangle(
+  const floor = Bodies.rectangle(
     0,
-    FLOOR_Y+50,
+    FLOOR_Y+40,
     100000,
-    100,
+    80,
     {
       isStatic:true,
       label:"floor",
@@ -355,641 +500,1107 @@ function createEngine(){
     }
   );
 
-  World.add(engine.world,floor);
+  World.add(e.world,floor);
 
-  Events.on(engine,"beforeUpdate",()=>{
-    const now=performance.now();
+  installCollisionEvents(e);
 
-    for(const [body,endTime] of newlyPlacedBodies){
-      if(now<endTime){
-        if(engine.world.bodies.includes(body)){
-          Body.setVelocity(body,{x:0,y:0});
-          Body.setAngularVelocity(body,0);
-          Matter.Sleeping.set(body,true);
-        }
-      }else{
-        newlyPlacedBodies.delete(body);
-
-        if(engine.world.bodies.includes(body)){
-          Matter.Sleeping.set(body,false);
-        }
-      }
-    }
-
-    for(const body of engine.world.bodies){
-      if(gameType(body)==="bedrock"){
-        Body.setAngle(body,0);
-        Body.setAngularVelocity(body,0);
-      }
-    }
-  });
-
-  Events.on(engine,"collisionStart",event=>{
-    for(const pair of event.pairs){
-      handleCollision(pair,engine);
-    }
-  });
-
-  Events.on(engine,"collisionEnd",event=>{
-    for(const pair of event.pairs){
-      const a=pair.bodyA;
-      const b=pair.bodyB;
-
-      const ta=gameType(a);
-      const tb=gameType(b);
-
-      let bomb=null;
-      let multi=null;
-
-      if(ta==="bomb"&&tb==="multiply"){
-        bomb=a;
-        multi=b;
-      }
-
-      if(tb==="bomb"&&ta==="multiply"){
-        bomb=b;
-        multi=a;
-      }
-
-      if(bomb&&multi){
-        const set=multiplyContacts.get(multi.id);
-
-        if(set){
-          set.delete(bomb.id);
-        }
-      }
-    }
-  });
-
-  return engine;
+  return e;
 }
 
-function handleCollision(pair,engine){
-  const a=pair.bodyA;
-  const b=pair.bodyB;
-
-  const ta=gameType(a);
-  const tb=gameType(b);
-
-  if(
-    (ta==="bomb"&&tb==="multiply")||
-    (tb==="bomb"&&ta==="multiply")
-  ){
-    const bomb=ta==="bomb"?a:b;
-    const multi=ta==="multiply"?a:b;
-
-    if(!multiplyContacts.has(multi.id)){
-      multiplyContacts.set(
-        multi.id,
-        new Set()
-      );
-    }
-
-    const set=multiplyContacts.get(multi.id);
-
-    if(!set.has(bomb.id)){
-      set.add(bomb.id);
-
-      createBomb(
-        engine,
-        multi.position.x+
-        (Math.random()-.5)*30,
-        multi.position.y+
-        (multi.plugin.height||45)/2+
-        42
-      );
-    }
-
-    return;
+function stopEngine(){
+  if(engine){
+    Events.off(engine,"beforeUpdate",editorBeforeUpdate);
+    Events.off(engine,"collisionStart",collisionStart);
+    Events.off(engine,"collisionEnd",collisionEnd);
+    engine = null;
   }
 
-  if(
-    (ta==="bomb"&&tb==="block")||
-    (tb==="bomb"&&ta==="block")
-  ){
-    if(currentMode==="play"){
-      const block=ta==="block"?a:b;
-      damageBlock(block,30,engine);
-    }
-
-    return;
-  }
-
-  if(ta==="block"&&tb==="block"){
-    if(currentMode==="editor"){
-      return;
-    }
-
-    const speed=Math.max(
-      Vector.magnitude(a.velocity),
-      Vector.magnitude(b.velocity)
-    );
-
-    if(speed>8){
-      damageBlock(a,20,engine);
-      damageBlock(b,20,engine);
-    }
-
-    return;
-  }
-
-  if(
-    (ta==="bomb"&&tb==="enemy")||
-    (tb==="bomb"&&ta==="enemy")
-  ){
-    const bomb=ta==="bomb"?a:b;
-    const enemy=ta==="enemy"?a:b;
-
-    explodeAt(
-      engine,
-      bomb.position.x,
-      bomb.position.y
-    );
-
-    if(engine.world.bodies.includes(enemy)){
-      World.remove(engine.world,enemy);
-    }
-
-    return;
-  }
-
-  if(
-    (ta==="enemy"&&tb==="floor")||
-    (tb==="enemy"&&ta==="floor")
-  ){
-    const enemy=ta==="enemy"?a:b;
-
-    if(Math.abs(enemy.velocity.y)>12){
-      World.remove(engine.world,enemy);
-    }
-
-    return;
-  }
-
-  if(
-    (ta==="enemy"&&tb==="bedrock")||
-    (tb==="enemy"&&ta==="bedrock")
-  ){
-    const enemy=ta==="enemy"?a:b;
-
-    if(Math.abs(enemy.velocity.y)>8){
-      World.remove(engine.world,enemy);
-    }
-  }
+  selectedBody = null;
+  movingBody = null;
+  rotatingBody = null;
+  resizing = null;
 }
 
-function damageBlock(body,damage,engine){
-  if(!body||gameType(body)!=="block")return;
+function startEditor(objects){
+  stopEngine();
 
-  if(currentMode==="editor")return;
+  currentMode = "editor";
 
-  body.plugin.hp=
-    (body.plugin.hp||1)-damage;
+  engine = createEngine();
 
-  if(body.plugin.hp<=0){
-    World.remove(engine.world,body);
-  }
+  loadObjects(objects || []);
+
+  document.getElementById("editorTop").style.display="flex";
+  document.getElementById("playTop").style.display="none";
+  document.getElementById("editorTools").style.display="flex";
+  document.getElementById("playTools").style.display="none";
+
+  document.getElementById("editorTitle").textContent=stageName;
+
+  camera.x=0;
+  camera.y=540;
+  camera.zoom=.72;
+
+  Events.on(engine,"beforeUpdate",editorBeforeUpdate);
+
+  showScreen("gameScreen");
 }
 
-function explodeAt(engine,x,y){
-  const bodies=engine.world.bodies.slice();
+function startPlay(objects){
+  stopEngine();
 
-  for(const body of bodies){
-    const type=gameType(body);
+  currentMode="play";
 
-    if(type==="floor")continue;
+  engine=createEngine();
 
-    const dx=body.position.x-x;
-    const dy=body.position.y-y;
+  loadObjects(objects || []);
 
-    const dist=Math.sqrt(
-      dx*dx+dy*dy
-    );
+  document.getElementById("editorTop").style.display="none";
+  document.getElementById("playTop").style.display="flex";
+  document.getElementById("editorTools").style.display="none";
+  document.getElementById("playTools").style.display="flex";
 
-    if(dist>160)continue;
+  document.getElementById("playTitle").textContent=stageName;
 
-    const power=
-      (1-dist/160)*.045;
+  camera.x=0;
+  camera.y=540;
+  camera.zoom=.72;
 
-    if(!body.isStatic){
-      const len=
-        Math.sqrt(dx*dx+dy*dy)||1;
+  showScreen("gameScreen");
+}
 
-      Body.applyForce(
-        body,
-        body.position,
-        {
-          x:(dx/len)*power,
-          y:(dy/len)*power
-        }
-      );
-
-      Matter.Sleeping.set(
-        body,
+function loadObjects(objects){
+  objects.forEach(obj=>{
+    if(obj.type==="block"){
+      addBlock(
+        obj.material,
+        obj.x,
+        obj.y,
+        obj.w,
+        obj.h,
+        obj.angle || 0,
         false
       );
     }
 
-    if(
-      type==="block"&&
-      currentMode==="play"
-    ){
-      damageBlock(
-        body,
-        150,
-        engine
+    if(obj.type==="enemy"){
+      addEnemy(obj.x,obj.y,false);
+    }
+
+    if(obj.type==="bomb"){
+      addBomb(obj.x,obj.y,false);
+    }
+
+    if(obj.type==="multiply"){
+      addMultiplier(
+        obj.x,
+        obj.y,
+        obj.w || 70,
+        obj.h || 50,
+        false
       );
     }
 
-    if(
-      type==="enemy"&&
-      dist<150
-    ){
-      World.remove(
-        engine.world,
-        body
+    if(obj.type==="bedrock"){
+      addBedrock(
+        obj.x,
+        obj.y,
+        obj.w || 120,
+        obj.h || 35,
+        false
       );
     }
-  }
+  });
 }
 
-function createBomb(engine,x,y){
-  const bomb=Bodies.circle(
-    x,
-    y,
-    14,
-    {
-      density:.002,
-      friction:.2,
-      restitution:.35,
-      label:"bomb",
-      plugin:{
-        gameType:"bomb",
-        bodyId:nextBodyId++
-      }
-    }
-  );
-
-  World.add(engine.world,bomb);
-
-  return bomb;
-}
-
-function createBlock(
-  engine,
-  type,
-  x,
-  y,
-  w=100,
-  h=50,
-  angle=0
-){
+function addBlock(material,x,y,w=100,h=45,angle=0,placed=true){
   let density=.0035;
   let friction=.4;
   let restitution=.08;
   let hp=2;
 
-  if(type==="glass"){
+  if(material==="glass"){
     density=.0028;
     friction=.15;
     restitution=.25;
     hp=1;
   }
 
-  if(type==="stone"){
+  if(material==="stone"){
     density=.008;
     friction=.6;
     restitution=.02;
     hp=3;
   }
 
-  const body=Bodies.rectangle(
-    x,
-    y,
-    w,
-    h,
-    {
-      density,
-      friction,
-      restitution,
-      angle,
-      label:"block",
-      plugin:{
-        gameType:"block",
-        material:type,
-        width:w,
-        height:h,
-        hp,
-        bodyId:nextBodyId++
-      }
+  const body=Bodies.rectangle(x,y,w,h,{
+    angle,
+    density,
+    friction,
+    restitution,
+    label:"block",
+    plugin:{
+      gameType:"block",
+      material,
+      width:w,
+      height:h,
+      hp,
+      maxHp:hp,
+      id:nextId++
     }
-  );
+  });
 
   World.add(engine.world,body);
 
-  newlyPlacedBodies.set(
-    body,
-    performance.now()+300
-  );
+  if(placed && currentMode==="editor"){
+    Matter.Sleeping.set(body,true);
+    setTimeout(()=>{
+      if(body.world && currentMode==="editor"){
+        Matter.Sleeping.set(body,false);
+        Body.setVelocity(body,{x:0,y:0});
+        Body.setAngularVelocity(body,0);
+      }
+    },180);
+  }
+
+  return body;
+}
+
+function addEnemy(x,y,placed=true){
+  const body=Bodies.circle(x,y,22,{
+    density:.0018,
+    friction:.5,
+    restitution:.12,
+    label:"enemy",
+    plugin:{
+      gameType:"enemy",
+      radius:22,
+      alive:true,
+      id:nextId++
+    }
+  });
+
+  World.add(engine.world,body);
+
+  if(placed && currentMode==="editor"){
+    Matter.Sleeping.set(body,true);
+    setTimeout(()=>{
+      if(body.world){
+        Matter.Sleeping.set(body,false);
+      }
+    },180);
+  }
+
+  return body;
+}
+
+function addBomb(x,y,placed=true){
+  const body=Bodies.circle(x,y,13,{
+    density:.001,
+    friction:.25,
+    restitution:.35,
+    label:"bomb",
+    plugin:{
+      gameType:"bomb",
+      radius:13,
+      id:nextId++
+    }
+  });
+
+  World.add(engine.world,body);
+
+  if(placed && currentMode==="editor"){
+    Matter.Sleeping.set(body,true);
+    setTimeout(()=>{
+      if(body.world){
+        Matter.Sleeping.set(body,false);
+      }
+    },120);
+  }
+
+  return body;
+}
+
+function addMultiplier(x,y,w=70,h=50,placed=true){
+  const body=Bodies.rectangle(x,y,w,h,{
+    isStatic:true,
+    isSensor:true,
+    label:"multiply",
+    plugin:{
+      gameType:"multiply",
+      width:w,
+      height:h,
+      id:nextId++
+    }
+  });
+
+  World.add(engine.world,body);
+
+  return body;
+}
+
+function addBedrock(x,y,w=120,h=35,placed=true){
+  const body=Bodies.rectangle(x,y,w,h,{
+    isStatic:true,
+    label:"bedrock",
+    plugin:{
+      gameType:"bedrock",
+      width:w,
+      height:h,
+      id:nextId++
+    }
+  });
+
+  World.add(engine.world,body);
+
+  return body;
+}
+
+function removeBody(body){
+  if(!body || !engine) return;
+
+  World.remove(engine.world,body);
+
+  if(selectedBody===body){
+    selectedBody=null;
+  }
+}
+
+function getBodies(){
+  if(!engine) return [];
+
+  return Composite.allBodies(engine.world).filter(b=>{
+    return b.label!=="floor";
+  });
+}
+
+function pointInBody(body,p){
+  if(!body) return false;
+
+  return Matter.Vertices.contains(body.vertices,p);
+}
+
+function getBodyAt(p){
+  const bodies=getBodies();
+
+  for(let i=bodies.length-1;i>=0;i--){
+    const body=bodies[i];
+
+    if(body.plugin && body.plugin.gameType==="multiply"){
+      if(pointInBody(body,p)) return body;
+      continue;
+    }
+
+    if(pointInBody(body,p)) return body;
+  }
+
+  return null;
+}
+
+function getRectSize(body){
+  const p=body.plugin || {};
+
+  return {
+    w:p.width || 80,
+    h:p.height || 40
+  };
+}
+
+function getShapeHandles(body){
+  const s=getRectSize(body);
+
+  const hw=s.w/2;
+  const hh=s.h/2;
+
+  const cos=Math.cos(body.angle);
+  const sin=Math.sin(body.angle);
+
+  const local=[
+    {x:-hw,y:-hh},
+    {x: hw,y:-hh},
+    {x: hw,y: hh},
+    {x:-hw,y: hh}
+  ];
+
+  return local.map(v=>({
+    x:body.position.x+v.x*cos-v.y*sin,
+    y:body.position.y+v.x*sin+v.y*cos
+  }));
+}
+
+function getRotateHandle(body){
+  const s=getRectSize(body);
+
+  const d=Math.max(s.w,s.h)/2+42;
+
+  return {
+    x:body.position.x+Math.sin(body.angle)*d,
+    y:body.position.y-Math.cos(body.angle)*d
+  };
+}
+
+function distance(a,b){
+  return Math.hypot(a.x-b.x,a.y-b.y);
+}
+
+function cloneVector(v){
+  return {
+    x:v.x,
+    y:v.y
+  };
+}
+
+/*
+  ここが今回の形変更の中心。
+
+  Matter.jsのBody.scale()は使わない。
+
+  ドラッグしている頂点の「対角の頂点」を
+  完全な固定点として扱う。
+
+  その固定点とマウスポインタから新しい
+  幅・高さ・中心を計算し、4頂点を作り直す。
+*/
+function resizeBodyFromCorner(body,cornerIndex,pointer){
+  if(!body || body.label!=="block") return;
+
+  const size=getRectSize(body);
+
+  const oldWidth=size.w;
+  const oldHeight=size.h;
+
+  const angle=body.angle;
+
+  const cos=Math.cos(angle);
+  const sin=Math.sin(angle);
+
+  const halfW=oldWidth/2;
+  const halfH=oldHeight/2;
+
+  const oldLocalCorners=[
+    {x:-halfW,y:-halfH},
+    {x: halfW,y:-halfH},
+    {x: halfW,y: halfH},
+    {x:-halfW,y: halfH}
+  ];
+
+  const oppositeIndex=(cornerIndex+2)%4;
+
+  /*
+    対角の頂点をワールド座標で保存。
+    これが絶対に動かさない点。
+  */
+  const fixedLocal=oldLocalCorners[oppositeIndex];
+
+  const fixedWorld={
+    x:body.position.x+
+      fixedLocal.x*cos-
+      fixedLocal.y*sin,
+
+    y:body.position.y+
+      fixedLocal.x*sin+
+      fixedLocal.y*cos
+  };
+
+  /*
+    マウス位置を、元の回転座標系のローカル座標に変換。
+  */
+  const dx=pointer.x-body.position.x;
+  const dy=pointer.y-body.position.y;
+
+  const localX=
+    dx*cos+
+    dy*sin;
+
+  const localY=
+    -dx*sin+
+    dy*cos;
+
+  /*
+    dragged corner と opposite corner の関係を固定。
+  */
+  const signX=cornerIndex===0 || cornerIndex===3 ? -1 : 1;
+  const signY=cornerIndex===0 || cornerIndex===1 ? -1 : 1;
+
+  let newWidth=
+    Math.abs(localX-fixedLocal.x)*2;
+
+  let newHeight=
+    Math.abs(localY-fixedLocal.y)*2;
+
+  newWidth=Math.max(30,Math.min(2000,newWidth));
+  newHeight=Math.max(20,Math.min(2000,newHeight));
+
+  /*
+    固定点から見て、ドラッグ側に新しい中心を作る。
+  */
+  const centerLocal={
+    x:fixedLocal.x+signX*newWidth/2,
+    y:fixedLocal.y+signY*newHeight/2
+  };
+
+  const newCenter={
+    x:fixedWorld.x+
+      centerLocal.x*cos-
+      centerLocal.y*sin,
+
+    y:fixedWorld.y+
+      centerLocal.x*sin+
+      centerLocal.y*cos
+  };
+
+  const hw=newWidth/2;
+  const hh=newHeight/2;
+
+  const newLocalCorners=[
+    {x:-hw,y:-hh},
+    {x: hw,y:-hh},
+    {x: hw,y: hh},
+    {x:-hw,y: hh}
+  ];
+
+  /*
+    新しい4頂点を作る。
+  */
+  const newVertices=newLocalCorners.map(v=>({
+    x:newCenter.x+
+      v.x*cos-
+      v.y*sin,
+
+    y:newCenter.y+
+      v.x*sin+
+      v.y*cos
+  }));
+
+  /*
+    物理演算による飛びを完全に防止。
+  */
+  Body.setVelocity(body,{x:0,y:0});
+  Body.setAngularVelocity(body,0);
+
+  /*
+    直接頂点を変更。
+  */
+  Body.setVertices(body,newVertices);
+
+  /*
+    Matter.jsが計算した位置を上書きして、
+    新しい中心を正確に固定。
+  */
+  Body.setPosition(body,newCenter);
+
+  Body.setAngle(body,angle);
 
   Body.setVelocity(body,{x:0,y:0});
   Body.setAngularVelocity(body,0);
-  Matter.Sleeping.set(body,true);
 
-  return body;
-}
+  body.plugin.width=newWidth;
+  body.plugin.height=newHeight;
 
-function createEnemy(engine,x,y){
-  const body=Bodies.circle(
-    x,
-    y,
-    22,
-    {
-      density:.002,
-      friction:.5,
-      restitution:.1,
-      label:"enemy",
-      plugin:{
-        gameType:"enemy",
-        bodyId:nextBodyId++
-      }
-    }
-  );
+  /*
+    Matter.jsの内部位置補正による微妙なズレを
+    最後にもう一度頂点から補正する。
+  */
+  const actual={
+    x:body.position.x,
+    y:body.position.y
+  };
 
-  World.add(engine.world,body);
+  const correctionX=newCenter.x-actual.x;
+  const correctionY=newCenter.y-actual.y;
 
-  newlyPlacedBodies.set(
-    body,
-    performance.now()+300
-  );
+  if(Math.abs(correctionX)>0.0001 || Math.abs(correctionY)>0.0001){
+    Body.translate(body,{
+      x:correctionX,
+      y:correctionY
+    });
+  }
 
   Body.setVelocity(body,{x:0,y:0});
   Body.setAngularVelocity(body,0);
-  Matter.Sleeping.set(body,true);
 
-  return body;
+  Matter.Sleeping.set(body,false);
 }
 
-function createMultiply(
-  engine,
-  x,
-  y,
-  w=70,
-  h=45
-){
-  const body=Bodies.rectangle(
-    x,
-    y,
-    w,
-    h,
-    {
-      isSensor:true,
-      isStatic:true,
-      label:"multiply",
-      plugin:{
-        gameType:"multiply",
-        width:w,
-        height:h,
-        bodyId:nextBodyId++
-      }
-    }
-  );
+function rotateBody(body,pointer){
+  if(!body) return;
 
-  World.add(engine.world,body);
+  if(body.label==="bedrock") return;
 
-  return body;
+  const dx=pointer.x-body.position.x;
+  const dy=pointer.y-body.position.y;
+
+  let angle=Math.atan2(dx,-dy);
+
+  Body.setVelocity(body,{x:0,y:0});
+  Body.setAngularVelocity(body,0);
+
+  Body.setAngle(body,angle);
+
+  Body.setVelocity(body,{x:0,y:0});
+  Body.setAngularVelocity(body,0);
+
+  Matter.Sleeping.set(body,false);
 }
 
-function createBedrock(
-  engine,
-  x,
-  y,
-  w=110,
-  h=45
-){
-  const body=Bodies.rectangle(
-    x,
-    y,
-    w,
-    h,
-    {
-      isStatic:true,
-      label:"bedrock",
-      plugin:{
-        gameType:"bedrock",
-        width:w,
-        height:h,
-        bodyId:nextBodyId++
-      }
-    }
-  );
+function setTool(tool){
+  currentTool=tool;
 
-  World.add(engine.world,body);
-
-  return body;
-}
-
-function addPlacedObject(tool,x,y){
-  if(!editorEngine)return;
-
-  let body=null;
-
-  if(tool==="wood"){
-    body=createBlock(
-      editorEngine,
-      "wood",
-      x,
-      y
+  document.querySelectorAll(".tool").forEach(btn=>{
+    btn.classList.toggle(
+      "selected",
+      btn.dataset.tool===tool
     );
-  }
-
-  if(tool==="glass"){
-    body=createBlock(
-      editorEngine,
-      "glass",
-      x,
-      y
-    );
-  }
-
-  if(tool==="stone"){
-    body=createBlock(
-      editorEngine,
-      "stone",
-      x,
-      y
-    );
-  }
-
-  if(tool==="enemy"){
-    body=createEnemy(
-      editorEngine,
-      x,
-      y
-    );
-  }
+  });
 
   if(tool==="bomb"){
-    body=createBomb(
-      editorEngine,
-      x,
-      y
-    );
+    showMessage("爆弾を置く");
   }
 
-  if(tool==="multiply"){
-    body=createMultiply(
-      editorEngine,
-      x,
-      y
-    );
+  if(tool==="shape"){
+    showMessage("角をドラッグして形を変更");
   }
 
-  if(tool==="bedrock"){
-    body=createBedrock(
-      editorEngine,
-      x,
-      y
-    );
-  }
-
-  if(body){
-    selectedBody=body;
+  if(tool==="rotate"){
+    showMessage("上のハンドルをドラッグして回転");
   }
 }
 
-function startEditor(stage=null){
-  stopPlay();
-  stopEditor();
+document.querySelectorAll(".tool").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    setTool(btn.dataset.tool);
+  });
+});
 
-  currentMode="editor";
+function getPointer(e){
+  const rect=canvas.getBoundingClientRect();
 
-  editorEngine=createEngine();
+  return {
+    x:e.clientX-rect.left,
+    y:e.clientY-rect.top
+  };
+}
 
-  if(stage){
-    currentStageId=stage.id;
-    currentStageName=stage.name;
+canvas.addEventListener("pointerdown",e=>{
+  if(currentMode==="none") return;
 
-    loadStageIntoEngine(
-      stage,
-      editorEngine
+  canvas.setPointerCapture(e.pointerId);
+
+  const screen=getPointer(e);
+  const p=screenToWorld(screen.x,screen.y);
+
+  if(currentMode==="play"){
+    if(bombMode){
+      addBomb(p.x,p.y,true);
+    }
+    return;
+  }
+
+  /*
+    形変更
+  */
+  if(currentTool==="shape"){
+    if(selectedBody && selectedBody.label==="block"){
+      const handles=getShapeHandles(selectedBody);
+
+      for(let i=0;i<handles.length;i++){
+        if(distance(handles[i],p)<22/camera.zoom){
+          resizing={
+            body:selectedBody,
+            corner:i
+          };
+
+          Body.setVelocity(selectedBody,{x:0,y:0});
+          Body.setAngularVelocity(selectedBody,0);
+          Matter.Sleeping.set(selectedBody,true);
+
+          e.preventDefault();
+          return;
+        }
+      }
+    }
+
+    const hit=getBodyAt(p);
+
+    if(hit && hit.label==="block"){
+      selectedBody=hit;
+    }else{
+      selectedBody=null;
+    }
+
+    return;
+  }
+
+  /*
+    回転
+  */
+  if(currentTool==="rotate"){
+    if(selectedBody){
+      const handle=getRotateHandle(selectedBody);
+
+      if(distance(handle,p)<28/camera.zoom){
+        rotatingBody=selectedBody;
+        Matter.Sleeping.set(rotatingBody,true);
+        e.preventDefault();
+        return;
+      }
+    }
+
+    const hit=getBodyAt(p);
+
+    if(hit){
+      selectedBody=hit;
+    }else{
+      selectedBody=null;
+    }
+
+    return;
+  }
+
+  /*
+    移動
+  */
+  if(currentTool==="move"){
+    const hit=getBodyAt(p);
+
+    if(hit){
+      selectedBody=hit;
+
+      if(hit.label!=="bedrock" &&
+         hit.plugin &&
+         hit.plugin.gameType!=="multiply"){
+
+        movingBody=hit;
+
+        moveOffset={
+          x:p.x-hit.position.x,
+          y:p.y-hit.position.y
+        };
+
+        Matter.Sleeping.set(hit,false);
+
+        Body.setVelocity(hit,{x:0,y:0});
+        Body.setAngularVelocity(hit,0);
+      }
+    }else{
+      selectedBody=null;
+    }
+
+    return;
+  }
+
+  /*
+    消去
+  */
+  if(currentTool==="delete"){
+    const hit=getBodyAt(p);
+
+    if(hit){
+      removeBody(hit);
+    }
+
+    return;
+  }
+
+  /*
+    新規配置
+  */
+  if(currentTool==="wood" ||
+     currentTool==="glass" ||
+     currentTool==="stone"){
+
+    addBlock(
+      currentTool,
+      p.x,
+      p.y,
+      100,
+      45,
+      0,
+      true
     );
-  }else{
-    currentStageId=
-      "stage_"+Date.now();
 
-    currentStageName=
-      "新しいステージ";
+    return;
   }
 
-  $("editorTitle").textContent=
-    currentStageName;
-
-  $("startScreen").style.display="none";
-  $("stageScreen").style.display="none";
-  $("editorUI").style.display="block";
-  $("playUI").style.display="none";
-
-  selectedBody=null;
-  currentTool="move";
-
-  updateToolButtons();
-
-  runEngine(editorEngine);
-}
-
-function stopEditor(){
-  if(editorEngine){
-    Engine.clear(editorEngine);
-    editorEngine=null;
+  if(currentTool==="enemy"){
+    addEnemy(p.x,p.y,true);
+    return;
   }
 
-  selectedBody=null;
-  movingBody=null;
-  shapeDragging=null;
-  rotateDragging=false;
+  if(currentTool==="bomb"){
+    addBomb(p.x,p.y,true);
+    return;
+  }
+
+  if(currentTool==="multiply"){
+    addMultiplier(p.x,p.y,70,50,true);
+    return;
+  }
+
+  if(currentTool==="bedrock"){
+    addBedrock(p.x,p.y,120,35,true);
+    return;
+  }
+});
+
+canvas.addEventListener("pointermove",e=>{
+  if(currentMode!=="editor") return;
+
+  const screen=getPointer(e);
+  const p=screenToWorld(screen.x,screen.y);
+
+  /*
+    形変更中
+  */
+  if(resizing){
+    resizeBodyFromCorner(
+      resizing.body,
+      resizing.corner,
+      p
+    );
+
+    e.preventDefault();
+    return;
+  }
+
+  /*
+    回転中
+  */
+  if(rotatingBody){
+    rotateBody(rotatingBody,p);
+
+    e.preventDefault();
+    return;
+  }
+
+  /*
+    移動中
+  */
+  if(movingBody){
+    const body=movingBody;
+
+    Body.setPosition(body,{
+      x:p.x-moveOffset.x,
+      y:p.y-moveOffset.y
+    });
+
+    Body.setVelocity(body,{x:0,y:0});
+    Body.setAngularVelocity(body,0);
+
+    Matter.Sleeping.set(body,false);
+
+    e.preventDefault();
+  }
+});
+
+function endPointer(e){
+  if(resizing){
+    Body.setVelocity(resizing.body,{x:0,y:0});
+    Body.setAngularVelocity(resizing.body,0);
+
+    Matter.Sleeping.set(resizing.body,false);
+
+    resizing=null;
+  }
+
+  if(rotatingBody){
+    Body.setVelocity(rotatingBody,{x:0,y:0});
+    Body.setAngularVelocity(rotatingBody,0);
+
+    Matter.Sleeping.set(rotatingBody,false);
+
+    rotatingBody=null;
+  }
+
+  if(movingBody){
+    Body.setVelocity(movingBody,{x:0,y:0});
+    Body.setAngularVelocity(movingBody,0);
+
+    Matter.Sleeping.set(movingBody,false);
+
+    movingBody=null;
+  }
 }
 
-function startPlay(stage){
-  stopPlay();
-  stopEditor();
+canvas.addEventListener("pointerup",endPointer);
+canvas.addEventListener("pointercancel",endPointer);
 
-  currentMode="play";
+function editorBeforeUpdate(){
+  if(!engine) return;
 
-  playEngine=createEngine();
+  const bodies=getBodies();
 
-  currentStageId=stage.id;
-  currentStageName=stage.name;
+  bodies.forEach(body=>{
+    if(body.plugin &&
+       body.plugin.gameType==="bedrock"){
+      Body.setVelocity(body,{x:0,y:0});
+      Body.setAngularVelocity(body,0);
+    }
 
-  loadStageIntoEngine(
-    stage,
-    playEngine
+    /*
+      編集中はブロックが壊れない。
+      ただし重力・衝突・爆発による移動は発生する。
+    */
+    if(body.label==="block" &&
+       body.plugin){
+      body.plugin.hp=body.plugin.maxHp;
+    }
+  });
+}
+
+function installCollisionEvents(e){
+  Events.on(e,"collisionStart",collisionStart);
+  Events.on(e,"collisionEnd",collisionEnd);
+}
+
+const multiplierContacts=new Map();
+
+function getPair(a,b){
+  if(!a || !b) return null;
+
+  if(a.plugin &&
+     a.plugin.gameType==="multiply" &&
+     b.plugin &&
+     b.plugin.gameType==="bomb"){
+    return {
+      multi:a,
+      bomb:b
+    };
+  }
+
+  if(b.plugin &&
+     b.plugin.gameType==="multiply" &&
+     a.plugin &&
+     a.plugin.gameType==="bomb"){
+    return {
+      multi:b,
+      bomb:a
+    };
+  }
+
+  return null;
+}
+
+function collisionStart(event){
+  event.pairs.forEach(pair=>{
+    const a=pair.bodyA;
+    const b=pair.bodyB;
+
+    /*
+      増殖
+    */
+    const mb=getPair(a,b);
+
+    if(mb){
+      const multi=mb.multi;
+      const bomb=mb.bomb;
+
+      if(!multiplierContacts.has(multi.id)){
+        multiplierContacts.set(
+          multi.id,
+          new Set()
+        );
+      }
+
+      const set=multiplierContacts.get(multi.id);
+
+      if(!set.has(bomb.plugin.id)){
+        set.add(bomb.plugin.id);
+
+        spawnMultipliedBomb(multi,bomb);
+      }
+    }
+
+    /*
+      爆弾とブロック
+    */
+    if(currentMode==="play"){
+      if(
+        (a.label==="bomb" && b.label==="block") ||
+        (b.label==="bomb" && a.label==="block")
+      ){
+        const block=
+          a.label==="block" ? a : b;
+
+        damageBlock(block,1);
+      }
+    }
+  });
+}
+
+function collisionEnd(event){
+  event.pairs.forEach(pair=>{
+    const a=pair.bodyA;
+    const b=pair.bodyB;
+
+    const mb=getPair(a,b);
+
+    if(mb){
+      const multi=mb.multi;
+      const bomb=mb.bomb;
+
+      const set=multiplierContacts.get(multi.id);
+
+      if(set){
+        set.delete(bomb.plugin.id);
+      }
+    }
+  });
+}
+
+function spawnMultipliedBomb(multi,original){
+  if(!engine) return;
+
+  const w=multi.plugin.width || 70;
+  const h=multi.plugin.height || 50;
+
+  const x=
+    multi.position.x+
+    (Math.random()-.5)*w*.7;
+
+  /*
+    必ず増殖の下側から出す。
+  */
+  const y=
+    multi.position.y+
+    h/2+
+    30;
+
+  const bomb=addBomb(x,y,false);
+
+  Body.setVelocity(
+    bomb,
+    {
+      x:(Math.random()-.5)*1.2,
+      y:0
+    }
+  );
+}
+
+function damageBlock(block,damage){
+  if(currentMode!=="play") return;
+
+  if(!block || block.label!=="block") return;
+
+  if(!block.plugin) return;
+
+  block.plugin.hp-=damage;
+
+  if(block.plugin.hp<=0){
+    explodeBody(block);
+  }
+}
+
+function explodeBody(body){
+  if(!body || !engine) return;
+
+  const p=cloneVector(body.position);
+
+  World.remove(engine.world,body);
+
+  createExplosion(p.x,p.y);
+}
+
+function createExplosion(x,y){
+  const radius=155;
+  const force=.045;
+
+  const bodies=getBodies();
+
+  bodies.forEach(body=>{
+    if(body.label==="floor") return;
+    if(!body.position) return;
+
+    const dx=body.position.x-x;
+    const dy=body.position.y-y;
+
+    const d=Math.hypot(dx,dy);
+
+    if(d>radius || d===0) return;
+
+    const power=(1-d/radius);
+
+    if(body.isStatic){
+      return;
+    }
+
+    const nx=dx/d;
+    const ny=dy/d;
+
+    Body.applyForce(
+      body,
+      body.position,
+      {
+        x:nx*force*power,
+        y:ny*force*power
+      }
+    );
+
+    if(currentMode==="play"){
+      if(body.label==="block"){
+        damageBlock(body,2);
+      }
+
+      if(body.label==="enemy"){
+        killEnemy(body);
+      }
+    }
+  });
+}
+
+function killEnemy(enemy){
+  if(!enemy || !engine) return;
+
+  if(enemy.plugin && !enemy.plugin.alive) return;
+
+  if(enemy.plugin){
+    enemy.plugin.alive=false;
+  }
+
+  World.remove(engine.world,enemy);
+}
+
+function explodeAll(){
+  if(!engine) return;
+
+  const bombs=getBodies().filter(
+    b=>b.label==="bomb"
   );
 
-  $("playTitle").textContent=
-    currentStageName;
+  bombs.forEach(bomb=>{
+    if(!bomb.world) return;
 
-  $("startScreen").style.display="none";
-  $("stageScreen").style.display="none";
-  $("editorUI").style.display="none";
-  $("playUI").style.display="block";
+    const p=cloneVector(bomb.position);
 
-  runEngine(playEngine);
+    World.remove(engine.world,bomb);
+
+    createExplosion(p.x,p.y);
+  });
 }
 
-function stopPlay(){
-  if(playEngine){
-    Engine.clear(playEngine);
-    playEngine=null;
-  }
-}
+function draw(){
+  requestAnimationFrame(draw);
 
-let lastTime=performance.now();
-
-function runEngine(engine){
-  if(!engine)return;
-
-  function loop(time){
-    if(
-      engine===editorEngine||
-      engine===playEngine
-    ){
-      const delta=Math.min(
-        33,
-        time-lastTime
-      );
-
-      lastTime=time;
-
-      Engine.update(
-        engine,
-        delta
-      );
-
-      draw(engine);
-
-      requestAnimationFrame(loop);
-    }
+  if(currentMode==="none"){
+    return;
   }
 
-  lastTime=performance.now();
+  if(!engine){
+    return;
+  }
 
-  requestAnimationFrame(loop);
-}
-
-function draw(engine){
   ctx.clearRect(
     0,
     0,
-    canvas.clientWidth,
-    canvas.clientHeight
+    canvasWidth,
+    canvasHeight
   );
 
   ctx.save();
 
   ctx.translate(
-    canvas.clientWidth/2,
-    canvas.clientHeight/2
+    canvasWidth/2,
+    canvasHeight/2
   );
 
   ctx.scale(
@@ -1002,39 +1613,248 @@ function draw(engine){
     -camera.y
   );
 
-  for(const body of engine.world.bodies){
-    drawBody(body);
-  }
+  drawBackground();
 
-  drawSelection();
+  drawFloor();
+
+  const bodies=getBodies();
+
+  bodies.forEach(drawBody);
+
+  if(currentMode==="editor" && selectedBody){
+    drawSelection(selectedBody);
+  }
 
   ctx.restore();
 }
 
+function drawBackground(){
+  ctx.fillStyle="#dce3e9";
+  ctx.fillRect(
+    camera.x-canvasWidth/camera.zoom,
+    camera.y-canvasHeight/camera.zoom,
+    canvasWidth/camera.zoom*2,
+    canvasHeight/camera.zoom*2
+  );
+
+  ctx.strokeStyle="rgba(0,0,0,.045)";
+  ctx.lineWidth=1;
+
+  const left=camera.x-canvasWidth/camera.zoom;
+  const right=camera.x+canvasWidth/camera.zoom;
+
+  const top=camera.y-canvasHeight/camera.zoom;
+  const bottom=camera.y+canvasHeight/camera.zoom;
+
+  for(let x=Math.floor(left/50)*50;x<right;x+=50){
+    ctx.beginPath();
+    ctx.moveTo(x,top);
+    ctx.lineTo(x,bottom);
+    ctx.stroke();
+  }
+
+  for(let y=Math.floor(top/50)*50;y<bottom;y+=50){
+    ctx.beginPath();
+    ctx.moveTo(left,y);
+    ctx.lineTo(right,y);
+    ctx.stroke();
+  }
+}
+
+function drawFloor(){
+  ctx.fillStyle=colors.floor;
+
+  ctx.fillRect(
+    -50000,
+    FLOOR_Y,
+    100000,
+    80
+  );
+
+  ctx.fillStyle="#565d65";
+
+  ctx.fillRect(
+    -50000,
+    FLOOR_Y,
+    100000,
+    8
+  );
+}
+
 function drawBody(body){
-  const type=gameType(body);
+  const type=body.plugin &&
+    body.plugin.gameType;
 
-  if(type==="floor"){
-    ctx.fillStyle="#222";
-
-    ctx.fillRect(
-      -50000,
-      FLOOR_Y,
-      100000,
-      100
-    );
-
-    ctx.fillStyle="#555";
-
-    ctx.fillRect(
-      -50000,
-      FLOOR_Y,
-      100000,
-      8
-    );
-
+  if(type==="block"){
+    drawBlock(body);
     return;
   }
+
+  if(type==="enemy"){
+    drawEnemy(body);
+    return;
+  }
+
+  if(type==="bomb"){
+    drawBomb(body);
+    return;
+  }
+
+  if(type==="multiply"){
+    drawMultiplier(body);
+    return;
+  }
+
+  if(type==="bedrock"){
+    drawBedrock(body);
+    return;
+  }
+}
+
+function drawPolygon(vertices,fill,stroke="#222"){
+  ctx.beginPath();
+
+  vertices.forEach((v,i)=>{
+    if(i===0){
+      ctx.moveTo(v.x,v.y);
+    }else{
+      ctx.lineTo(v.x,v.y);
+    }
+  });
+
+  ctx.closePath();
+
+  ctx.fillStyle=fill;
+  ctx.fill();
+
+  ctx.strokeStyle=stroke;
+  ctx.lineWidth=2;
+  ctx.stroke();
+}
+
+function drawBlock(body){
+  let fill=colors.wood;
+
+  if(body.plugin.material==="glass"){
+    fill="rgba(114,201,232,.62)";
+  }
+
+  if(body.plugin.material==="stone"){
+    fill=colors.stone;
+  }
+
+  drawPolygon(
+    body.vertices,
+    fill,
+    "#30343a"
+  );
+
+  if(body.plugin.material==="glass"){
+    ctx.save();
+
+    ctx.strokeStyle="rgba(255,255,255,.7)";
+    ctx.lineWidth=3;
+
+    const v=body.vertices;
+
+    ctx.beginPath();
+    ctx.moveTo(v[0].x,v[0].y);
+    ctx.lineTo(v[2].x,v[2].y);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+}
+
+function drawEnemy(body){
+  const p=body.position;
+
+  ctx.beginPath();
+  ctx.arc(
+    p.x,
+    p.y,
+    body.plugin.radius || 22,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fillStyle=colors.enemy;
+  ctx.fill();
+
+  ctx.strokeStyle="#236523";
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  ctx.fillStyle="#111";
+
+  ctx.beginPath();
+  ctx.arc(p.x-7,p.y-4,3,0,Math.PI*2);
+  ctx.arc(p.x+7,p.y-4,3,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.strokeStyle="#111";
+  ctx.lineWidth=2;
+
+  ctx.beginPath();
+  ctx.arc(
+    p.x,
+    p.y+3,
+    8,
+    0,
+    Math.PI
+  );
+
+  ctx.stroke();
+}
+
+function drawBomb(body){
+  const p=body.position;
+
+  ctx.beginPath();
+  ctx.arc(
+    p.x,
+    p.y,
+    13,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fillStyle=colors.bomb;
+  ctx.fill();
+
+  ctx.strokeStyle="#111";
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  ctx.strokeStyle="#8b4a22";
+  ctx.lineWidth=4;
+
+  ctx.beginPath();
+  ctx.moveTo(p.x+7,p.y-9);
+  ctx.quadraticCurveTo(
+    p.x+12,
+    p.y-17,
+    p.x+9,
+    p.y-22
+  );
+  ctx.stroke();
+
+  ctx.fillStyle="#ffca28";
+
+  ctx.beginPath();
+  ctx.arc(
+    p.x+9,
+    p.y-22,
+    4,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+}
+
+function drawMultiplier(body){
+  const s=getRectSize(body);
 
   ctx.save();
 
@@ -1045,1073 +1865,179 @@ function drawBody(body){
 
   ctx.rotate(body.angle);
 
-  if(type==="block"){
-    const w=body.plugin.width;
-    const h=body.plugin.height;
+  ctx.fillStyle=colors.multiply;
 
-    if(body.plugin.material==="wood"){
-      ctx.fillStyle="#b8793d";
-      ctx.strokeStyle="#75451f";
-    }
+  ctx.fillRect(
+    -s.w/2,
+    -s.h/2,
+    s.w,
+    s.h
+  );
 
-    if(body.plugin.material==="glass"){
-      ctx.fillStyle="#8ed8e8aa";
-      ctx.strokeStyle="#368ea0";
-    }
+  ctx.strokeStyle="#5d3c9c";
+  ctx.lineWidth=3;
 
-    if(body.plugin.material==="stone"){
-      ctx.fillStyle="#888";
-      ctx.strokeStyle="#555";
-    }
+  ctx.strokeRect(
+    -s.w/2,
+    -s.h/2,
+    s.w,
+    s.h
+  );
 
-    ctx.lineWidth=3;
+  ctx.fillStyle="#fff";
+  ctx.font="bold 26px sans-serif";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
 
-    ctx.fillRect(
-      -w/2,
-      -h/2,
-      w,
-      h
-    );
-
-    ctx.strokeRect(
-      -w/2,
-      -h/2,
-      w,
-      h
-    );
-  }
-
-  if(type==="bedrock"){
-    const w=body.plugin.width;
-    const h=body.plugin.height;
-
-    ctx.fillStyle="#333";
-    ctx.strokeStyle="#111";
-    ctx.lineWidth=3;
-
-    ctx.fillRect(
-      -w/2,
-      -h/2,
-      w,
-      h
-    );
-
-    ctx.strokeRect(
-      -w/2,
-      -h/2,
-      w,
-      h
-    );
-
-    ctx.strokeStyle="#777";
-
-    ctx.beginPath();
-
-    for(let i=-w;i<w;i+=25){
-      ctx.moveTo(i,-h/2);
-      ctx.lineTo(i+20,h/2);
-    }
-
-    ctx.stroke();
-  }
-
-  if(type==="enemy"){
-    ctx.fillStyle="#55b84a";
-    ctx.strokeStyle="#247d21";
-    ctx.lineWidth=3;
-
-    ctx.beginPath();
-    ctx.arc(
-      0,
-      0,
-      22,
-      0,
-      Math.PI*2
-    );
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle="#fff";
-
-    ctx.beginPath();
-    ctx.arc(-7,-5,5,0,Math.PI*2);
-    ctx.arc(7,-5,5,0,Math.PI*2);
-    ctx.fill();
-
-    ctx.fillStyle="#111";
-
-    ctx.beginPath();
-    ctx.arc(-7,-5,2,0,Math.PI*2);
-    ctx.arc(7,-5,2,0,Math.PI*2);
-    ctx.fill();
-  }
-
-  if(type==="bomb"){
-    ctx.fillStyle="#111";
-
-    ctx.beginPath();
-    ctx.arc(
-      0,
-      0,
-      14,
-      0,
-      Math.PI*2
-    );
-    ctx.fill();
-
-    ctx.strokeStyle="#f80";
-    ctx.lineWidth=3;
-
-    ctx.beginPath();
-    ctx.moveTo(8,-9);
-    ctx.quadraticCurveTo(
-      18,
-      -20,
-      12,
-      -25
-    );
-    ctx.stroke();
-  }
-
-  if(type==="multiply"){
-    const w=body.plugin.width;
-    const h=body.plugin.height;
-
-    ctx.globalAlpha=.65;
-    ctx.fillStyle="#a65cff";
-    ctx.strokeStyle="#6c27b5";
-    ctx.lineWidth=3;
-
-    ctx.fillRect(
-      -w/2,
-      -h/2,
-      w,
-      h
-    );
-
-    ctx.strokeRect(
-      -w/2,
-      -h/2,
-      w,
-      h
-    );
-
-    ctx.globalAlpha=1;
-    ctx.fillStyle="#fff";
-    ctx.font="bold 25px sans-serif";
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
-
-    ctx.fillText(
-      "×2",
-      0,
-      0
-    );
-  }
+  ctx.fillText("×2",0,0);
 
   ctx.restore();
 }
 
-function getShapeHandles(body){
-  const w=body.plugin.width;
-  const h=body.plugin.height;
+function drawBedrock(body){
+  const s=getRectSize(body);
 
-  const c=Math.cos(body.angle);
-  const s=Math.sin(body.angle);
+  ctx.save();
 
-  const points=[
-    {x:-w/2,y:-h/2},
-    {x:w/2,y:-h/2},
-    {x:w/2,y:h/2},
-    {x:-w/2,y:h/2}
-  ];
+  ctx.translate(
+    body.position.x,
+    body.position.y
+  );
 
-  return points.map(p=>({
-    x:body.position.x+
-      p.x*c-
-      p.y*s,
+  ctx.rotate(body.angle);
 
-    y:body.position.y+
-      p.x*s+
-      p.y*c
-  }));
+  ctx.fillStyle=colors.bedrock;
+
+  ctx.fillRect(
+    -s.w/2,
+    -s.h/2,
+    s.w,
+    s.h
+  );
+
+  ctx.strokeStyle="#17191d";
+  ctx.lineWidth=3;
+
+  ctx.strokeRect(
+    -s.w/2,
+    -s.h/2,
+    s.w,
+    s.h
+  );
+
+  ctx.fillStyle="#aaa";
+  ctx.font="bold 15px sans-serif";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+
+  ctx.fillText("岩盤",0,0);
+
+  ctx.restore();
 }
 
-function drawSelection(){
-  if(!selectedBody)return;
+function drawSelection(body){
+  if(body.label==="block"){
+    const handles=getShapeHandles(body);
 
-  const body=selectedBody;
+    ctx.strokeStyle="#1677ff";
+    ctx.lineWidth=3;
+    ctx.setLineDash([7,5]);
 
-  if(
-    !body.plugin||
-    gameType(body)==="floor"
-  )return;
+    const s=getRectSize(body);
 
-  if(
-    currentTool==="rotate"&&
-    isBlock(body)
-  ){
-    const distance=
-      Math.max(
-        body.plugin.width,
-        body.plugin.height
-      )/2+40;
+    ctx.save();
 
-    const hx=
-      body.position.x+
-      Math.sin(body.angle)*
-      distance;
-
-    const hy=
-      body.position.y-
-      Math.cos(body.angle)*
-      distance;
-
-    ctx.strokeStyle="#f80";
-    ctx.lineWidth=4;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
+    ctx.translate(
       body.position.x,
       body.position.y
     );
 
-    ctx.lineTo(hx,hy);
-    ctx.stroke();
+    ctx.rotate(body.angle);
 
-    ctx.fillStyle="#f80";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      hx,
-      hy,
-      9,
-      0,
-      Math.PI*2
+    ctx.strokeRect(
+      -s.w/2,
+      -s.h/2,
+      s.w,
+      s.h
     );
 
-    ctx.fill();
-  }
+    ctx.restore();
 
-  if(
-    currentTool==="shape"&&
-    isBlock(body)
-  ){
-    const handles=
-      getShapeHandles(body);
+    ctx.setLineDash([]);
 
-    ctx.fillStyle="#fff";
-    ctx.strokeStyle="#f80";
-    ctx.lineWidth=3;
-
-    for(const p of handles){
+    handles.forEach((p,i)=>{
       ctx.beginPath();
-
       ctx.arc(
         p.x,
         p.y,
-        9,
+        8,
         0,
         Math.PI*2
       );
 
+      ctx.fillStyle="#fff";
       ctx.fill();
+
+      ctx.strokeStyle="#1677ff";
+      ctx.lineWidth=3;
+      ctx.stroke();
+
+      ctx.fillStyle="#1677ff";
+      ctx.font="bold 9px sans-serif";
+      ctx.textAlign="center";
+      ctx.textBaseline="middle";
+      ctx.fillText(String(i+1),p.x,p.y);
+    });
+  }
+
+  if(
+    body.label==="block" ||
+    body.label==="enemy" ||
+    body.label==="bomb" ||
+    body.label==="multiply"
+  ){
+    if(currentTool==="rotate"){
+      const h=getRotateHandle(body);
+
+      ctx.strokeStyle="#f08000";
+      ctx.lineWidth=3;
+
+      ctx.beginPath();
+      ctx.moveTo(
+        body.position.x,
+        body.position.y
+      );
+
+      ctx.lineTo(h.x,h.y);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(
+        h.x,
+        h.y,
+        10,
+        0,
+        Math.PI*2
+      );
+
+      ctx.fillStyle="#fff";
+      ctx.fill();
+
+      ctx.strokeStyle="#f08000";
       ctx.stroke();
     }
   }
 }
 
-function hitTest(
-  worldX,
-  worldY,
-  engine
-){
-  const bodies=
-    engine.world.bodies;
-
-  for(
-    let i=bodies.length-1;
-    i>=0;
-    i--
-  ){
-    const body=bodies[i];
-
-    if(gameType(body)==="floor"){
-      continue;
-    }
-
-    const dx=
-      worldX-body.position.x;
-
-    const dy=
-      worldY-body.position.y;
-
-    const c=Math.cos(-body.angle);
-    const s=Math.sin(-body.angle);
-
-    const localX=
-      dx*c-dy*s;
-
-    const localY=
-      dx*s+dy*c;
-
-    if(gameType(body)==="enemy"){
-      if(
-        localX*localX+
-        localY*localY<
-        22*22
-      ){
-        return body;
-      }
-    }
-
-    if(gameType(body)==="bomb"){
-      if(
-        localX*localX+
-        localY*localY<
-        14*14
-      ){
-        return body;
-      }
-    }
-
-    if(
-      gameType(body)==="block"||
-      gameType(body)==="bedrock"||
-      gameType(body)==="multiply"
-    ){
-      const w=body.plugin.width;
-      const h=body.plugin.height;
-
-      if(
-        Math.abs(localX)<=w/2&&
-        Math.abs(localY)<=h/2
-      ){
-        return body;
-      }
-    }
-  }
-
-  return null;
-}
-
-function nearestShapeHandle(
-  body,
-  x,
-  y
-){
-  const handles=
-    getShapeHandles(body);
-
-  let best=-1;
-  let bestDist=Infinity;
-
-  handles.forEach((p,i)=>{
-    const dx=p.x-x;
-    const dy=p.y-y;
-
-    const d=Math.sqrt(
-      dx*dx+
-      dy*dy
-    );
-
-    if(d<bestDist){
-      bestDist=d;
-      best=i;
-    }
-  });
-
-  return bestDist<
-    28/camera.zoom
-    ?best
-    :-1;
-}
-
-function isRotateHandle(
-  body,
-  x,
-  y
-){
-  if(!body||!isBlock(body)){
-    return false;
-  }
-
-  const distance=
-    Math.max(
-      body.plugin.width,
-      body.plugin.height
-    )/2+40;
-
-  const hx=
-    body.position.x+
-    Math.sin(body.angle)*
-    distance;
-
-  const hy=
-    body.position.y-
-    Math.cos(body.angle)*
-    distance;
-
-  const dx=x-hx;
-  const dy=y-hy;
-
-  return Math.sqrt(
-    dx*dx+
-    dy*dy
-  )<25/camera.zoom;
-}
-
-canvas.addEventListener(
-  "pointerdown",
-  e=>{
-    const rect=
-      canvas.getBoundingClientRect();
-
-    const sx=
-      e.clientX-rect.left;
-
-    const sy=
-      e.clientY-rect.top;
-
-    const p=
-      screenToWorld(sx,sy);
-
-    const engine=
-      currentMode==="editor"
-      ?editorEngine
-      :playEngine;
-
-    if(!engine)return;
-
-    canvas.setPointerCapture(
-      e.pointerId
-    );
-
-    if(currentMode==="play"){
-      if(
-        $("bombBtn").dataset.active==="1"
-      ){
-        createBomb(
-          playEngine,
-          p.x,
-          p.y
-        );
-      }
-
-      return;
-    }
-
-    if(
-      currentTool==="rotate"&&
-      selectedBody&&
-      isRotateHandle(
-        selectedBody,
-        p.x,
-        p.y
-      )
-    ){
-      rotateDragging=true;
-
-      Matter.Sleeping.set(
-        selectedBody,
-        false
-      );
-
-      return;
-    }
-
-    if(
-      currentTool==="shape"&&
-      selectedBody
-    ){
-      const index=
-        nearestShapeHandle(
-          selectedBody,
-          p.x,
-          p.y
-        );
-
-      if(index>=0){
-        shapeDragging=index;
-
-        Matter.Sleeping.set(
-          selectedBody,
-          false
-        );
-
-        return;
-      }
-    }
-
-    const body=
-      hitTest(
-        p.x,
-        p.y,
-        engine
-      );
-
-    if(currentTool==="erase"){
-      if(body){
-        World.remove(
-          engine.world,
-          body
-        );
-
-        if(selectedBody===body){
-          selectedBody=null;
-        }
-      }
-
-      return;
-    }
-
-    if(
-      currentTool==="wood"||
-      currentTool==="glass"||
-      currentTool==="stone"||
-      currentTool==="enemy"||
-      currentTool==="bomb"||
-      currentTool==="multiply"||
-      currentTool==="bedrock"
-    ){
-      if(!body){
-        addPlacedObject(
-          currentTool,
-          p.x,
-          p.y
-        );
-      }else{
-        selectedBody=body;
-      }
-
-      return;
-    }
-
-    if(currentTool==="move"){
-      if(body){
-        selectedBody=body;
-        movingBody=body;
-
-        moveOffset={
-          x:body.position.x-p.x,
-          y:body.position.y-p.y
-        };
-
-        newlyPlacedBodies.delete(body);
-
-        Matter.Sleeping.set(
-          body,
-          false
-        );
-
-        Body.setVelocity(
-          body,
-          {x:0,y:0}
-        );
-
-        Body.setAngularVelocity(
-          body,
-          0
-        );
-      }else{
-        selectedBody=null;
-      }
-    }
-  }
-);
-
-canvas.addEventListener(
-  "pointermove",
-  e=>{
-    const rect=
-      canvas.getBoundingClientRect();
-
-    const sx=
-      e.clientX-rect.left;
-
-    const sy=
-      e.clientY-rect.top;
-
-    const p=
-      screenToWorld(sx,sy);
-
-    if(currentMode!=="editor"){
-      return;
-    }
-
-    if(
-      rotateDragging&&
-      selectedBody
-    ){
-      Matter.Sleeping.set(
-        selectedBody,
-        false
-      );
-
-      const dx=
-        p.x-selectedBody.position.x;
-
-      const dy=
-        p.y-selectedBody.position.y;
-
-      const angle=
-        Math.atan2(
-          dx,
-          -dy
-        );
-
-      Body.setAngle(
-        selectedBody,
-        angle
-      );
-
-      Body.setVelocity(
-        selectedBody,
-        {x:0,y:0}
-      );
-
-      Body.setAngularVelocity(
-        selectedBody,
-        0
-      );
-
-      return;
-    }
-
-    if(
-      shapeDragging!==null&&
-      selectedBody
-    ){
-      Matter.Sleeping.set(
-        selectedBody,
-        false
-      );
-
-      resizeFromCorner(
-        selectedBody,
-        shapeDragging,
-        p.x,
-        p.y
-      );
-
-      return;
-    }
-
-    if(movingBody){
-      Matter.Sleeping.set(
-        movingBody,
-        false
-      );
-
-      Body.setPosition(
-        movingBody,
-        {
-          x:p.x+moveOffset.x,
-          y:p.y+moveOffset.y
-        }
-      );
-
-      Body.setVelocity(
-        movingBody,
-        {x:0,y:0}
-      );
-
-      Body.setAngularVelocity(
-        movingBody,
-        0
-      );
-    }
-  }
-);
-
-canvas.addEventListener(
-  "pointerup",
-  e=>{
-    if(movingBody){
-      Matter.Sleeping.set(
-        movingBody,
-        false
-      );
-
-      Body.setVelocity(
-        movingBody,
-        {x:0,y:0}
-      );
-
-      Body.setAngularVelocity(
-        movingBody,
-        0
-      );
-    }
-
-    if(selectedBody){
-      Matter.Sleeping.set(
-        selectedBody,
-        false
-      );
-    }
-
-    rotateDragging=false;
-    shapeDragging=null;
-    movingBody=null;
-
-    try{
-      canvas.releasePointerCapture(
-        e.pointerId
-      );
-    }catch(_){}
-  }
-);
-
-canvas.addEventListener(
-  "pointercancel",
-  ()=>{
-    rotateDragging=false;
-    shapeDragging=null;
-    movingBody=null;
-  }
-);
-
-function resizeFromCorner(
-  body,
-  index,
-  x,
-  y
-){
-  if(!isBlock(body))return;
-
-  const oldW=body.plugin.width;
-  const oldH=body.plugin.height;
-  const angle=body.angle;
-
-  const c=Math.cos(angle);
-  const s=Math.sin(angle);
-
-  const corners=[
-    {
-      x:-oldW/2,
-      y:-oldH/2
-    },
-    {
-      x:oldW/2,
-      y:-oldH/2
-    },
-    {
-      x:oldW/2,
-      y:oldH/2
-    },
-    {
-      x:-oldW/2,
-      y:oldH/2
-    }
-  ];
-
-  const opposite=
-    (index+2)%4;
-
-  const fixedLocal=
-    corners[opposite];
-
-  const fixedWorld={
-    x:body.position.x+
-      fixedLocal.x*c-
-      fixedLocal.y*s,
-
-    y:body.position.y+
-      fixedLocal.x*s+
-      fixedLocal.y*c
-  };
-
-  const dx=x-fixedWorld.x;
-  const dy=y-fixedWorld.y;
-
-  const draggedLocalX=
-    dx*c+
-    dy*s;
-
-  const draggedLocalY=
-    -dx*s+
-    dy*c;
-
-  let newW=
-    Math.abs(draggedLocalX);
-
-  let newH=
-    Math.abs(draggedLocalY);
-
-  newW=Math.max(
-    30,
-    Math.min(newW,2000)
-  );
-
-  newH=Math.max(
-    20,
-    Math.min(newH,2000)
-  );
-
-  const signX=
-    corners[index].x>=0
-    ?1
-    :-1;
-
-  const signY=
-    corners[index].y>=0
-    ?1
-    :-1;
-
-  const newCenterLocal={
-    x:fixedLocal.x+
-      signX*newW/2,
-
-    y:fixedLocal.y+
-      signY*newH/2
-  };
-
-  const newCenterWorld={
-    x:fixedWorld.x+
-      newCenterLocal.x*c-
-      newCenterLocal.y*s,
-
-    y:fixedWorld.y+
-      newCenterLocal.x*s+
-      newCenterLocal.y*c
-  };
-
-  const vertices=[
-    {
-      x:-newW/2,
-      y:-newH/2
-    },
-    {
-      x:newW/2,
-      y:-newH/2
-    },
-    {
-      x:newW/2,
-      y:newH/2
-    },
-    {
-      x:-newW/2,
-      y:newH/2
-    }
-  ].map(p=>({
-    x:newCenterWorld.x+
-      p.x*c-
-      p.y*s,
-
-    y:newCenterWorld.y+
-      p.x*s+
-      p.y*c
-  }));
-
-  Body.setVertices(
-    body,
-    vertices
-  );
-
-  Body.setPosition(
-    body,
-    newCenterWorld
-  );
-
-  Body.setAngle(
-    body,
-    angle
-  );
-
-  Body.setVelocity(
-    body,
-    {x:0,y:0}
-  );
-
-  Body.setAngularVelocity(
-    body,
-    0
-  );
-
-  body.plugin.width=newW;
-  body.plugin.height=newH;
-
-  Matter.Sleeping.set(
-    body,
-    false
-  );
-}
-
-function updateToolButtons(){
-  document.querySelectorAll(".tool")
-    .forEach(btn=>{
-      btn.classList.toggle(
-        "active",
-        btn.dataset.tool===currentTool
-      );
-    });
-}
-
-document.querySelectorAll(".tool")
-.forEach(btn=>{
-  btn.addEventListener(
-    "click",
-    ()=>{
-      currentTool=
-        btn.dataset.tool;
-
-      updateToolButtons();
-    }
-  );
-});
-
-$("bombBtn").addEventListener(
-  "click",
-  ()=>{
-    const active=
-      $("bombBtn").dataset.active==="1";
-
-    $("bombBtn").dataset.active=
-      active?"0":"1";
-
-    $("bombBtn").style.background=
-      active?"#222":"#f80";
-  }
-);
-
-$("allBombBtn").addEventListener(
-  "click",
-  ()=>{
-    if(!playEngine)return;
-
-    const bombs=
-      playEngine.world.bodies.filter(
-        b=>gameType(b)==="bomb"
-      );
-
-    bombs.forEach(b=>{
-      explodeAt(
-        playEngine,
-        b.position.x,
-        b.position.y
-      );
-    });
-  }
-);
-
-$("restartBtn").addEventListener(
-  "click",
-  ()=>{
-    const stage=
-      getSavedStages().find(
-        s=>s.id===currentStageId
-      );
-
-    if(stage){
-      startPlay(stage);
-    }
-  }
-);
-
-$("editorBack").addEventListener(
-  "click",
-  ()=>{
-    stopEditor();
-    currentMode="none";
-
-    $("editorUI").style.display="none";
-    $("startScreen").style.display="flex";
-  }
-);
-
-$("playBack").addEventListener(
-  "click",
-  ()=>{
-    stopPlay();
-    currentMode="none";
-
-    $("playUI").style.display="none";
-    $("startScreen").style.display="flex";
-  }
-);
-
-$("stageBack").addEventListener(
-  "click",
-  ()=>{
-    $("stageScreen").style.display="none";
-    $("startScreen").style.display="flex";
-  }
-);
-
-$("createBtn").addEventListener(
-  "click",
-  ()=>{
-    startEditor();
-  }
-);
-
-$("selectBtn").addEventListener(
-  "click",
-  ()=>{
-    showStageScreen();
-  }
-);
-
-$("clearBtn").addEventListener(
-  "click",
-  ()=>{
-    if(!editorEngine)return;
-
-    editorEngine.world.bodies
-      .slice()
-      .forEach(body=>{
-        if(gameType(body)!=="floor"){
-          World.remove(
-            editorEngine.world,
-            body
-          );
-        }
-      });
-
-    selectedBody=null;
-  }
-);
-
-$("saveBtn").addEventListener(
-  "click",
-  ()=>{
-    saveCurrentStage();
-  }
-);
-
-$("testBtn").addEventListener(
-  "click",
-  ()=>{
-    saveCurrentStage();
-
-    const stage=
-      getSavedStages().find(
-        s=>s.id===currentStageId
-      );
-
-    if(stage){
-      startPlay(stage);
-    }
-  }
-);
-
-function saveCurrentStage(){
-  if(!editorEngine)return;
-
-  const data={
-    id:currentStageId,
-    name:currentStageName,
-    objects:[]
-  };
-
-  for(const body of editorEngine.world.bodies){
-    const type=gameType(body);
+function serializeStage(){
+  const objects=[];
+
+  getBodies().forEach(body=>{
+    const type=body.plugin &&
+      body.plugin.gameType;
 
     if(type==="block"){
-      data.objects.push({
+      objects.push({
         type:"block",
         material:body.plugin.material,
         x:body.position.x,
@@ -2123,7 +2049,7 @@ function saveCurrentStage(){
     }
 
     if(type==="enemy"){
-      data.objects.push({
+      objects.push({
         type:"enemy",
         x:body.position.x,
         y:body.position.y
@@ -2131,7 +2057,7 @@ function saveCurrentStage(){
     }
 
     if(type==="bomb"){
-      data.objects.push({
+      objects.push({
         type:"bomb",
         x:body.position.x,
         y:body.position.y
@@ -2139,7 +2065,7 @@ function saveCurrentStage(){
     }
 
     if(type==="multiply"){
-      data.objects.push({
+      objects.push({
         type:"multiply",
         x:body.position.x,
         y:body.position.y,
@@ -2149,7 +2075,7 @@ function saveCurrentStage(){
     }
 
     if(type==="bedrock"){
-      data.objects.push({
+      objects.push({
         type:"bedrock",
         x:body.position.x,
         y:body.position.y,
@@ -2157,190 +2083,298 @@ function saveCurrentStage(){
         h:body.plugin.height
       });
     }
+  });
+
+  return objects;
+}
+
+function getStages(){
+  try{
+    const data=localStorage.getItem(SAVE_KEY);
+
+    if(!data){
+      return [];
+    }
+
+    const parsed=JSON.parse(data);
+
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(e){
+    return [];
   }
+}
 
-  const stages=getSavedStages();
-
-  const index=stages.findIndex(
-    s=>s.id===data.id
-  );
-
-  if(index>=0){
-    stages[index]=data;
-  }else{
-    stages.push(data);
-  }
-
+function saveStages(stages){
   localStorage.setItem(
     SAVE_KEY,
     JSON.stringify(stages)
   );
 }
 
-function loadStageIntoEngine(
-  stage,
-  engine
-){
-  newlyPlacedBodies.clear();
-  multiplyContacts.clear();
+function saveCurrentStage(){
+  if(currentMode!=="editor") return;
 
-  for(const obj of stage.objects||[]){
-    if(obj.type==="block"){
-      createBlock(
-        engine,
-        obj.material,
-        obj.x,
-        obj.y,
-        obj.w,
-        obj.h,
-        obj.angle||0
-      );
-    }
+  const objects=serializeStage();
 
-    if(obj.type==="enemy"){
-      createEnemy(
-        engine,
-        obj.x,
-        obj.y
-      );
-    }
+  let stages=getStages();
 
-    if(obj.type==="bomb"){
-      createBomb(
-        engine,
-        obj.x,
-        obj.y
-      );
-    }
-
-    if(obj.type==="multiply"){
-      createMultiply(
-        engine,
-        obj.x,
-        obj.y,
-        obj.w,
-        obj.h
-      );
-    }
-
-    if(obj.type==="bedrock"){
-      createBedrock(
-        engine,
-        obj.x,
-        obj.y,
-        obj.w,
-        obj.h
-      );
-    }
+  if(!stageId){
+    stageId=
+      Date.now().toString(36)+
+      Math.random().toString(36).slice(2);
   }
+
+  const stage={
+    id:stageId,
+    name:stageName,
+    objects
+  };
+
+  const index=stages.findIndex(
+    x=>x.id===stageId
+  );
+
+  if(index>=0){
+    stages[index]=stage;
+  }else{
+    stages.push(stage);
+  }
+
+  saveStages(stages);
+
+  currentStageObjects=objects;
+
+  showMessage("保存しました");
 }
 
-function getSavedStages(){
-  try{
-    return JSON.parse(
-      localStorage.getItem(
-        SAVE_KEY
-      )||"[]"
-    );
-  }catch(_){
-    return [];
-  }
+function openNameDialog(){
+  document.getElementById("stageNameInput").value=
+    stageName || "新しいステージ";
+
+  document.getElementById("nameDialog")
+    .classList.add("active");
+
+  setTimeout(()=>{
+    document.getElementById("stageNameInput").focus();
+  },50);
 }
 
-function showStageScreen(){
-  $("startScreen").style.display="none";
-  $("stageScreen").style.display="block";
+function closeNameDialog(){
+  document.getElementById("nameDialog")
+    .classList.remove("active");
+}
 
-  const list=$("stageList");
+function renderStageList(){
+  const list=document.getElementById("stageList");
 
   list.innerHTML="";
 
-  const stages=
-    getSavedStages();
+  const stages=getStages();
 
   if(stages.length===0){
-    list.innerHTML=
-      "<div class='stageItem'>保存されたステージはありません。</div>";
+    const empty=document.createElement("div");
+
+    empty.style.background="white";
+    empty.style.padding="25px";
+    empty.style.borderRadius="15px";
+    empty.style.textAlign="center";
+
+    empty.textContent="保存されたステージはありません。";
+
+    list.appendChild(empty);
 
     return;
   }
 
   stages.forEach(stage=>{
-    const item=
-      document.createElement("div");
+    const card=document.createElement("div");
+    card.className="stageCard";
 
-    item.className="stageItem";
-
-    const name=
-      document.createElement("div");
-
+    const name=document.createElement("div");
     name.className="stageName";
     name.textContent=stage.name;
 
-    const buttons=
-      document.createElement("div");
-
-    buttons.className="stageBtns";
-
-    const play=
-      document.createElement("button");
-
+    const play=document.createElement("button");
     play.textContent="遊ぶ";
 
-    play.addEventListener(
-      "click",
-      ()=>{
-        startPlay(stage);
-      }
-    );
+    play.addEventListener("click",()=>{
+      stageId=stage.id;
+      stageName=stage.name;
+      currentStageObjects=
+        JSON.parse(JSON.stringify(stage.objects));
 
-    const edit=
-      document.createElement("button");
+      startPlay(currentStageObjects);
+    });
 
+    const edit=document.createElement("button");
     edit.textContent="編集";
 
-    edit.addEventListener(
-      "click",
-      ()=>{
-        startEditor(stage);
-      }
-    );
+    edit.addEventListener("click",()=>{
+      stageId=stage.id;
+      stageName=stage.name;
+      currentStageObjects=
+        JSON.parse(JSON.stringify(stage.objects));
 
-    const del=
-      document.createElement("button");
+      startEditor(currentStageObjects);
+    });
 
+    const del=document.createElement("button");
     del.textContent="削除";
 
-    del.addEventListener(
-      "click",
-      ()=>{
-        deleteStage(stage.id);
-        showStageScreen();
-      }
-    );
+    del.addEventListener("click",()=>{
+      stages.splice(
+        stages.findIndex(x=>x.id===stage.id),
+        1
+      );
 
-    buttons.appendChild(play);
-    buttons.appendChild(edit);
-    buttons.appendChild(del);
+      saveStages(stages);
+      renderStageList();
+    });
 
-    item.appendChild(name);
-    item.appendChild(buttons);
+    card.appendChild(name);
+    card.appendChild(play);
+    card.appendChild(edit);
+    card.appendChild(del);
 
-    list.appendChild(item);
+    list.appendChild(card);
   });
 }
 
-function deleteStage(id){
-  const stages=
-    getSavedStages().filter(
-      s=>s.id!==id
-    );
+document.getElementById("makeStageButton")
+.addEventListener("click",()=>{
+  stageId=null;
+  stageName="新しいステージ";
+  currentStageObjects=[];
 
-  localStorage.setItem(
-    SAVE_KEY,
-    JSON.stringify(stages)
+  openNameDialog();
+});
+
+document.getElementById("playStageButton")
+.addEventListener("click",()=>{
+  renderStageList();
+  showScreen("stageScreen");
+});
+
+document.getElementById("stageBackButton")
+.addEventListener("click",()=>{
+  showScreen("startScreen");
+});
+
+document.getElementById("nameCancel")
+.addEventListener("click",()=>{
+  closeNameDialog();
+});
+
+document.getElementById("nameOK")
+.addEventListener("click",()=>{
+  const input=
+    document.getElementById("stageNameInput");
+
+  const name=input.value.trim();
+
+  if(name){
+    stageName=name;
+  }else{
+    stageName="新しいステージ";
+  }
+
+  closeNameDialog();
+
+  startEditor([]);
+});
+
+document.getElementById("editorBack")
+.addEventListener("click",()=>{
+  saveCurrentStage();
+  stopEngine();
+  currentMode="none";
+
+  document.getElementById("editorTop").style.display="none";
+  document.getElementById("editorTools").style.display="none";
+
+  showScreen("startScreen");
+});
+
+document.getElementById("saveButton")
+.addEventListener("click",()=>{
+  saveCurrentStage();
+});
+
+document.getElementById("testButton")
+.addEventListener("click",()=>{
+  currentStageObjects=serializeStage();
+
+  startPlay(
+    JSON.parse(
+      JSON.stringify(currentStageObjects)
+    )
   );
+});
+
+document.getElementById("clearButton")
+.addEventListener("click",()=>{
+  getBodies().forEach(body=>{
+    removeBody(body);
+  });
+
+  selectedBody=null;
+});
+
+document.getElementById("playBack")
+.addEventListener("click",()=>{
+  stopEngine();
+  currentMode="none";
+
+  document.getElementById("playTop").style.display="none";
+  document.getElementById("playTools").style.display="none";
+
+  renderStageList();
+  showScreen("stageScreen");
+});
+
+document.getElementById("restartButton")
+.addEventListener("click",()=>{
+  startPlay(
+    JSON.parse(
+      JSON.stringify(currentStageObjects)
+    )
+  );
+});
+
+document.getElementById("bombModeButton")
+.addEventListener("click",()=>{
+  bombMode=!bombMode;
+
+  document.getElementById("bombModeButton")
+    .textContent=
+      bombMode
+      ? "💣 爆弾配置中"
+      : "💣 爆弾を置く";
+});
+
+document.getElementById("explodeButton")
+.addEventListener("click",()=>{
+  explodeAll();
+});
+
+document.getElementById("nameDialog")
+.addEventListener("pointerdown",e=>{
+  if(e.target===e.currentTarget){
+    closeNameDialog();
+  }
+});
+
+function gameLoop(){
+  requestAnimationFrame(gameLoop);
+
+  if(engine){
+    Engine.update(engine,1000/60);
+  }
 }
+
+draw();
+gameLoop();
 </script>
+
 </body>
 </html>
