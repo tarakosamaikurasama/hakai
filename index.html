@@ -175,28 +175,6 @@ button:active{
   background:#f80;
   color:#fff;
 }
-#property{
-  position:absolute;
-  left:10px;
-  bottom:10px;
-  width:min(330px,calc(100vw - 20px));
-  background:#fff;
-  border-radius:16px;
-  padding:12px;
-  box-shadow:0 4px 15px #0003;
-  display:none;
-  pointer-events:auto;
-}
-#property .row{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin:7px 0;
-}
-#property input{
-  width:90px;
-  padding:7px;
-}
 .playTools{
   position:absolute;
   left:8px;
@@ -271,20 +249,6 @@ button:active{
     <button class="tool" data-tool="shape">形変更</button>
   </div>
 
-  <div id="property">
-    <div class="row">
-      <b>幅</b>
-      <input id="propW" type="number">
-      <b>高さ</b>
-      <input id="propH" type="number">
-    </div>
-    <div class="row">
-      <b>角度</b>
-      <input id="propAngle" type="number">
-      <button id="applyProp">適用</button>
-    </div>
-  </div>
-
   <div id="editorModeText">編集中：ブロックは壊れません</div>
 </div>
 
@@ -324,12 +288,12 @@ let currentMode="none";
 
 let currentTool="move";
 let selectedBody=null;
+
 let rotateDragging=false;
 let shapeDragging=null;
 let movingBody=null;
 let moveOffset={x:0,y:0};
 
-let stageObjects=[];
 let currentStageId=null;
 let currentStageName="新しいステージ";
 
@@ -349,15 +313,14 @@ function resizeCanvas(){
   canvas.width=canvas.clientWidth;
   canvas.height=canvas.clientHeight;
 }
+
 window.addEventListener("resize",resizeCanvas);
 resizeCanvas();
 
 function gameType(body){
-  return body&&body.plugin?body.plugin.gameType:null;
-}
-
-function materialOf(body){
-  return body&&body.plugin?body.plugin.material:null;
+  return body&&body.plugin
+    ?body.plugin.gameType
+    :null;
 }
 
 function isBlock(body){
@@ -399,12 +362,17 @@ function createEngine(){
 
     for(const [body,endTime] of newlyPlacedBodies){
       if(now<endTime){
-        Body.setVelocity(body,{x:0,y:0});
-        Body.setAngularVelocity(body,0);
-        Matter.Sleeping.set(body,true);
+        if(engine.world.bodies.includes(body)){
+          Body.setVelocity(body,{x:0,y:0});
+          Body.setAngularVelocity(body,0);
+          Matter.Sleeping.set(body,true);
+        }
       }else{
         newlyPlacedBodies.delete(body);
-        Matter.Sleeping.set(body,false);
+
+        if(engine.world.bodies.includes(body)){
+          Matter.Sleeping.set(body,false);
+        }
       }
     }
 
@@ -471,7 +439,10 @@ function handleCollision(pair,engine){
     const multi=ta==="multiply"?a:b;
 
     if(!multiplyContacts.has(multi.id)){
-      multiplyContacts.set(multi.id,new Set());
+      multiplyContacts.set(
+        multi.id,
+        new Set()
+      );
     }
 
     const set=multiplyContacts.get(multi.id);
@@ -481,8 +452,11 @@ function handleCollision(pair,engine){
 
       createBomb(
         engine,
-        multi.position.x+(Math.random()-.5)*30,
-        multi.position.y+(multi.plugin.height||45)/2+42
+        multi.position.x+
+        (Math.random()-.5)*30,
+        multi.position.y+
+        (multi.plugin.height||45)/2+
+        42
       );
     }
 
@@ -566,9 +540,11 @@ function handleCollision(pair,engine){
 
 function damageBlock(body,damage,engine){
   if(!body||gameType(body)!=="block")return;
+
   if(currentMode==="editor")return;
 
-  body.plugin.hp=(body.plugin.hp||1)-damage;
+  body.plugin.hp=
+    (body.plugin.hp||1)-damage;
 
   if(body.plugin.hp<=0){
     World.remove(engine.world,body);
@@ -585,14 +561,19 @@ function explodeAt(engine,x,y){
 
     const dx=body.position.x-x;
     const dy=body.position.y-y;
-    const dist=Math.sqrt(dx*dx+dy*dy);
+
+    const dist=Math.sqrt(
+      dx*dx+dy*dy
+    );
 
     if(dist>160)continue;
 
-    const power=(1-dist/160)*.045;
+    const power=
+      (1-dist/160)*.045;
 
     if(!body.isStatic){
-      const len=Math.sqrt(dx*dx+dy*dy)||1;
+      const len=
+        Math.sqrt(dx*dx+dy*dy)||1;
 
       Body.applyForce(
         body,
@@ -603,15 +584,31 @@ function explodeAt(engine,x,y){
         }
       );
 
-      Matter.Sleeping.set(body,false);
+      Matter.Sleeping.set(
+        body,
+        false
+      );
     }
 
-    if(type==="block"&&currentMode==="play"){
-      damageBlock(body,150,engine);
+    if(
+      type==="block"&&
+      currentMode==="play"
+    ){
+      damageBlock(
+        body,
+        150,
+        engine
+      );
     }
 
-    if(type==="enemy"&&dist<150){
-      World.remove(engine.world,body);
+    if(
+      type==="enemy"&&
+      dist<150
+    ){
+      World.remove(
+        engine.world,
+        body
+      );
     }
   }
 }
@@ -733,7 +730,13 @@ function createEnemy(engine,x,y){
   return body;
 }
 
-function createMultiply(engine,x,y,w=70,h=45){
+function createMultiply(
+  engine,
+  x,
+  y,
+  w=70,
+  h=45
+){
   const body=Bodies.rectangle(
     x,
     y,
@@ -753,10 +756,17 @@ function createMultiply(engine,x,y,w=70,h=45){
   );
 
   World.add(engine.world,body);
+
   return body;
 }
 
-function createBedrock(engine,x,y,w=110,h=45){
+function createBedrock(
+  engine,
+  x,
+  y,
+  w=110,
+  h=45
+){
   const body=Bodies.rectangle(
     x,
     y,
@@ -775,6 +785,7 @@ function createBedrock(engine,x,y,w=110,h=45){
   );
 
   World.add(engine.world,body);
+
   return body;
 }
 
@@ -784,31 +795,62 @@ function addPlacedObject(tool,x,y){
   let body=null;
 
   if(tool==="wood"){
-    body=createBlock(editorEngine,"wood",x,y);
+    body=createBlock(
+      editorEngine,
+      "wood",
+      x,
+      y
+    );
   }
 
   if(tool==="glass"){
-    body=createBlock(editorEngine,"glass",x,y);
+    body=createBlock(
+      editorEngine,
+      "glass",
+      x,
+      y
+    );
   }
 
   if(tool==="stone"){
-    body=createBlock(editorEngine,"stone",x,y);
+    body=createBlock(
+      editorEngine,
+      "stone",
+      x,
+      y
+    );
   }
 
   if(tool==="enemy"){
-    body=createEnemy(editorEngine,x,y);
+    body=createEnemy(
+      editorEngine,
+      x,
+      y
+    );
   }
 
   if(tool==="bomb"){
-    body=createBomb(editorEngine,x,y);
+    body=createBomb(
+      editorEngine,
+      x,
+      y
+    );
   }
 
   if(tool==="multiply"){
-    body=createMultiply(editorEngine,x,y);
+    body=createMultiply(
+      editorEngine,
+      x,
+      y
+    );
   }
 
   if(tool==="bedrock"){
-    body=createBedrock(editorEngine,x,y);
+    body=createBedrock(
+      editorEngine,
+      x,
+      y
+    );
   }
 
   if(body){
@@ -821,18 +863,27 @@ function startEditor(stage=null){
   stopEditor();
 
   currentMode="editor";
+
   editorEngine=createEngine();
 
   if(stage){
     currentStageId=stage.id;
     currentStageName=stage.name;
-    loadStageIntoEngine(stage,editorEngine);
+
+    loadStageIntoEngine(
+      stage,
+      editorEngine
+    );
   }else{
-    currentStageId="stage_"+Date.now();
-    currentStageName="新しいステージ";
+    currentStageId=
+      "stage_"+Date.now();
+
+    currentStageName=
+      "新しいステージ";
   }
 
-  $("editorTitle").textContent=currentStageName;
+  $("editorTitle").textContent=
+    currentStageName;
 
   $("startScreen").style.display="none";
   $("stageScreen").style.display="none";
@@ -841,6 +892,7 @@ function startEditor(stage=null){
 
   selectedBody=null;
   currentTool="move";
+
   updateToolButtons();
 
   runEngine(editorEngine);
@@ -863,14 +915,19 @@ function startPlay(stage){
   stopEditor();
 
   currentMode="play";
+
   playEngine=createEngine();
 
   currentStageId=stage.id;
   currentStageName=stage.name;
 
-  loadStageIntoEngine(stage,playEngine);
+  loadStageIntoEngine(
+    stage,
+    playEngine
+  );
 
-  $("playTitle").textContent=currentStageName;
+  $("playTitle").textContent=
+    currentStageName;
 
   $("startScreen").style.display="none";
   $("stageScreen").style.display="none";
@@ -904,7 +961,11 @@ function runEngine(engine){
 
       lastTime=time;
 
-      Engine.update(engine,delta);
+      Engine.update(
+        engine,
+        delta
+      );
+
       draw(engine);
 
       requestAnimationFrame(loop);
@@ -912,6 +973,7 @@ function runEngine(engine){
   }
 
   lastTime=performance.now();
+
   requestAnimationFrame(loop);
 }
 
@@ -1059,7 +1121,13 @@ function drawBody(body){
     ctx.lineWidth=3;
 
     ctx.beginPath();
-    ctx.arc(0,0,22,0,Math.PI*2);
+    ctx.arc(
+      0,
+      0,
+      22,
+      0,
+      Math.PI*2
+    );
     ctx.fill();
     ctx.stroke();
 
@@ -1082,7 +1150,13 @@ function drawBody(body){
     ctx.fillStyle="#111";
 
     ctx.beginPath();
-    ctx.arc(0,0,14,0,Math.PI*2);
+    ctx.arc(
+      0,
+      0,
+      14,
+      0,
+      Math.PI*2
+    );
     ctx.fill();
 
     ctx.strokeStyle="#f80";
@@ -1090,7 +1164,12 @@ function drawBody(body){
 
     ctx.beginPath();
     ctx.moveTo(8,-9);
-    ctx.quadraticCurveTo(18,-20,12,-25);
+    ctx.quadraticCurveTo(
+      18,
+      -20,
+      12,
+      -25
+    );
     ctx.stroke();
   }
 
@@ -1122,7 +1201,12 @@ function drawBody(body){
     ctx.font="bold 25px sans-serif";
     ctx.textAlign="center";
     ctx.textBaseline="middle";
-    ctx.fillText("×2",0,0);
+
+    ctx.fillText(
+      "×2",
+      0,
+      0
+    );
   }
 
   ctx.restore();
@@ -1143,8 +1227,13 @@ function getShapeHandles(body){
   ];
 
   return points.map(p=>({
-    x:body.position.x+p.x*c-p.y*s,
-    y:body.position.y+p.x*s+p.y*c
+    x:body.position.x+
+      p.x*c-
+      p.y*s,
+
+    y:body.position.y+
+      p.x*s+
+      p.y*c
   }));
 }
 
@@ -1158,42 +1247,60 @@ function drawSelection(){
     gameType(body)==="floor"
   )return;
 
-  ctx.save();
-
-  if(currentTool==="rotate"&&isBlock(body)){
-    const distance=Math.max(
-      body.plugin.width,
-      body.plugin.height
-    )/2+40;
+  if(
+    currentTool==="rotate"&&
+    isBlock(body)
+  ){
+    const distance=
+      Math.max(
+        body.plugin.width,
+        body.plugin.height
+      )/2+40;
 
     const hx=
       body.position.x+
-      Math.sin(body.angle)*distance;
+      Math.sin(body.angle)*
+      distance;
 
     const hy=
       body.position.y-
-      Math.cos(body.angle)*distance;
+      Math.cos(body.angle)*
+      distance;
 
     ctx.strokeStyle="#f80";
     ctx.lineWidth=4;
 
     ctx.beginPath();
+
     ctx.moveTo(
       body.position.x,
       body.position.y
     );
+
     ctx.lineTo(hx,hy);
     ctx.stroke();
 
     ctx.fillStyle="#f80";
 
     ctx.beginPath();
-    ctx.arc(hx,hy,9,0,Math.PI*2);
+
+    ctx.arc(
+      hx,
+      hy,
+      9,
+      0,
+      Math.PI*2
+    );
+
     ctx.fill();
   }
 
-  if(currentTool==="shape"&&isBlock(body)){
-    const handles=getShapeHandles(body);
+  if(
+    currentTool==="shape"&&
+    isBlock(body)
+  ){
+    const handles=
+      getShapeHandles(body);
 
     ctx.fillStyle="#fff";
     ctx.strokeStyle="#f80";
@@ -1201,37 +1308,54 @@ function drawSelection(){
 
     for(const p of handles){
       ctx.beginPath();
+
       ctx.arc(
         p.x,
         p.y,
-        8,
+        9,
         0,
         Math.PI*2
       );
+
       ctx.fill();
       ctx.stroke();
     }
   }
-
-  ctx.restore();
 }
 
-function hitTest(worldX,worldY,engine){
-  const bodies=engine.world.bodies;
+function hitTest(
+  worldX,
+  worldY,
+  engine
+){
+  const bodies=
+    engine.world.bodies;
 
-  for(let i=bodies.length-1;i>=0;i--){
+  for(
+    let i=bodies.length-1;
+    i>=0;
+    i--
+  ){
     const body=bodies[i];
 
-    if(gameType(body)==="floor")continue;
+    if(gameType(body)==="floor"){
+      continue;
+    }
 
-    const dx=worldX-body.position.x;
-    const dy=worldY-body.position.y;
+    const dx=
+      worldX-body.position.x;
+
+    const dy=
+      worldY-body.position.y;
 
     const c=Math.cos(-body.angle);
     const s=Math.sin(-body.angle);
 
-    const localX=dx*c-dy*s;
-    const localY=dx*s+dy*c;
+    const localX=
+      dx*c-dy*s;
+
+    const localY=
+      dx*s+dy*c;
 
     if(gameType(body)==="enemy"){
       if(
@@ -1273,8 +1397,13 @@ function hitTest(worldX,worldY,engine){
   return null;
 }
 
-function nearestShapeHandle(body,x,y){
-  const handles=getShapeHandles(body);
+function nearestShapeHandle(
+  body,
+  x,
+  y
+){
+  const handles=
+    getShapeHandles(body);
 
   let best=-1;
   let bestDist=Infinity;
@@ -1295,26 +1424,35 @@ function nearestShapeHandle(body,x,y){
   });
 
   return bestDist<
-    25/camera.zoom
+    28/camera.zoom
     ?best
     :-1;
 }
 
-function isRotateHandle(body,x,y){
-  if(!body||!isBlock(body))return false;
+function isRotateHandle(
+  body,
+  x,
+  y
+){
+  if(!body||!isBlock(body)){
+    return false;
+  }
 
-  const distance=Math.max(
-    body.plugin.width,
-    body.plugin.height
-  )/2+40;
+  const distance=
+    Math.max(
+      body.plugin.width,
+      body.plugin.height
+    )/2+40;
 
   const hx=
     body.position.x+
-    Math.sin(body.angle)*distance;
+    Math.sin(body.angle)*
+    distance;
 
   const hy=
     body.position.y-
-    Math.cos(body.angle)*distance;
+    Math.cos(body.angle)*
+    distance;
 
   const dx=x-hx;
   const dy=y-hy;
@@ -1322,18 +1460,23 @@ function isRotateHandle(body,x,y){
   return Math.sqrt(
     dx*dx+
     dy*dy
-  )<20/camera.zoom;
+  )<25/camera.zoom;
 }
 
 canvas.addEventListener(
   "pointerdown",
   e=>{
-    const rect=canvas.getBoundingClientRect();
+    const rect=
+      canvas.getBoundingClientRect();
 
-    const sx=e.clientX-rect.left;
-    const sy=e.clientY-rect.top;
+    const sx=
+      e.clientX-rect.left;
 
-    const p=screenToWorld(sx,sy);
+    const sy=
+      e.clientY-rect.top;
+
+    const p=
+      screenToWorld(sx,sy);
 
     const engine=
       currentMode==="editor"
@@ -1362,22 +1505,21 @@ canvas.addEventListener(
 
     if(
       currentTool==="rotate"&&
-      selectedBody
+      selectedBody&&
+      isRotateHandle(
+        selectedBody,
+        p.x,
+        p.y
+      )
     ){
-      if(
-        isRotateHandle(
-          selectedBody,
-          p.x,
-          p.y
-        )
-      ){
-        rotateDragging=true;
-        Matter.Sleeping.set(
-          selectedBody,
-          false
-        );
-        return;
-      }
+      rotateDragging=true;
+
+      Matter.Sleeping.set(
+        selectedBody,
+        false
+      );
+
+      return;
     }
 
     if(
@@ -1403,11 +1545,12 @@ canvas.addEventListener(
       }
     }
 
-    const body=hitTest(
-      p.x,
-      p.y,
-      engine
-    );
+    const body=
+      hitTest(
+        p.x,
+        p.y,
+        engine
+      );
 
     if(currentTool==="erase"){
       if(body){
@@ -1456,6 +1599,8 @@ canvas.addEventListener(
           y:body.position.y-p.y
         };
 
+        newlyPlacedBodies.delete(body);
+
         Matter.Sleeping.set(
           body,
           false
@@ -1480,14 +1625,21 @@ canvas.addEventListener(
 canvas.addEventListener(
   "pointermove",
   e=>{
-    const rect=canvas.getBoundingClientRect();
+    const rect=
+      canvas.getBoundingClientRect();
 
-    const sx=e.clientX-rect.left;
-    const sy=e.clientY-rect.top;
+    const sx=
+      e.clientX-rect.left;
 
-    const p=screenToWorld(sx,sy);
+    const sy=
+      e.clientY-rect.top;
 
-    if(currentMode!=="editor")return;
+    const p=
+      screenToWorld(sx,sy);
+
+    if(currentMode!=="editor"){
+      return;
+    }
 
     if(
       rotateDragging&&
@@ -1505,11 +1657,19 @@ canvas.addEventListener(
         p.y-selectedBody.position.y;
 
       const angle=
-        Math.atan2(dx,-dy);
+        Math.atan2(
+          dx,
+          -dy
+        );
 
       Body.setAngle(
         selectedBody,
         angle
+      );
+
+      Body.setVelocity(
+        selectedBody,
+        {x:0,y:0}
       );
 
       Body.setAngularVelocity(
@@ -1624,20 +1784,35 @@ function resizeFromCorner(
 
   const oldW=body.plugin.width;
   const oldH=body.plugin.height;
+  const angle=body.angle;
 
-  const c=Math.cos(body.angle);
-  const s=Math.sin(body.angle);
+  const c=Math.cos(angle);
+  const s=Math.sin(angle);
 
   const corners=[
-    {x:-oldW/2,y:-oldH/2},
-    {x: oldW/2,y:-oldH/2},
-    {x: oldW/2,y: oldH/2},
-    {x:-oldW/2,y: oldH/2}
+    {
+      x:-oldW/2,
+      y:-oldH/2
+    },
+    {
+      x:oldW/2,
+      y:-oldH/2
+    },
+    {
+      x:oldW/2,
+      y:oldH/2
+    },
+    {
+      x:-oldW/2,
+      y:oldH/2
+    }
   ];
 
-  const opposite=(index+2)%4;
+  const opposite=
+    (index+2)%4;
 
-  const fixedLocal=corners[opposite];
+  const fixedLocal=
+    corners[opposite];
 
   const fixedWorld={
     x:body.position.x+
@@ -1652,55 +1827,88 @@ function resizeFromCorner(
   const dx=x-fixedWorld.x;
   const dy=y-fixedWorld.y;
 
-  const localX=
+  const draggedLocalX=
     dx*c+
     dy*s;
 
-  const localY=
+  const draggedLocalY=
     -dx*s+
     dy*c;
 
-  let newW=Math.abs(localX);
-  let newH=Math.abs(localY);
+  let newW=
+    Math.abs(draggedLocalX);
 
-  newW=Math.max(30,newW);
-  newH=Math.max(20,newH);
+  let newH=
+    Math.abs(draggedLocalY);
 
-  const draggedSignX=
+  newW=Math.max(
+    30,
+    Math.min(newW,2000)
+  );
+
+  newH=Math.max(
+    20,
+    Math.min(newH,2000)
+  );
+
+  const signX=
     corners[index].x>=0
     ?1
     :-1;
 
-  const draggedSignY=
+  const signY=
     corners[index].y>=0
     ?1
     :-1;
 
-  const centerLocal={
+  const newCenterLocal={
     x:fixedLocal.x+
-      draggedSignX*newW/2,
+      signX*newW/2,
 
     y:fixedLocal.y+
-      draggedSignY*newH/2
+      signY*newH/2
   };
 
   const newCenterWorld={
     x:fixedWorld.x+
-      centerLocal.x*c-
-      centerLocal.y*s,
+      newCenterLocal.x*c-
+      newCenterLocal.y*s,
 
     y:fixedWorld.y+
-      centerLocal.x*s+
-      centerLocal.y*c
+      newCenterLocal.x*s+
+      newCenterLocal.y*c
   };
 
-  const sx=newW/oldW;
-  const sy=newH/oldH;
+  const vertices=[
+    {
+      x:-newW/2,
+      y:-newH/2
+    },
+    {
+      x:newW/2,
+      y:-newH/2
+    },
+    {
+      x:newW/2,
+      y:newH/2
+    },
+    {
+      x:-newW/2,
+      y:newH/2
+    }
+  ].map(p=>({
+    x:newCenterWorld.x+
+      p.x*c-
+      p.y*s,
 
-  Body.scale(
+    y:newCenterWorld.y+
+      p.x*s+
+      p.y*c
+  }));
+
+  Body.setVertices(
     body,
-    sx,
-    sy
+    vertices
   );
 
   Body.setPosition(
@@ -1708,8 +1916,10 @@ function resizeFromCorner(
     newCenterWorld
   );
 
-  body.plugin.width=newW;
-  body.plugin.height=newH;
+  Body.setAngle(
+    body,
+    angle
+  );
 
   Body.setVelocity(
     body,
@@ -1720,6 +1930,9 @@ function resizeFromCorner(
     body,
     0
   );
+
+  body.plugin.width=newW;
+  body.plugin.height=newH;
 
   Matter.Sleeping.set(
     body,
@@ -1742,16 +1955,10 @@ document.querySelectorAll(".tool")
   btn.addEventListener(
     "click",
     ()=>{
-      currentTool=btn.dataset.tool;
+      currentTool=
+        btn.dataset.tool;
 
       updateToolButtons();
-
-      if(
-        currentTool!=="rotate"&&
-        currentTool!=="shape"
-      ){
-        $("property").style.display="none";
-      }
     }
   );
 });
@@ -1888,67 +2095,6 @@ $("testBtn").addEventListener(
     if(stage){
       startPlay(stage);
     }
-  }
-);
-
-$("applyProp").addEventListener(
-  "click",
-  ()=>{
-    if(
-      !selectedBody||
-      !isBlock(selectedBody)
-    )return;
-
-    const w=Math.max(
-      30,
-      Number($("propW").value)||
-      selectedBody.plugin.width
-    );
-
-    const h=Math.max(
-      20,
-      Number($("propH").value)||
-      selectedBody.plugin.height
-    );
-
-    const angle=
-      (Number($("propAngle").value)||0)*
-      Math.PI/180;
-
-    const sx=
-      w/selectedBody.plugin.width;
-
-    const sy=
-      h/selectedBody.plugin.height;
-
-    Body.scale(
-      selectedBody,
-      sx,
-      sy
-    );
-
-    selectedBody.plugin.width=w;
-    selectedBody.plugin.height=h;
-
-    Body.setAngle(
-      selectedBody,
-      angle
-    );
-
-    Body.setVelocity(
-      selectedBody,
-      {x:0,y:0}
-    );
-
-    Body.setAngularVelocity(
-      selectedBody,
-      0
-    );
-
-    Matter.Sleeping.set(
-      selectedBody,
-      false
-    );
   }
 );
 
@@ -2092,7 +2238,9 @@ function loadStageIntoEngine(
 function getSavedStages(){
   try{
     return JSON.parse(
-      localStorage.getItem(SAVE_KEY)||"[]"
+      localStorage.getItem(
+        SAVE_KEY
+      )||"[]"
     );
   }catch(_){
     return [];
@@ -2104,29 +2252,41 @@ function showStageScreen(){
   $("stageScreen").style.display="block";
 
   const list=$("stageList");
+
   list.innerHTML="";
 
-  const stages=getSavedStages();
+  const stages=
+    getSavedStages();
 
   if(stages.length===0){
     list.innerHTML=
       "<div class='stageItem'>保存されたステージはありません。</div>";
+
     return;
   }
 
   stages.forEach(stage=>{
-    const item=document.createElement("div");
+    const item=
+      document.createElement("div");
+
     item.className="stageItem";
 
-    const name=document.createElement("div");
+    const name=
+      document.createElement("div");
+
     name.className="stageName";
     name.textContent=stage.name;
 
-    const buttons=document.createElement("div");
+    const buttons=
+      document.createElement("div");
+
     buttons.className="stageBtns";
 
-    const play=document.createElement("button");
+    const play=
+      document.createElement("button");
+
     play.textContent="遊ぶ";
+
     play.addEventListener(
       "click",
       ()=>{
@@ -2134,8 +2294,11 @@ function showStageScreen(){
       }
     );
 
-    const edit=document.createElement("button");
+    const edit=
+      document.createElement("button");
+
     edit.textContent="編集";
+
     edit.addEventListener(
       "click",
       ()=>{
@@ -2143,8 +2306,11 @@ function showStageScreen(){
       }
     );
 
-    const del=document.createElement("button");
+    const del=
+      document.createElement("button");
+
     del.textContent="削除";
+
     del.addEventListener(
       "click",
       ()=>{
@@ -2175,33 +2341,6 @@ function deleteStage(id){
     JSON.stringify(stages)
   );
 }
-
-setInterval(
-  ()=>{
-    if(
-      selectedBody&&
-      currentMode==="editor"&&
-      isBlock(selectedBody)
-    ){
-      $("propW").value=
-        Math.round(
-          selectedBody.plugin.width
-        );
-
-      $("propH").value=
-        Math.round(
-          selectedBody.plugin.height
-        );
-
-      $("propAngle").value=
-        Math.round(
-          selectedBody.angle*
-          180/Math.PI
-        );
-    }
-  },
-  100
-);
 </script>
 </body>
 </html>
