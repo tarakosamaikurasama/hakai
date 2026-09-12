@@ -34,8 +34,6 @@ button{
 .screen.active{
  display:block;
 }
-
-/* ===== スタート ===== */
 #startScreen{
  background:linear-gradient(#fff,#e7f4ff);
  align-items:center;
@@ -75,8 +73,6 @@ button{
 .play{
  background:#168cff;
 }
-
-/* ===== ステージ選択 ===== */
 #selectScreen{
  background:#edf3f8;
  flex-direction:column;
@@ -143,8 +139,6 @@ button{
  padding:50px;
  color:#777;
 }
-
-/* ===== ゲーム ===== */
 .gameCanvas{
  position:absolute;
  inset:0;
@@ -264,8 +258,6 @@ button{
 .message.show{
  opacity:1;
 }
-
-/* ===== 設定 ===== */
 .property{
  position:absolute;
  right:10px;
@@ -336,7 +328,6 @@ button{
   <button id="selectBack">← 戻る</button>
   <h1>ステージを選択</h1>
  </div>
-
  <div id="stageList" class="stageList"></div>
 </section>
 
@@ -349,15 +340,9 @@ button{
   <div class="topbar">
    <button id="editorBack">← 戻る</button>
 
-   <input
-    id="stageName"
-    placeholder="ステージ名"
-   >
+   <input id="stageName" placeholder="ステージ名">
 
-   <button
-    class="orange"
-    id="saveBtn"
-   >
+   <button class="orange" id="saveBtn">
     保存
    </button>
 
@@ -365,10 +350,7 @@ button{
     ▶ 遊ぶ
    </button>
 
-   <button
-    class="red"
-    id="clearBtn"
-   >
+   <button class="red" id="clearBtn">
     全消去
    </button>
   </div>
@@ -432,10 +414,7 @@ button{
 
   </div>
 
-  <div
-   class="property"
-   id="property"
-  >
+  <div class="property" id="property">
 
    <h3>ブロック設定</h3>
 
@@ -466,10 +445,7 @@ button{
   配置：タップ　移動：ドラッグ　回転：中央の線をドラッグ　形変更：4つの角をドラッグ
  </div>
 
- <div
-  id="editorMessage"
-  class="message"
- ></div>
+ <div id="editorMessage" class="message"></div>
 
 </section>
 
@@ -485,19 +461,15 @@ button{
     ← 戻る
    </button>
 
-   <span
-    id="playName"
-    style="color:white;font-weight:900;padding:0 5px"
-   ></span>
+   <span id="playName"
+    style="color:white;font-weight:900;padding:0 5px">
+   </span>
 
    <button id="bombMode">
     💣 爆弾を置く
    </button>
 
-   <button
-    class="red"
-    id="explodeBtn"
-   >
+   <button class="red" id="explodeBtn">
     💥 全爆破
    </button>
 
@@ -513,10 +485,7 @@ button{
   「爆弾を置く」を押してから画面をタップ
  </div>
 
- <div
-  id="playMessage"
-  class="message"
- ></div>
+ <div id="playMessage" class="message"></div>
 
 </section>
 
@@ -606,10 +575,6 @@ const editorCanvas=
 const playCanvas=
  document.getElementById("playCanvas");
 
-/* =================================
-   共通
-================================= */
-
 function $(id){
  return document.getElementById(id);
 }
@@ -662,9 +627,6 @@ function getStages(){
    return JSON.parse(v);
   }
 
-  /*
-   * 古いバージョンの保存データも読む。
-   */
   for(
    const key of [
     "slimeCastleMaker_v4",
@@ -696,10 +658,6 @@ function setStages(a){
  );
 }
 
-/* =================================
-   Canvas
-================================= */
-
 function resizeCanvas(canvas){
 
  const r=
@@ -717,11 +675,6 @@ function resizeAll(){
  resizeCanvas(editorCanvas);
  resizeCanvas(playCanvas);
 }
-
-window.addEventListener(
- "resize",
- resizeAll
-);
 
 function getPointer(canvas,e){
 
@@ -753,10 +706,6 @@ function screenToWorld(
    camera.y
  };
 }
-
-/* =================================
-   Body
-================================= */
 
 function createFloor(){
 
@@ -793,15 +742,10 @@ function createBlock(
   h,
   {
    angle:angle*Math.PI/180,
-
    density:m.density,
-
    friction:m.friction,
-
    restitution:m.restitution,
-
    label:"block",
-
    plugin:{
     gameType:"block",
     material:material,
@@ -826,9 +770,7 @@ function createEnemy(x,y){
    density:.0018,
    friction:.4,
    restitution:.03,
-
    label:"enemy",
-
    plugin:{
     gameType:"enemy",
     alive:true,
@@ -850,9 +792,7 @@ function createBomb(x,y){
    density:.002,
    friction:.4,
    restitution:.15,
-
    label:"bomb",
-
    plugin:{
     gameType:"bomb",
     id:newId()
@@ -875,14 +815,8 @@ function createMultiply(
   h,
   {
    isStatic:true,
-
-   /*
-    * 爆弾を透過。
-    */
    isSensor:true,
-
    label:"multiply",
-
    plugin:{
     gameType:"multiply",
     width:w,
@@ -908,9 +842,7 @@ function createBedrock(
   {
    isStatic:true,
    angle:0,
-
    label:"bedrock",
-
    plugin:{
     gameType:"bedrock",
     width:w,
@@ -926,10 +858,6 @@ function gameType(b){
  return b?.plugin?.gameType||
   b?.label;
 }
-
-/* =================================
-   Engine
-================================= */
 
 function setupEngine(engine){
 
@@ -989,10 +917,6 @@ function setupEngine(engine){
  );
 }
 
-/* =================================
-   Collision
-================================= */
-
 function handleCollision(pair){
 
  const a=pair.bodyA;
@@ -1001,7 +925,6 @@ function handleCollision(pair){
  const ta=gameType(a);
  const tb=gameType(b);
 
- /* ×2 */
  if(
   ta==="bomb"&&
   tb==="multiply"
@@ -1020,7 +943,6 @@ function handleCollision(pair){
   return;
  }
 
- /* 敵 */
  let enemyBody=null;
  let other=null;
 
@@ -1064,11 +986,18 @@ function handleCollision(pair){
   }
  }
 
- /* ブロック同士 */
+ /*
+  * 編集中はブロック同士の衝突で
+  * ダメージを与えない。
+  */
  if(
   ta==="block"&&
   tb==="block"
  ){
+
+  if(editorEngine){
+   return;
+  }
 
   const speed=
    Math.abs(
@@ -1094,7 +1023,6 @@ function handleCollision(pair){
   }
  }
 
- /* 爆弾 */
  if(
   ta==="bomb"||
   tb==="bomb"
@@ -1106,8 +1034,13 @@ function handleCollision(pair){
   const otherBody=
    bombBody===a?b:a;
 
+  /*
+   * 編集中は爆弾とブロックの
+   * 接触でも壊さない。
+   */
   if(
-   gameType(otherBody)==="block"
+   gameType(otherBody)==="block"&&
+   !editorEngine
   ){
 
    damageBlock(
@@ -1203,10 +1136,6 @@ function removeMultiplyContact(
  }
 }
 
-/* =================================
-   ×2
-================================= */
-
 function multiplyBomb(
  multi,
  bombBody
@@ -1227,10 +1156,6 @@ function multiplyBomb(
  const contacts=
   multiplyContacts.get(id);
 
- /*
-  * 同じ爆弾が触れている間は
-  * 何度も増殖しない。
-  */
  if(
   contacts.has(
    bombBody.plugin.id
@@ -1253,7 +1178,8 @@ function multiplyBomb(
  if(!engine)return;
 
  /*
-  * 必ず×2の下側。
+  * 増殖した爆弾は必ず
+  * 増殖ブロックの下側から出す。
   */
  const x=
   multi.position.x+
@@ -1288,10 +1214,6 @@ function multiplyBomb(
   );
  }
 }
-
-/* =================================
-   Damage
-================================= */
 
 function damageBlock(
  b,
@@ -1343,10 +1265,6 @@ function damageBlock(
   }
  }
 }
-
-/* =================================
-   Enemy
-================================= */
 
 function crushEnemy(
  enemyBody,
@@ -1428,10 +1346,6 @@ function killEnemy(b){
  }
 }
 
-/* =================================
-   爆発
-================================= */
-
 function explodeAt(
  engine,
  x,
@@ -1444,6 +1358,12 @@ function explodeAt(
   y:y,
   time:performance.now()
  });
+
+ /*
+  * editorEngineなら編集中。
+  */
+ const isEditor=
+  engine===editorEngine;
 
  Composite
   .allBodies(engine.world)
@@ -1488,6 +1408,10 @@ function explodeAt(
      1
     );
 
+   /*
+    * 編集中でも爆発の衝撃自体は
+    * 発生させる。
+    */
    if(!b.isStatic){
 
     Body.applyForce(
@@ -1507,7 +1431,16 @@ function explodeAt(
     );
    }
 
-   if(t==="block"){
+   /*
+    * ここが重要。
+    *
+    * 編集中はブロックへの
+    * ダメージ処理を完全にスキップ。
+    */
+   if(
+    t==="block"&&
+    !isEditor
+   ){
 
     damageBlock(
      b,
@@ -1516,6 +1449,9 @@ function explodeAt(
     );
    }
 
+   /*
+    * 敵は編集時でも倒せる。
+    */
    if(
     t==="enemy"&&
     distance<EXPLOSION_RADIUS
@@ -1562,10 +1498,6 @@ function explodeAll(engine){
  }
 }
 
-/* =================================
-   Body検索
-================================= */
-
 function bodyAt(
  engine,
  point
@@ -1607,10 +1539,6 @@ function bodyAt(
 
  return null;
 }
-
-/* =================================
-   Editor
-================================= */
 
 function startEditor(stage=null){
 
@@ -1710,9 +1638,6 @@ function startEditor(stage=null){
   editorEngine
  );
 
- /*
-  * 床が画面下側に見える位置。
-  */
  editorCamera={
   x:0,
   y:620,
@@ -1746,10 +1671,6 @@ function stopEditor(){
  multiplyContacts.clear();
 }
 
-/* =================================
-   Editor Pointer
-================================= */
-
 editorCanvas.addEventListener(
  "pointerdown",
  e=>{
@@ -1772,7 +1693,6 @@ editorCanvas.addEventListener(
     editorCamera
    );
 
-  /* 回転ハンドル */
   if(
    currentTool==="rotate"&&
    selectedBody&&
@@ -1807,11 +1727,16 @@ editorCanvas.addEventListener(
      body:selectedBody
     };
 
+    try{
+     editorCanvas.setPointerCapture(
+      e.pointerId
+     );
+    }catch(_){}
+
     return;
    }
   }
 
-  /* 4頂点 */
   if(
    currentTool==="shape"&&
    selectedBody&&
@@ -1857,11 +1782,16 @@ editorCanvas.addEventListener(
      corner:nearest.corner
     };
 
+    try{
+     editorCanvas.setPointerCapture(
+      e.pointerId
+     );
+    }catch(_){}
+
     return;
    }
   }
 
-  /* 移動 */
   if(
    currentTool==="move"
   ){
@@ -1884,12 +1814,17 @@ editorCanvas.addEventListener(
      dy:
       b.position.y-p.y
     };
+
+    try{
+     editorCanvas.setPointerCapture(
+      e.pointerId
+     );
+    }catch(_){}
    }
 
    return;
   }
 
-  /* 消去 */
   if(
    currentTool==="erase"
   ){
@@ -1924,7 +1859,6 @@ editorCanvas.addEventListener(
    return;
   }
 
-  /* 回転 */
   if(
    currentTool==="rotate"
   ){
@@ -1947,13 +1881,18 @@ editorCanvas.addEventListener(
       mode:"rotate",
       body:b
      };
+
+     try{
+      editorCanvas.setPointerCapture(
+       e.pointerId
+      );
+     }catch(_){}
     }
    }
 
    return;
   }
 
-  /* 形変更 */
   if(
    currentTool==="shape"
   ){
@@ -1971,10 +1910,6 @@ editorCanvas.addEventListener(
    return;
   }
 
-  /*
-   * 既存物体をタップした場合は
-   * 新しい物体を重ねない。
-   */
   const existing=
    bodyAt(
     editorEngine,
@@ -1988,7 +1923,6 @@ editorCanvas.addEventListener(
    return;
   }
 
-  /* 新規 */
   let b=null;
 
   if(
@@ -2089,7 +2023,6 @@ editorCanvas.addEventListener(
 
   const b=drag.body;
 
-  /* 移動 */
   if(
    drag.mode==="move"
   ){
@@ -2109,7 +2042,6 @@ editorCanvas.addEventListener(
    }
   }
 
-  /* 回転 */
   if(
    drag.mode==="rotate"
   ){
@@ -2126,10 +2058,6 @@ editorCanvas.addEventListener(
    const dy=
     p.y-b.position.y;
 
-   /*
-    * 中心からマウスへの方向を
-    * ブロックの垂直方向として扱う。
-    */
    const angle=
     Math.atan2(
      dx,
@@ -2142,7 +2070,6 @@ editorCanvas.addEventListener(
    );
   }
 
-  /* 形変更 */
   if(
    drag.mode==="shape"
   ){
@@ -2157,6 +2084,7 @@ editorCanvas.addEventListener(
 );
 
 function stopDrag(){
+
  drag=null;
 }
 
@@ -2170,19 +2098,6 @@ editorCanvas.addEventListener(
  stopDrag
 );
 
-/* =================================
-   4頂点
-================================= */
-
-/*
- * ここを大幅に修正。
- *
- * 「画面座標」と「ワールド座標」を
- * 混ぜない。
- *
- * 4点は必ず実際のBodyの4頂点から
- * 計算する。
- */
 function getShapeHandles(b){
 
  const w=
@@ -2255,10 +2170,6 @@ function resizeFromCorner(
  const dy=
   pointer.y-b.position.y;
 
- /*
-  * ワールド座標→
-  * ブロックローカル座標。
-  */
  const lx=
   dx*cos+
   dy*sin;
@@ -2276,10 +2187,6 @@ function resizeFromCorner(
  let ox;
  let oy;
 
- /*
-  * ドラッグしている角の
-  * 対角線側を固定。
-  */
  if(corner==="tr"){
   ox=-oldW/2;
   oy= oldH/2;
@@ -2300,36 +2207,22 @@ function resizeFromCorner(
   oy=-oldH/2;
  }
 
- /*
-  * 常に長方形になる。
-  */
- const left=
-  Math.min(lx,ox);
+ let newW=
+  Math.abs(lx-ox);
 
- const right=
-  Math.max(lx,ox);
+ let newH=
+  Math.abs(ly-oy);
 
- const top=
-  Math.min(ly,oy);
+ newW=
+  Math.max(20,newW);
 
- const bottom=
-  Math.max(ly,oy);
-
- const newW=
-  Math.max(
-   20,
-   right-left
-  );
-
- const newH=
-  Math.max(
-   20,
-   bottom-top
-  );
+ newH=
+  Math.max(20,newH);
 
  /*
-  * 対角線側を固定したまま
-  * 新しい中心を計算。
+  * 対角の点を固定し、
+  * 反対側も動かして
+  * 常に長方形を維持する。
   */
  const centerLX=
   (lx+ox)/2;
@@ -2364,10 +2257,6 @@ function resizeFromCorner(
  b.plugin.width=newW;
  b.plugin.height=newH;
 }
-
-/* =================================
-   Property
-================================= */
 
 function openProperty(b){
 
@@ -2512,10 +2401,6 @@ $("closeProp").onclick=()=>{
   .remove("show");
 };
 
-/* =================================
-   Toolbar
-================================= */
-
 document
  .querySelectorAll(".tool")
  .forEach(button=>{
@@ -2561,10 +2446,6 @@ document
    }
   );
  });
-
-/* =================================
-   Save
-================================= */
 
 function serializeStage(){
 
@@ -2652,7 +2533,6 @@ function serializeStage(){
        angle:0
       };
      }
-
     })
  };
 }
@@ -2718,10 +2598,6 @@ $("testBtn").onclick=()=>{
   startPlay(stage);
  }
 };
-
-/* =================================
-   Play
-================================= */
 
 function startPlay(stage){
 
@@ -2817,9 +2693,6 @@ function startPlay(stage){
   playEngine
  );
 
- /*
-  * プレイ中も床を画面内に。
-  */
  playCamera={
   x:0,
   y:620,
@@ -2938,10 +2811,6 @@ $("restartBtn").onclick=()=>{
  }
 };
 
-/* =================================
-   Stage Select
-================================= */
-
 function renderStages(){
 
  const list=
@@ -3034,10 +2903,6 @@ function renderStages(){
  });
 }
 
-/* =================================
-   Navigation
-================================= */
-
 $("makeBtn").onclick=()=>{
  startEditor();
 };
@@ -3070,10 +2935,6 @@ $("playBack").onclick=()=>{
  );
 };
 
-/* =================================
-   描画
-================================= */
-
 function draw(
  canvas,
  engine,
@@ -3091,17 +2952,6 @@ function draw(
   canvas.height
  );
 
- /*
-  * ここからワールド座標系。
-  *
-  * 重要：
-  * 以前はこの中でtoScreen()を
-  * さらに使っていたため、
-  * 4点が画面端などに飛んでいた。
-  *
-  * 今回は描画中の座標系を
-  * 最初からワールド座標にしている。
-  */
  ctx.save();
 
  ctx.translate(
@@ -3119,7 +2969,6 @@ function draw(
   -camera.y
  );
 
- /* 背景 */
  const visibleW=
   canvas.clientWidth/
   camera.zoom;
@@ -3143,7 +2992,6 @@ function draw(
   visibleH+1000
  );
 
- /* 雲っぽい背景ライン */
  ctx.strokeStyle=
   "rgba(255,255,255,.35)";
 
@@ -3181,13 +3029,8 @@ function draw(
   const t=
    gameType(b);
 
-  /* ===== 床 ===== */
   if(t==="floor"){
 
-   /*
-    * 巨大Bodyをそのまま描かず、
-    * 見えている範囲だけ描画。
-    */
    const floorLeft=
     camera.x-visibleW/2-100;
 
@@ -3209,9 +3052,6 @@ function draw(
     8
    );
 
-   /*
-    * 床の模様
-    */
    ctx.strokeStyle="#8c8c8c";
    ctx.lineWidth=2;
 
@@ -3250,7 +3090,6 @@ function draw(
    b.angle
   );
 
-  /* ===== 木・ガラス・石 ===== */
   if(t==="block"){
 
    const w=
@@ -3295,7 +3134,6 @@ function draw(
    );
   }
 
-  /* ===== 岩盤 ===== */
   if(t==="bedrock"){
 
    const w=
@@ -3348,7 +3186,6 @@ function draw(
    }
   }
 
-  /* ===== ×2 ===== */
   if(t==="multiply"){
 
    const w=
@@ -3392,7 +3229,6 @@ function draw(
    );
   }
 
-  /* ===== 敵 ===== */
   if(t==="enemy"){
 
    ctx.fillStyle="#55c94a";
@@ -3454,7 +3290,6 @@ function draw(
    ctx.fill();
   }
 
-  /* ===== 爆弾 ===== */
   if(t==="bomb"){
 
    ctx.fillStyle="#222";
@@ -3494,10 +3329,6 @@ function draw(
   ctx.restore();
  });
 
- /* =================================
-    選択表示
- ================================= */
-
  if(
   isEditor&&
   selectedBody&&
@@ -3507,12 +3338,6 @@ function draw(
   const b=
    selectedBody;
 
-  /*
-   * 長方形の選択枠
-   *
-   * ここもworld座標のまま描画する。
-   * toScreen()を使わない。
-   */
   if(
    gameType(b)==="block"||
    gameType(b)==="bedrock"||
@@ -3558,14 +3383,6 @@ function draw(
    ctx.restore();
   }
 
-  /*
-   * ================================
-   * 回転ハンドル
-   * ================================
-   *
-   * ブロック中央から
-   * 「ブロックの上方向」に線を出す。
-   */
   if(
    currentTool==="rotate"&&
    gameType(b)!=="bedrock"
@@ -3577,10 +3394,6 @@ function draw(
      b.plugin.height||50
     )/2+40;
 
-   /*
-    * ローカルの上方向を
-    * ワールド座標に変換。
-    */
    const hx=
     b.position.x+
     Math.sin(b.angle)*
@@ -3625,13 +3438,6 @@ function draw(
    ctx.fill();
   }
 
-  /*
-   * ================================
-   * 形変更の4点
-   * ================================
-   *
-   * 必ず実際の四隅の位置に描画。
-   */
   if(
    currentTool==="shape"&&
    gameType(b)==="block"
@@ -3667,10 +3473,6 @@ function draw(
 
  ctx.restore();
 
- /* =================================
-    爆発
- ================================= */
-
  const now=
   performance.now();
 
@@ -3690,9 +3492,6 @@ function draw(
   const progress=
    (now-effect.time)/300;
 
-  /*
-   * ここだけ画面座標へ変換。
-   */
   const sx=
    (effect.x-camera.x)*
    camera.zoom+
@@ -3727,10 +3526,6 @@ function draw(
   ctx.globalAlpha=1;
  });
 }
-
-/* =================================
-   Animation
-================================= */
 
 function editorLoop(){
 
@@ -3775,10 +3570,6 @@ function playLoop(){
   playLoop
  );
 }
-
-/* =================================
-   起動
-================================= */
 
 resizeAll();
 
