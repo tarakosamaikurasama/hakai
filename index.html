@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>スライム城くずし ステージメーカー</title>
 <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
-
 <style>
 *{
   box-sizing:border-box;
@@ -354,32 +353,21 @@ window.addEventListener("resize",resizeCanvas);
 resizeCanvas();
 
 function gameType(body){
-  return body && body.plugin ? body.plugin.gameType : null;
+  return body&&body.plugin?body.plugin.gameType:null;
 }
 
 function materialOf(body){
-  return body && body.plugin ? body.plugin.material : null;
+  return body&&body.plugin?body.plugin.material:null;
 }
 
 function isBlock(body){
   return gameType(body)==="block";
 }
 
-function isStaticObject(body){
-  return gameType(body)==="bedrock" || gameType(body)==="floor";
-}
-
 function screenToWorld(x,y){
   return {
     x:(x-canvas.clientWidth/2)/camera.zoom+camera.x,
     y:(y-canvas.clientHeight/2)/camera.zoom+camera.y
-  };
-}
-
-function worldToScreen(x,y){
-  return {
-    x:(x-camera.x)*camera.zoom+canvas.clientWidth/2,
-    y:(y-camera.y)*camera.zoom+canvas.clientHeight/2
   };
 }
 
@@ -413,6 +401,7 @@ function createEngine(){
       if(now<endTime){
         Body.setVelocity(body,{x:0,y:0});
         Body.setAngularVelocity(body,0);
+        Matter.Sleeping.set(body,true);
       }else{
         newlyPlacedBodies.delete(body);
         Matter.Sleeping.set(body,false);
@@ -448,6 +437,7 @@ function createEngine(){
         bomb=a;
         multi=b;
       }
+
       if(tb==="bomb"&&ta==="multiply"){
         bomb=b;
         multi=a;
@@ -455,6 +445,7 @@ function createEngine(){
 
       if(bomb&&multi){
         const set=multiplyContacts.get(multi.id);
+
         if(set){
           set.delete(bomb.id);
         }
@@ -476,8 +467,8 @@ function handleCollision(pair,engine){
     (ta==="bomb"&&tb==="multiply")||
     (tb==="bomb"&&ta==="multiply")
   ){
-    let bomb=ta==="bomb"?a:b;
-    let multi=ta==="multiply"?a:b;
+    const bomb=ta==="bomb"?a:b;
+    const multi=ta==="multiply"?a:b;
 
     if(!multiplyContacts.has(multi.id)){
       multiplyContacts.set(multi.id,new Set());
@@ -488,10 +479,11 @@ function handleCollision(pair,engine){
     if(!set.has(bomb.id)){
       set.add(bomb.id);
 
-      const x=multi.position.x+(Math.random()-.5)*30;
-      const y=multi.position.y+(multi.plugin.height||45)/2+42;
-
-      createBomb(engine,x,y);
+      createBomb(
+        engine,
+        multi.position.x+(Math.random()-.5)*30,
+        multi.position.y+(multi.plugin.height||45)/2+42
+      );
     }
 
     return;
@@ -505,6 +497,7 @@ function handleCollision(pair,engine){
       const block=ta==="block"?a:b;
       damageBlock(block,30,engine);
     }
+
     return;
   }
 
@@ -533,7 +526,11 @@ function handleCollision(pair,engine){
     const bomb=ta==="bomb"?a:b;
     const enemy=ta==="enemy"?a:b;
 
-    explodeAt(engine,bomb.position.x,bomb.position.y);
+    explodeAt(
+      engine,
+      bomb.position.x,
+      bomb.position.y
+    );
 
     if(engine.world.bodies.includes(enemy)){
       World.remove(engine.world,enemy);
@@ -569,7 +566,6 @@ function handleCollision(pair,engine){
 
 function damageBlock(body,damage,engine){
   if(!body||gameType(body)!=="block")return;
-
   if(currentMode==="editor")return;
 
   body.plugin.hp=(body.plugin.hp||1)-damage;
@@ -596,22 +592,18 @@ function explodeAt(engine,x,y){
     const power=(1-dist/160)*.045;
 
     if(!body.isStatic){
-      let nx=dx;
-      let ny=dy;
-
-      const len=Math.sqrt(nx*nx+ny*ny)||1;
-
-      nx/=len;
-      ny/=len;
+      const len=Math.sqrt(dx*dx+dy*dy)||1;
 
       Body.applyForce(
         body,
         body.position,
         {
-          x:nx*power,
-          y:ny*power
+          x:(dx/len)*power,
+          y:(dy/len)*power
         }
       );
+
+      Matter.Sleeping.set(body,false);
     }
 
     if(type==="block"&&currentMode==="play"){
@@ -646,7 +638,15 @@ function createBomb(engine,x,y){
   return bomb;
 }
 
-function createBlock(engine,type,x,y,w=100,h=50,angle=0){
+function createBlock(
+  engine,
+  type,
+  x,
+  y,
+  w=100,
+  h=50,
+  angle=0
+){
   let density=.0035;
   let friction=.4;
   let restitution=.08;
@@ -690,7 +690,10 @@ function createBlock(engine,type,x,y,w=100,h=50,angle=0){
 
   World.add(engine.world,body);
 
-  newlyPlacedBodies.set(body,performance.now()+300);
+  newlyPlacedBodies.set(
+    body,
+    performance.now()+300
+  );
 
   Body.setVelocity(body,{x:0,y:0});
   Body.setAngularVelocity(body,0);
@@ -718,7 +721,10 @@ function createEnemy(engine,x,y){
 
   World.add(engine.world,body);
 
-  newlyPlacedBodies.set(body,performance.now()+300);
+  newlyPlacedBodies.set(
+    body,
+    performance.now()+300
+  );
 
   Body.setVelocity(body,{x:0,y:0});
   Body.setAngularVelocity(body,0);
@@ -815,7 +821,6 @@ function startEditor(stage=null){
   stopEditor();
 
   currentMode="editor";
-
   editorEngine=createEngine();
 
   if(stage){
@@ -858,7 +863,6 @@ function startPlay(stage){
   stopEditor();
 
   currentMode="play";
-
   playEngine=createEngine();
 
   currentStageId=stage.id;
@@ -893,7 +897,11 @@ function runEngine(engine){
       engine===editorEngine||
       engine===playEngine
     ){
-      const delta=Math.min(33,time-lastTime);
+      const delta=Math.min(
+        33,
+        time-lastTime
+      );
+
       lastTime=time;
 
       Engine.update(engine,delta);
@@ -908,7 +916,12 @@ function runEngine(engine){
 }
 
 function draw(engine){
-  ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
+  ctx.clearRect(
+    0,
+    0,
+    canvas.clientWidth,
+    canvas.clientHeight
+  );
 
   ctx.save();
 
@@ -917,13 +930,17 @@ function draw(engine){
     canvas.clientHeight/2
   );
 
-  ctx.scale(camera.zoom,camera.zoom);
+  ctx.scale(
+    camera.zoom,
+    camera.zoom
+  );
 
-  ctx.translate(-camera.x,-camera.y);
+  ctx.translate(
+    -camera.x,
+    -camera.y
+  );
 
-  const bodies=engine.world.bodies;
-
-  for(const body of bodies){
+  for(const body of engine.world.bodies){
     drawBody(body);
   }
 
@@ -936,9 +953,8 @@ function drawBody(body){
   const type=gameType(body);
 
   if(type==="floor"){
-    ctx.save();
-
     ctx.fillStyle="#222";
+
     ctx.fillRect(
       -50000,
       FLOOR_Y,
@@ -947,6 +963,7 @@ function drawBody(body){
     );
 
     ctx.fillStyle="#555";
+
     ctx.fillRect(
       -50000,
       FLOOR_Y,
@@ -954,13 +971,16 @@ function drawBody(body){
       8
     );
 
-    ctx.restore();
     return;
   }
 
   ctx.save();
 
-  ctx.translate(body.position.x,body.position.y);
+  ctx.translate(
+    body.position.x,
+    body.position.y
+  );
+
   ctx.rotate(body.angle);
 
   if(type==="block"){
@@ -984,17 +1004,19 @@ function drawBody(body){
 
     ctx.lineWidth=3;
 
-    ctx.fillRect(-w/2,-h/2,w,h);
-    ctx.strokeRect(-w/2,-h/2,w,h);
+    ctx.fillRect(
+      -w/2,
+      -h/2,
+      w,
+      h
+    );
 
-    if(body.plugin.material==="wood"){
-      ctx.strokeStyle="#dca56a";
-      ctx.lineWidth=2;
-      ctx.beginPath();
-      ctx.moveTo(-w*.35,-h*.25);
-      ctx.lineTo(w*.3,h*.2);
-      ctx.stroke();
-    }
+    ctx.strokeRect(
+      -w/2,
+      -h/2,
+      w,
+      h
+    );
   }
 
   if(type==="bedrock"){
@@ -1005,10 +1027,22 @@ function drawBody(body){
     ctx.strokeStyle="#111";
     ctx.lineWidth=3;
 
-    ctx.fillRect(-w/2,-h/2,w,h);
-    ctx.strokeRect(-w/2,-h/2,w,h);
+    ctx.fillRect(
+      -w/2,
+      -h/2,
+      w,
+      h
+    );
+
+    ctx.strokeRect(
+      -w/2,
+      -h/2,
+      w,
+      h
+    );
 
     ctx.strokeStyle="#777";
+
     ctx.beginPath();
 
     for(let i=-w;i<w;i+=25){
@@ -1030,12 +1064,14 @@ function drawBody(body){
     ctx.stroke();
 
     ctx.fillStyle="#fff";
+
     ctx.beginPath();
     ctx.arc(-7,-5,5,0,Math.PI*2);
     ctx.arc(7,-5,5,0,Math.PI*2);
     ctx.fill();
 
     ctx.fillStyle="#111";
+
     ctx.beginPath();
     ctx.arc(-7,-5,2,0,Math.PI*2);
     ctx.arc(7,-5,2,0,Math.PI*2);
@@ -1044,6 +1080,7 @@ function drawBody(body){
 
   if(type==="bomb"){
     ctx.fillStyle="#111";
+
     ctx.beginPath();
     ctx.arc(0,0,14,0,Math.PI*2);
     ctx.fill();
@@ -1066,8 +1103,19 @@ function drawBody(body){
     ctx.strokeStyle="#6c27b5";
     ctx.lineWidth=3;
 
-    ctx.fillRect(-w/2,-h/2,w,h);
-    ctx.strokeRect(-w/2,-h/2,w,h);
+    ctx.fillRect(
+      -w/2,
+      -h/2,
+      w,
+      h
+    );
+
+    ctx.strokeRect(
+      -w/2,
+      -h/2,
+      w,
+      h
+    );
 
     ctx.globalAlpha=1;
     ctx.fillStyle="#fff";
@@ -1130,11 +1178,15 @@ function drawSelection(){
     ctx.lineWidth=4;
 
     ctx.beginPath();
-    ctx.moveTo(body.position.x,body.position.y);
+    ctx.moveTo(
+      body.position.x,
+      body.position.y
+    );
     ctx.lineTo(hx,hy);
     ctx.stroke();
 
     ctx.fillStyle="#f80";
+
     ctx.beginPath();
     ctx.arc(hx,hy,9,0,Math.PI*2);
     ctx.fill();
@@ -1149,7 +1201,13 @@ function drawSelection(){
 
     for(const p of handles){
       ctx.beginPath();
-      ctx.arc(p.x,p.y,8,0,Math.PI*2);
+      ctx.arc(
+        p.x,
+        p.y,
+        8,
+        0,
+        Math.PI*2
+      );
       ctx.fill();
       ctx.stroke();
     }
@@ -1169,22 +1227,28 @@ function hitTest(worldX,worldY,engine){
     const dx=worldX-body.position.x;
     const dy=worldY-body.position.y;
 
-    const localX=
-      dx*Math.cos(-body.angle)-
-      dy*Math.sin(-body.angle);
+    const c=Math.cos(-body.angle);
+    const s=Math.sin(-body.angle);
 
-    const localY=
-      dx*Math.sin(-body.angle)+
-      dy*Math.cos(-body.angle);
+    const localX=dx*c-dy*s;
+    const localY=dx*s+dy*c;
 
     if(gameType(body)==="enemy"){
-      if(localX*localX+localY*localY<22*22){
+      if(
+        localX*localX+
+        localY*localY<
+        22*22
+      ){
         return body;
       }
     }
 
     if(gameType(body)==="bomb"){
-      if(localX*localX+localY*localY<14*14){
+      if(
+        localX*localX+
+        localY*localY<
+        14*14
+      ){
         return body;
       }
     }
@@ -1218,7 +1282,11 @@ function nearestShapeHandle(body,x,y){
   handles.forEach((p,i)=>{
     const dx=p.x-x;
     const dy=p.y-y;
-    const d=Math.sqrt(dx*dx+dy*dy);
+
+    const d=Math.sqrt(
+      dx*dx+
+      dy*dy
+    );
 
     if(d<bestDist){
       bestDist=d;
@@ -1226,7 +1294,10 @@ function nearestShapeHandle(body,x,y){
     }
   });
 
-  return bestDist<25/camera.zoom?best:-1;
+  return bestDist<
+    25/camera.zoom
+    ?best
+    :-1;
 }
 
 function isRotateHandle(body,x,y){
@@ -1248,354 +1319,638 @@ function isRotateHandle(body,x,y){
   const dx=x-hx;
   const dy=y-hy;
 
-  return Math.sqrt(dx*dx+dy*dy)<20/camera.zoom;
+  return Math.sqrt(
+    dx*dx+
+    dy*dy
+  )<20/camera.zoom;
 }
 
-canvas.addEventListener("pointerdown",e=>{
-  const rect=canvas.getBoundingClientRect();
+canvas.addEventListener(
+  "pointerdown",
+  e=>{
+    const rect=canvas.getBoundingClientRect();
 
-  const sx=e.clientX-rect.left;
-  const sy=e.clientY-rect.top;
+    const sx=e.clientX-rect.left;
+    const sy=e.clientY-rect.top;
 
-  const p=screenToWorld(sx,sy);
+    const p=screenToWorld(sx,sy);
 
-  const engine=
-    currentMode==="editor"
-    ?editorEngine
-    :playEngine;
+    const engine=
+      currentMode==="editor"
+      ?editorEngine
+      :playEngine;
 
-  if(!engine)return;
+    if(!engine)return;
 
-  canvas.setPointerCapture(e.pointerId);
-
-  if(currentMode==="play"){
-    if($("bombBtn").dataset.active==="1"){
-      createBomb(playEngine,p.x,p.y);
-      return;
-    }
-
-    return;
-  }
-
-  if(currentTool==="rotate"&&selectedBody){
-    if(isRotateHandle(selectedBody,p.x,p.y)){
-      rotateDragging=true;
-      return;
-    }
-  }
-
-  if(currentTool==="shape"&&selectedBody){
-    const index=nearestShapeHandle(
-      selectedBody,
-      p.x,
-      p.y
+    canvas.setPointerCapture(
+      e.pointerId
     );
 
-    if(index>=0){
-      shapeDragging=index;
+    if(currentMode==="play"){
+      if(
+        $("bombBtn").dataset.active==="1"
+      ){
+        createBomb(
+          playEngine,
+          p.x,
+          p.y
+        );
+      }
+
       return;
     }
-  }
 
-  const body=hitTest(p.x,p.y,engine);
+    if(
+      currentTool==="rotate"&&
+      selectedBody
+    ){
+      if(
+        isRotateHandle(
+          selectedBody,
+          p.x,
+          p.y
+        )
+      ){
+        rotateDragging=true;
+        Matter.Sleeping.set(
+          selectedBody,
+          false
+        );
+        return;
+      }
+    }
 
-  if(currentTool==="erase"){
-    if(body){
-      World.remove(engine.world,body);
+    if(
+      currentTool==="shape"&&
+      selectedBody
+    ){
+      const index=
+        nearestShapeHandle(
+          selectedBody,
+          p.x,
+          p.y
+        );
 
-      if(selectedBody===body){
+      if(index>=0){
+        shapeDragging=index;
+
+        Matter.Sleeping.set(
+          selectedBody,
+          false
+        );
+
+        return;
+      }
+    }
+
+    const body=hitTest(
+      p.x,
+      p.y,
+      engine
+    );
+
+    if(currentTool==="erase"){
+      if(body){
+        World.remove(
+          engine.world,
+          body
+        );
+
+        if(selectedBody===body){
+          selectedBody=null;
+        }
+      }
+
+      return;
+    }
+
+    if(
+      currentTool==="wood"||
+      currentTool==="glass"||
+      currentTool==="stone"||
+      currentTool==="enemy"||
+      currentTool==="bomb"||
+      currentTool==="multiply"||
+      currentTool==="bedrock"
+    ){
+      if(!body){
+        addPlacedObject(
+          currentTool,
+          p.x,
+          p.y
+        );
+      }else{
+        selectedBody=body;
+      }
+
+      return;
+    }
+
+    if(currentTool==="move"){
+      if(body){
+        selectedBody=body;
+        movingBody=body;
+
+        moveOffset={
+          x:body.position.x-p.x,
+          y:body.position.y-p.y
+        };
+
+        Matter.Sleeping.set(
+          body,
+          false
+        );
+
+        Body.setVelocity(
+          body,
+          {x:0,y:0}
+        );
+
+        Body.setAngularVelocity(
+          body,
+          0
+        );
+      }else{
         selectedBody=null;
       }
     }
-
-    return;
   }
+);
 
-  if(
-    currentTool==="wood"||
-    currentTool==="glass"||
-    currentTool==="stone"||
-    currentTool==="enemy"||
-    currentTool==="bomb"||
-    currentTool==="multiply"||
-    currentTool==="bedrock"
-  ){
-    if(!body){
-      addPlacedObject(currentTool,p.x,p.y);
-    }else{
-      selectedBody=body;
+canvas.addEventListener(
+  "pointermove",
+  e=>{
+    const rect=canvas.getBoundingClientRect();
+
+    const sx=e.clientX-rect.left;
+    const sy=e.clientY-rect.top;
+
+    const p=screenToWorld(sx,sy);
+
+    if(currentMode!=="editor")return;
+
+    if(
+      rotateDragging&&
+      selectedBody
+    ){
+      Matter.Sleeping.set(
+        selectedBody,
+        false
+      );
+
+      const dx=
+        p.x-selectedBody.position.x;
+
+      const dy=
+        p.y-selectedBody.position.y;
+
+      const angle=
+        Math.atan2(dx,-dy);
+
+      Body.setAngle(
+        selectedBody,
+        angle
+      );
+
+      Body.setAngularVelocity(
+        selectedBody,
+        0
+      );
+
+      return;
     }
 
-    return;
-  }
+    if(
+      shapeDragging!==null&&
+      selectedBody
+    ){
+      Matter.Sleeping.set(
+        selectedBody,
+        false
+      );
 
-  if(currentTool==="move"){
-    if(body){
-      selectedBody=body;
+      resizeFromCorner(
+        selectedBody,
+        shapeDragging,
+        p.x,
+        p.y
+      );
 
-      movingBody=body;
+      return;
+    }
 
-      moveOffset={
-        x:body.position.x-p.x,
-        y:body.position.y-p.y
-      };
+    if(movingBody){
+      Matter.Sleeping.set(
+        movingBody,
+        false
+      );
 
-      Body.setVelocity(body,{x:0,y:0});
-      Body.setAngularVelocity(body,0);
-    }else{
-      selectedBody=null;
+      Body.setPosition(
+        movingBody,
+        {
+          x:p.x+moveOffset.x,
+          y:p.y+moveOffset.y
+        }
+      );
+
+      Body.setVelocity(
+        movingBody,
+        {x:0,y:0}
+      );
+
+      Body.setAngularVelocity(
+        movingBody,
+        0
+      );
     }
   }
-});
+);
 
-canvas.addEventListener("pointermove",e=>{
-  const rect=canvas.getBoundingClientRect();
+canvas.addEventListener(
+  "pointerup",
+  e=>{
+    if(movingBody){
+      Matter.Sleeping.set(
+        movingBody,
+        false
+      );
 
-  const sx=e.clientX-rect.left;
-  const sy=e.clientY-rect.top;
+      Body.setVelocity(
+        movingBody,
+        {x:0,y:0}
+      );
 
-  const p=screenToWorld(sx,sy);
+      Body.setAngularVelocity(
+        movingBody,
+        0
+      );
+    }
 
-  if(currentMode!=="editor")return;
+    if(selectedBody){
+      Matter.Sleeping.set(
+        selectedBody,
+        false
+      );
+    }
 
-  if(rotateDragging&&selectedBody){
-    const dx=p.x-selectedBody.position.x;
-    const dy=p.y-selectedBody.position.y;
+    rotateDragging=false;
+    shapeDragging=null;
+    movingBody=null;
 
-    const angle=Math.atan2(dx,-dy);
-
-    Body.setAngle(selectedBody,angle);
-    Body.setAngularVelocity(selectedBody,0);
-
-    return;
+    try{
+      canvas.releasePointerCapture(
+        e.pointerId
+      );
+    }catch(_){}
   }
+);
 
-  if(shapeDragging!==null&&selectedBody){
-    resizeFromCorner(
-      selectedBody,
-      shapeDragging,
-      p.x,
-      p.y
-    );
-
-    return;
+canvas.addEventListener(
+  "pointercancel",
+  ()=>{
+    rotateDragging=false;
+    shapeDragging=null;
+    movingBody=null;
   }
+);
 
-  if(movingBody){
-    Body.setPosition(
-      movingBody,
-      {
-        x:p.x+moveOffset.x,
-        y:p.y+moveOffset.y
-      }
-    );
-
-    Body.setVelocity(movingBody,{x:0,y:0});
-    Body.setAngularVelocity(movingBody,0);
-  }
-});
-
-canvas.addEventListener("pointerup",e=>{
-  rotateDragging=false;
-  shapeDragging=null;
-  movingBody=null;
-
-  try{
-    canvas.releasePointerCapture(e.pointerId);
-  }catch(_){}
-});
-
-canvas.addEventListener("pointercancel",()=>{
-  rotateDragging=false;
-  shapeDragging=null;
-  movingBody=null;
-});
-
-function resizeFromCorner(body,index,x,y){
+function resizeFromCorner(
+  body,
+  index,
+  x,
+  y
+){
   if(!isBlock(body))return;
-
-  const angle=body.angle;
-  const c=Math.cos(angle);
-  const s=Math.sin(angle);
-
-  const dx=x-body.position.x;
-  const dy=y-body.position.y;
-
-  const localX=dx*c+dy*s;
-  const localY=-dx*s+dy*c;
-
-  let w=Math.abs(localX)*2;
-  let h=Math.abs(localY)*2;
-
-  w=Math.max(30,w);
-  h=Math.max(20,h);
 
   const oldW=body.plugin.width;
   const oldH=body.plugin.height;
 
-  const scaleX=w/oldW;
-  const scaleY=h/oldH;
+  const c=Math.cos(body.angle);
+  const s=Math.sin(body.angle);
 
-  Body.scale(body,scaleX,scaleY);
+  const corners=[
+    {x:-oldW/2,y:-oldH/2},
+    {x: oldW/2,y:-oldH/2},
+    {x: oldW/2,y: oldH/2},
+    {x:-oldW/2,y: oldH/2}
+  ];
 
-  body.plugin.width=w;
-  body.plugin.height=h;
+  const opposite=(index+2)%4;
 
-  Body.setVelocity(body,{x:0,y:0});
-  Body.setAngularVelocity(body,0);
+  const fixedLocal=corners[opposite];
+
+  const fixedWorld={
+    x:body.position.x+
+      fixedLocal.x*c-
+      fixedLocal.y*s,
+
+    y:body.position.y+
+      fixedLocal.x*s+
+      fixedLocal.y*c
+  };
+
+  const dx=x-fixedWorld.x;
+  const dy=y-fixedWorld.y;
+
+  const localX=
+    dx*c+
+    dy*s;
+
+  const localY=
+    -dx*s+
+    dy*c;
+
+  let newW=Math.abs(localX);
+  let newH=Math.abs(localY);
+
+  newW=Math.max(30,newW);
+  newH=Math.max(20,newH);
+
+  const draggedSignX=
+    corners[index].x>=0
+    ?1
+    :-1;
+
+  const draggedSignY=
+    corners[index].y>=0
+    ?1
+    :-1;
+
+  const centerLocal={
+    x:fixedLocal.x+
+      draggedSignX*newW/2,
+
+    y:fixedLocal.y+
+      draggedSignY*newH/2
+  };
+
+  const newCenterWorld={
+    x:fixedWorld.x+
+      centerLocal.x*c-
+      centerLocal.y*s,
+
+    y:fixedWorld.y+
+      centerLocal.x*s+
+      centerLocal.y*c
+  };
+
+  const sx=newW/oldW;
+  const sy=newH/oldH;
+
+  Body.scale(
+    body,
+    sx,
+    sy
+  );
+
+  Body.setPosition(
+    body,
+    newCenterWorld
+  );
+
+  body.plugin.width=newW;
+  body.plugin.height=newH;
+
+  Body.setVelocity(
+    body,
+    {x:0,y:0}
+  );
+
+  Body.setAngularVelocity(
+    body,
+    0
+  );
+
+  Matter.Sleeping.set(
+    body,
+    false
+  );
 }
 
 function updateToolButtons(){
-  document.querySelectorAll(".tool").forEach(btn=>{
-    btn.classList.toggle(
-      "active",
-      btn.dataset.tool===currentTool
-    );
-  });
+  document.querySelectorAll(".tool")
+    .forEach(btn=>{
+      btn.classList.toggle(
+        "active",
+        btn.dataset.tool===currentTool
+      );
+    });
 }
 
-document.querySelectorAll(".tool").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    currentTool=btn.dataset.tool;
+document.querySelectorAll(".tool")
+.forEach(btn=>{
+  btn.addEventListener(
+    "click",
+    ()=>{
+      currentTool=btn.dataset.tool;
 
-    updateToolButtons();
+      updateToolButtons();
 
-    if(
-      currentTool!=="rotate"&&
-      currentTool!=="shape"
-    ){
-      $("property").style.display="none";
-    }
-  });
-});
-
-$("bombBtn").addEventListener("click",()=>{
-  const active=$("bombBtn").dataset.active==="1";
-
-  $("bombBtn").dataset.active=active?"0":"1";
-
-  $("bombBtn").style.background=
-    active?"#222":"#f80";
-});
-
-$("allBombBtn").addEventListener("click",()=>{
-  if(!playEngine)return;
-
-  const bombs=playEngine.world.bodies.filter(
-    b=>gameType(b)==="bomb"
-  );
-
-  bombs.forEach(b=>{
-    explodeAt(
-      playEngine,
-      b.position.x,
-      b.position.y
-    );
-  });
-});
-
-$("restartBtn").addEventListener("click",()=>{
-  const stage=getSavedStages().find(
-    s=>s.id===currentStageId
-  );
-
-  if(stage){
-    startPlay(stage);
-  }
-});
-
-$("editorBack").addEventListener("click",()=>{
-  stopEditor();
-  currentMode="none";
-
-  $("editorUI").style.display="none";
-  $("startScreen").style.display="flex";
-});
-
-$("playBack").addEventListener("click",()=>{
-  stopPlay();
-  currentMode="none";
-
-  $("playUI").style.display="none";
-  $("startScreen").style.display="flex";
-});
-
-$("stageBack").addEventListener("click",()=>{
-  $("stageScreen").style.display="none";
-  $("startScreen").style.display="flex";
-});
-
-$("createBtn").addEventListener("click",()=>{
-  startEditor();
-});
-
-$("selectBtn").addEventListener("click",()=>{
-  showStageScreen();
-});
-
-$("clearBtn").addEventListener("click",()=>{
-  if(!editorEngine)return;
-
-  const keep=editorEngine.world.bodies.filter(
-    b=>gameType(b)==="floor"
-  );
-
-  editorEngine.world.bodies
-    .slice()
-    .forEach(body=>{
-      if(!keep.includes(body)){
-        World.remove(editorEngine.world,body);
+      if(
+        currentTool!=="rotate"&&
+        currentTool!=="shape"
+      ){
+        $("property").style.display="none";
       }
-    });
-
-  selectedBody=null;
-});
-
-$("saveBtn").addEventListener("click",()=>{
-  saveCurrentStage();
-});
-
-$("testBtn").addEventListener("click",()=>{
-  saveCurrentStage();
-
-  const stage=getSavedStages().find(
-    s=>s.id===currentStageId
+    }
   );
+});
 
-  if(stage){
-    startPlay(stage);
+$("bombBtn").addEventListener(
+  "click",
+  ()=>{
+    const active=
+      $("bombBtn").dataset.active==="1";
+
+    $("bombBtn").dataset.active=
+      active?"0":"1";
+
+    $("bombBtn").style.background=
+      active?"#222":"#f80";
   }
-});
+);
 
-$("applyProp").addEventListener("click",()=>{
-  if(!selectedBody||!isBlock(selectedBody))return;
+$("allBombBtn").addEventListener(
+  "click",
+  ()=>{
+    if(!playEngine)return;
 
-  const w=Math.max(
-    30,
-    Number($("propW").value)||selectedBody.plugin.width
-  );
+    const bombs=
+      playEngine.world.bodies.filter(
+        b=>gameType(b)==="bomb"
+      );
 
-  const h=Math.max(
-    20,
-    Number($("propH").value)||selectedBody.plugin.height
-  );
+    bombs.forEach(b=>{
+      explodeAt(
+        playEngine,
+        b.position.x,
+        b.position.y
+      );
+    });
+  }
+);
 
-  const angle=
-    (Number($("propAngle").value)||0)*
-    Math.PI/180;
+$("restartBtn").addEventListener(
+  "click",
+  ()=>{
+    const stage=
+      getSavedStages().find(
+        s=>s.id===currentStageId
+      );
 
-  const sx=w/selectedBody.plugin.width;
-  const sy=h/selectedBody.plugin.height;
+    if(stage){
+      startPlay(stage);
+    }
+  }
+);
 
-  Body.scale(selectedBody,sx,sy);
+$("editorBack").addEventListener(
+  "click",
+  ()=>{
+    stopEditor();
+    currentMode="none";
 
-  selectedBody.plugin.width=w;
-  selectedBody.plugin.height=h;
+    $("editorUI").style.display="none";
+    $("startScreen").style.display="flex";
+  }
+);
 
-  Body.setAngle(selectedBody,angle);
-  Body.setVelocity(selectedBody,{x:0,y:0});
-  Body.setAngularVelocity(selectedBody,0);
-});
+$("playBack").addEventListener(
+  "click",
+  ()=>{
+    stopPlay();
+    currentMode="none";
+
+    $("playUI").style.display="none";
+    $("startScreen").style.display="flex";
+  }
+);
+
+$("stageBack").addEventListener(
+  "click",
+  ()=>{
+    $("stageScreen").style.display="none";
+    $("startScreen").style.display="flex";
+  }
+);
+
+$("createBtn").addEventListener(
+  "click",
+  ()=>{
+    startEditor();
+  }
+);
+
+$("selectBtn").addEventListener(
+  "click",
+  ()=>{
+    showStageScreen();
+  }
+);
+
+$("clearBtn").addEventListener(
+  "click",
+  ()=>{
+    if(!editorEngine)return;
+
+    editorEngine.world.bodies
+      .slice()
+      .forEach(body=>{
+        if(gameType(body)!=="floor"){
+          World.remove(
+            editorEngine.world,
+            body
+          );
+        }
+      });
+
+    selectedBody=null;
+  }
+);
+
+$("saveBtn").addEventListener(
+  "click",
+  ()=>{
+    saveCurrentStage();
+  }
+);
+
+$("testBtn").addEventListener(
+  "click",
+  ()=>{
+    saveCurrentStage();
+
+    const stage=
+      getSavedStages().find(
+        s=>s.id===currentStageId
+      );
+
+    if(stage){
+      startPlay(stage);
+    }
+  }
+);
+
+$("applyProp").addEventListener(
+  "click",
+  ()=>{
+    if(
+      !selectedBody||
+      !isBlock(selectedBody)
+    )return;
+
+    const w=Math.max(
+      30,
+      Number($("propW").value)||
+      selectedBody.plugin.width
+    );
+
+    const h=Math.max(
+      20,
+      Number($("propH").value)||
+      selectedBody.plugin.height
+    );
+
+    const angle=
+      (Number($("propAngle").value)||0)*
+      Math.PI/180;
+
+    const sx=
+      w/selectedBody.plugin.width;
+
+    const sy=
+      h/selectedBody.plugin.height;
+
+    Body.scale(
+      selectedBody,
+      sx,
+      sy
+    );
+
+    selectedBody.plugin.width=w;
+    selectedBody.plugin.height=h;
+
+    Body.setAngle(
+      selectedBody,
+      angle
+    );
+
+    Body.setVelocity(
+      selectedBody,
+      {x:0,y:0}
+    );
+
+    Body.setAngularVelocity(
+      selectedBody,
+      0
+    );
+
+    Matter.Sleeping.set(
+      selectedBody,
+      false
+    );
+  }
+);
 
 function saveCurrentStage(){
   if(!editorEngine)return;
@@ -1653,8 +2008,7 @@ function saveCurrentStage(){
         x:body.position.x,
         y:body.position.y,
         w:body.plugin.width,
-        h:body.plugin.height,
-        angle:0
+        h:body.plugin.height
       });
     }
   }
@@ -1677,7 +2031,10 @@ function saveCurrentStage(){
   );
 }
 
-function loadStageIntoEngine(stage,engine){
+function loadStageIntoEngine(
+  stage,
+  engine
+){
   newlyPlacedBodies.clear();
   multiplyContacts.clear();
 
@@ -1770,22 +2127,31 @@ function showStageScreen(){
 
     const play=document.createElement("button");
     play.textContent="遊ぶ";
-    play.addEventListener("click",()=>{
-      startPlay(stage);
-    });
+    play.addEventListener(
+      "click",
+      ()=>{
+        startPlay(stage);
+      }
+    );
 
     const edit=document.createElement("button");
     edit.textContent="編集";
-    edit.addEventListener("click",()=>{
-      startEditor(stage);
-    });
+    edit.addEventListener(
+      "click",
+      ()=>{
+        startEditor(stage);
+      }
+    );
 
     const del=document.createElement("button");
     del.textContent="削除";
-    del.addEventListener("click",()=>{
-      deleteStage(stage.id);
-      showStageScreen();
-    });
+    del.addEventListener(
+      "click",
+      ()=>{
+        deleteStage(stage.id);
+        showStageScreen();
+      }
+    );
 
     buttons.appendChild(play);
     buttons.appendChild(edit);
@@ -1799,9 +2165,10 @@ function showStageScreen(){
 }
 
 function deleteStage(id){
-  const stages=getSavedStages().filter(
-    s=>s.id!==id
-  );
+  const stages=
+    getSavedStages().filter(
+      s=>s.id!==id
+    );
 
   localStorage.setItem(
     SAVE_KEY,
@@ -1809,25 +2176,32 @@ function deleteStage(id){
   );
 }
 
-setInterval(()=>{
-  if(
-    selectedBody&&
-    currentMode==="editor"&&
-    isBlock(selectedBody)
-  ){
-    $("propW").value=
-      Math.round(selectedBody.plugin.width);
+setInterval(
+  ()=>{
+    if(
+      selectedBody&&
+      currentMode==="editor"&&
+      isBlock(selectedBody)
+    ){
+      $("propW").value=
+        Math.round(
+          selectedBody.plugin.width
+        );
 
-    $("propH").value=
-      Math.round(selectedBody.plugin.height);
+      $("propH").value=
+        Math.round(
+          selectedBody.plugin.height
+        );
 
-    $("propAngle").value=
-      Math.round(
-        selectedBody.angle*180/Math.PI
-      );
-  }
-},100);
-
+      $("propAngle").value=
+        Math.round(
+          selectedBody.angle*
+          180/Math.PI
+        );
+    }
+  },
+  100
+);
 </script>
 </body>
 </html>
