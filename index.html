@@ -1,0 +1,6362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>CASTLE BOMBER</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background:#f7ead7;
+  color:#3d2818;
+}
+
+button,
+input{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.screen{
+  position:fixed;
+  inset:0;
+  display:none;
+}
+
+.screen.active{
+  display:flex;
+}
+
+/* ================================
+   スタート
+================================ */
+
+#startScreen{
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(
+      circle at 50% 25%,
+      #fff8ec 0,
+      #f8e7cf 45%,
+      #e9cda9 100%
+    );
+}
+
+.startBox{
+  width:min(620px,92vw);
+  text-align:center;
+}
+
+.logo{
+  font-size:clamp(38px,9vw,72px);
+  font-weight:900;
+  letter-spacing:5px;
+  color:#ef8128;
+  text-shadow:
+    3px 3px 0 #713d1d;
+  margin-bottom:10px;
+}
+
+.subtitle{
+  font-weight:700;
+  margin-bottom:38px;
+  color:#744c2c;
+}
+
+.menuButton{
+  display:block;
+  width:100%;
+  border:0;
+  border-radius:18px;
+  padding:20px 24px;
+  margin:14px 0;
+  background:#ef8128;
+  color:white;
+  font-size:22px;
+  font-weight:800;
+  box-shadow:
+    0 6px 0 #a94e13,
+    0 10px 20px #0002;
+}
+
+.menuButton.secondary{
+  background:#5e4632;
+  box-shadow:
+    0 6px 0 #352519,
+    0 10px 20px #0002;
+}
+
+.menuButton:active{
+  transform:translateY(5px);
+  box-shadow:
+    0 1px 0 #a94e13;
+}
+
+/* ================================
+   共通ヘッダー
+================================ */
+
+.topbar{
+  position:absolute;
+  z-index:100;
+  top:0;
+  left:0;
+  right:0;
+  min-height:62px;
+  padding:9px 12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#fff5e8ee;
+  border-bottom:2px solid #c89460;
+  box-shadow:0 3px 10px #0002;
+}
+
+.topbarTitle{
+  font-size:20px;
+  font-weight:900;
+  margin-right:auto;
+}
+
+.smallButton{
+  border:2px solid #85542e;
+  border-radius:10px;
+  background:#fffaf3;
+  color:#4a2c18;
+  padding:8px 12px;
+  font-weight:800;
+}
+
+.smallButton.orange{
+  background:#ef8128;
+  border-color:#a84f16;
+  color:#fff;
+}
+
+.smallButton:active{
+  transform:translateY(1px);
+}
+
+/* ================================
+   ステージ選択
+================================ */
+
+#selectScreen{
+  flex-direction:column;
+  background:#f5e5d0;
+}
+
+.stageList{
+  position:absolute;
+  top:72px;
+  left:0;
+  right:0;
+  bottom:0;
+  overflow:auto;
+  padding:20px;
+  display:grid;
+  grid-template-columns:
+    repeat(auto-fill,minmax(250px,1fr));
+  gap:16px;
+}
+
+.stageCard{
+  min-height:180px;
+  padding:18px;
+  border-radius:18px;
+  background:#fff8ee;
+  border:2px solid #c89a68;
+  box-shadow:0 5px 12px #0002;
+  display:flex;
+  flex-direction:column;
+}
+
+.stageCardTitle{
+  font-size:21px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+
+.stageCardInfo{
+  font-size:13px;
+  color:#76583e;
+  margin-bottom:auto;
+}
+
+.stageCardButtons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:14px;
+}
+
+.emptyStage{
+  grid-column:1/-1;
+  text-align:center;
+  padding:60px 20px;
+  font-weight:800;
+  color:#805d3c;
+}
+
+/* ================================
+   エディタ
+================================ */
+
+#editorScreen,
+#playScreen{
+  background:#ead5b7;
+}
+
+.canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  touch-action:none;
+}
+
+.editorTools{
+  position:absolute;
+  z-index:110;
+  top:72px;
+  left:10px;
+  width:76px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.toolButton{
+  width:76px;
+  min-height:53px;
+  border:2px solid #80502c;
+  border-radius:12px;
+  background:#fff8ee;
+  color:#422a19;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 3px 7px #0003;
+}
+
+.toolButton.active{
+  background:#ef8128;
+  color:#fff;
+  border-color:#a74f14;
+}
+
+.toolIcon{
+  display:block;
+  font-size:22px;
+  margin-bottom:2px;
+}
+
+.editorInfo{
+  position:absolute;
+  z-index:110;
+  left:10px;
+  bottom:10px;
+  padding:9px 12px;
+  border-radius:10px;
+  background:#fff8eede;
+  border:1px solid #b9824f;
+  font-size:12px;
+  font-weight:700;
+  pointer-events:none;
+}
+
+.editorHelp{
+  position:absolute;
+  z-index:110;
+  right:10px;
+  bottom:10px;
+  max-width:310px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#fff8eedb;
+  border:1px solid #b9824f;
+  font-size:12px;
+  line-height:1.5;
+  pointer-events:none;
+}
+
+/* ================================
+   プレイ
+================================ */
+
+.playHud{
+  position:absolute;
+  z-index:110;
+  top:72px;
+  left:12px;
+  right:12px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  pointer-events:none;
+}
+
+.enemyCounter,
+.bombCounter{
+  padding:10px 14px;
+  border-radius:12px;
+  background:#fff8eeeb;
+  border:2px solid #956038;
+  font-weight:900;
+  box-shadow:0 3px 8px #0002;
+}
+
+.bombCounter{
+  color:#b34e0d;
+}
+
+.explodeButton{
+  margin-left:auto;
+  pointer-events:auto;
+  border:0;
+  border-radius:14px;
+  padding:13px 20px;
+  background:#ef8128;
+  color:white;
+  font-weight:900;
+  box-shadow:0 4px 0 #a74d12,0 5px 12px #0003;
+}
+
+.explodeButton:active{
+  transform:translateY(3px);
+  box-shadow:0 1px 0 #a74d12;
+}
+
+/* ================================
+   モーダル
+================================ */
+
+.modalLayer{
+  position:fixed;
+  z-index:500;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#0007;
+  padding:20px;
+}
+
+.modalLayer.hidden{
+  display:none;
+}
+
+.modal{
+  width:min(500px,95vw);
+  padding:25px;
+  border-radius:20px;
+  background:#fff8ee;
+  border:3px solid #a76b38;
+  box-shadow:0 15px 50px #0006;
+}
+
+.modal h2{
+  margin:0 0 16px;
+}
+
+.modal input{
+  width:100%;
+  padding:13px;
+  border:2px solid #bb8a59;
+  border-radius:10px;
+  background:#fff;
+  outline:none;
+}
+
+.modalButtons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:16px;
+}
+
+/* ================================
+   結果
+================================ */
+
+.resultBox{
+  text-align:center;
+}
+
+.resultTitle{
+  font-size:42px;
+  font-weight:900;
+  color:#ef8128;
+  margin-bottom:10px;
+}
+
+.resultText{
+  font-size:18px;
+  line-height:1.7;
+  margin-bottom:20px;
+}
+
+/* ================================
+   レスポンシブ
+================================ */
+
+@media(max-width:600px){
+
+  .topbarTitle{
+    font-size:15px;
+  }
+
+  .topbar{
+    min-height:58px;
+  }
+
+  .smallButton{
+    padding:7px 8px;
+    font-size:12px;
+  }
+
+  .editorTools{
+    top:66px;
+    left:6px;
+    width:63px;
+  }
+
+  .toolButton{
+    width:63px;
+    min-height:47px;
+    font-size:10px;
+  }
+
+  .toolIcon{
+    font-size:18px;
+  }
+
+  .editorHelp{
+    display:none;
+  }
+
+  .playHud{
+    top:65px;
+    left:6px;
+    right:6px;
+  }
+
+  .enemyCounter,
+  .bombCounter{
+    padding:8px 9px;
+    font-size:12px;
+  }
+
+  .explodeButton{
+    padding:10px 12px;
+    font-size:12px;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<!-- ======================================================
+     スタート
+====================================================== -->
+
+<section id="startScreen" class="screen active">
+
+  <div class="startBox">
+
+    <div class="logo">
+      CASTLE BOMBER
+    </div>
+
+    <div class="subtitle">
+      物理演算で城を破壊しよう
+    </div>
+
+    <button
+      id="createStageButton"
+      class="menuButton">
+      ステージを作る
+    </button>
+
+    <button
+      id="playStageButton"
+      class="menuButton secondary">
+      ステージで遊ぶ
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ======================================================
+     ステージ選択
+====================================================== -->
+
+<section id="selectScreen" class="screen">
+
+  <div class="topbar">
+
+    <div class="topbarTitle">
+      ステージで遊ぶ
+    </div>
+
+    <button
+      id="selectBackButton"
+      class="smallButton">
+      戻る
+    </button>
+
+  </div>
+
+  <div
+    id="stageList"
+    class="stageList">
+  </div>
+
+</section>
+
+
+<!-- ======================================================
+     エディタ
+====================================================== -->
+
+<section id="editorScreen" class="screen">
+
+  <canvas
+    id="editorCanvas"
+    class="canvas">
+  </canvas>
+
+  <div class="topbar">
+
+    <div
+      id="editorTitle"
+      class="topbarTitle">
+      新しいステージ
+    </div>
+
+    <button
+      id="editorFitButton"
+      class="smallButton">
+      全体表示
+    </button>
+
+    <button
+      id="editorSaveButton"
+      class="smallButton orange">
+      保存
+    </button>
+
+    <button
+      id="editorBackButton"
+      class="smallButton">
+      戻る
+    </button>
+
+  </div>
+
+
+  <div class="editorTools">
+
+    <button
+      class="toolButton active"
+      data-tool="wood">
+
+      <span class="toolIcon">🪵</span>
+      木
+
+    </button>
+
+    <button
+      class="toolButton"
+      data-tool="glass">
+
+      <span class="toolIcon">◇</span>
+      ガラス
+
+    </button>
+
+    <button
+      class="toolButton"
+      data-tool="stone">
+
+      <span class="toolIcon">⬟</span>
+      石
+
+    </button>
+
+    <button
+      class="toolButton"
+      data-tool="enemy">
+
+      <span class="toolIcon">●</span>
+      敵
+
+    </button>
+
+    <button
+      class="toolButton"
+      data-tool="bomb">
+
+      <span class="toolIcon">●</span>
+      爆弾
+
+    </button>
+
+    <button
+      class="toolButton"
+      data-tool="erase">
+
+      <span class="toolIcon">⌫</span>
+      消す
+
+    </button>
+
+  </div>
+
+
+  <div
+    id="editorInfo"
+    class="editorInfo">
+    物体 0個
+  </div>
+
+  <div class="editorHelp">
+    クリック：配置<br>
+    ドラッグ：物体を移動<br>
+    ホイール：ズーム<br>
+    2本指：ズーム<br>
+    矢印キー：選択物体を移動<br>
+    Delete：選択物体を削除<br>
+    Shift＋矢印：大きく移動<br>
+    1 / 2 / 3：サイズ変更
+  </div>
+
+</section>
+
+
+<!-- ======================================================
+     プレイ
+====================================================== -->
+
+<section id="playScreen" class="screen">
+
+  <canvas
+    id="playCanvas"
+    class="canvas">
+  </canvas>
+
+  <div class="topbar">
+
+    <div
+      id="playTitle"
+      class="topbarTitle">
+      ステージ
+    </div>
+
+    <button
+      id="playResetButton"
+      class="smallButton">
+      リセット
+    </button>
+
+    <button
+      id="playBackButton"
+      class="smallButton">
+      ステージ一覧
+    </button>
+
+  </div>
+
+
+  <div class="playHud">
+
+    <div
+      id="enemyCounter"
+      class="enemyCounter">
+      敵：0
+    </div>
+
+    <div
+      id="bombCounter"
+      class="bombCounter">
+      爆弾：0
+    </div>
+
+    <button
+      id="explodeButton"
+      class="explodeButton">
+      全爆破
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ======================================================
+     保存モーダル
+====================================================== -->
+
+<div
+  id="saveModalLayer"
+  class="modalLayer hidden">
+
+  <div class="modal">
+
+    <h2>
+      ステージを保存
+    </h2>
+
+    <input
+      id="stageNameInput"
+      type="text"
+      maxlength="50"
+      placeholder="ステージ名">
+
+    <div class="modalButtons">
+
+      <button
+        id="saveCancelButton"
+        class="smallButton">
+        キャンセル
+      </button>
+
+      <button
+        id="saveConfirmButton"
+        class="smallButton orange">
+        保存する
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ======================================================
+     結果モーダル
+====================================================== -->
+
+<div
+  id="resultModalLayer"
+  class="modalLayer hidden">
+
+  <div class="modal resultBox">
+
+    <div
+      id="resultTitle"
+      class="resultTitle">
+      CLEAR!
+    </div>
+
+    <div
+      id="resultText"
+      class="resultText">
+    </div>
+
+    <div class="modalButtons">
+
+      <button
+        id="resultResetButton"
+        class="smallButton">
+        もう一度
+      </button>
+
+      <button
+        id="resultBackButton"
+        class="smallButton orange">
+        ステージ一覧
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+"use strict";
+
+/* =========================================================
+   Matter.js
+========================================================= */
+
+const {
+  Engine,
+  Render,
+  Runner,
+  World,
+  Bodies,
+  Body,
+  Composite,
+  Events,
+  Vector,
+  Sleeping
+} = Matter;
+
+
+/* =========================================================
+   定数
+========================================================= */
+
+const STORAGE_KEY =
+  "castle_bomber_stages_v1";
+
+const GRAVITY =
+  1;
+
+const EXPLOSION_RADIUS =
+  110;
+
+const EXPLOSION_FORCE_RADIUS =
+  150;
+
+const EXPLOSION_FORCE =
+  0.045;
+
+const EXPLOSION_BLOCK_DAMAGE =
+  150;
+
+const ENEMY_KILL_IMPACT =
+  9;
+
+const IMPACT_MASS_CAP =
+  14;
+
+const FALLING_BLOCK_THRESHOLD =
+  4.5;
+
+const WORLD_GROUND_Y =
+  9000;
+
+const DEFAULT_ZOOM =
+  0.75;
+
+
+/*
+ * HinaTech系の物理パラメータを参考にした
+ * オリジナル実装。
+ */
+const MATERIALS = {
+
+  wood:{
+    density:0.0035,
+    friction:0.4,
+    restitution:0.08,
+    hp:2,
+    threshold:16,
+    width:90,
+    height:30
+  },
+
+  glass:{
+    density:0.0028,
+    friction:0.15,
+    restitution:0.25,
+    hp:1,
+    threshold:10,
+    width:90,
+    height:25
+  },
+
+  stone:{
+    density:0.008,
+    friction:0.6,
+    restitution:0.02,
+    hp:3,
+    threshold:48,
+    width:90,
+    height:36
+  }
+
+};
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const startScreen =
+  document.getElementById(
+    "startScreen"
+  );
+
+const selectScreen =
+  document.getElementById(
+    "selectScreen"
+  );
+
+const editorScreen =
+  document.getElementById(
+    "editorScreen"
+  );
+
+const playScreen =
+  document.getElementById(
+    "playScreen"
+  );
+
+const editorCanvas =
+  document.getElementById(
+    "editorCanvas"
+  );
+
+const playCanvas =
+  document.getElementById(
+    "playCanvas"
+  );
+
+const editorCtx =
+  editorCanvas.getContext(
+    "2d"
+  );
+
+const playCtx =
+  playCanvas.getContext(
+    "2d"
+  );
+
+const stageList =
+  document.getElementById(
+    "stageList"
+  );
+
+const editorInfo =
+  document.getElementById(
+    "editorInfo"
+  );
+
+const editorTitle =
+  document.getElementById(
+    "editorTitle"
+  );
+
+const playTitle =
+  document.getElementById(
+    "playTitle"
+  );
+
+const enemyCounter =
+  document.getElementById(
+    "enemyCounter"
+  );
+
+const bombCounter =
+  document.getElementById(
+    "bombCounter"
+  );
+
+const saveModalLayer =
+  document.getElementById(
+    "saveModalLayer"
+  );
+
+const resultModalLayer =
+  document.getElementById(
+    "resultModalLayer"
+  );
+
+const stageNameInput =
+  document.getElementById(
+    "stageNameInput"
+  );
+
+
+/* =========================================================
+   状態
+========================================================= */
+
+let currentScreen =
+  "start";
+
+let selectedTool =
+  "wood";
+
+let editingStageId =
+  null;
+
+let currentPlayStage =
+  null;
+
+
+/* =========================================================
+   エディタ
+========================================================= */
+
+let editorEngine =
+  null;
+
+let editorWorld =
+  null;
+
+let editorBodies =
+  [];
+
+let editorGround =
+  null;
+
+let editorCamera = {
+  x:0,
+  y:400,
+  zoom:DEFAULT_ZOOM
+};
+
+let editorPanning =
+  false;
+
+let editorPanStart = {
+  x:0,
+  y:0
+};
+
+let editorPanCameraStart = {
+  x:0,
+  y:0
+};
+
+let editorDraggingBody =
+  null;
+
+let editorDragOffset = {
+  x:0,
+  y:0
+};
+
+let selectedEditorBody =
+  null;
+
+let editorMouseWorld = {
+  x:0,
+  y:0
+};
+
+let editorBlockScale =
+  1;
+
+
+/* =========================================================
+   プレイ
+========================================================= */
+
+let playEngine =
+  null;
+
+let playWorld =
+  null;
+
+let playBodies =
+  [];
+
+let playBombs =
+  [];
+
+let playCamera = {
+  x:0,
+  y:300,
+  zoom:1
+};
+
+let playStats = {
+  enemiesStart:0,
+  enemiesKilled:0,
+  explosions:0
+};
+
+let resultShown =
+  false;
+
+let cameraShake =
+  0;
+
+let playMouse = {
+  x:0,
+  y:0,
+  active:false
+};
+
+
+/* =========================================================
+   エフェクト
+========================================================= */
+
+let particles =
+  [];
+
+let explosions =
+  [];
+
+
+/* =========================================================
+   共通
+========================================================= */
+
+function createId(){
+
+  return (
+    Date.now().toString(36) +
+    Math.random()
+      .toString(36)
+      .slice(2)
+  );
+
+}
+
+
+function clamp(
+  value,
+  min,
+  max
+){
+
+  return Math.max(
+    min,
+    Math.min(
+      max,
+      value
+    )
+  );
+
+}
+
+
+function distance(
+  a,
+  b
+){
+
+  const dx =
+    a.x-b.x;
+
+  const dy =
+    a.y-b.y;
+
+  return Math.sqrt(
+    dx*dx+
+    dy*dy
+  );
+
+}
+
+
+function showScreen(
+  name
+){
+
+  [
+    startScreen,
+    selectScreen,
+    editorScreen,
+    playScreen
+  ].forEach(
+    function(screen){
+
+      screen.classList.remove(
+        "active"
+      );
+
+    }
+  );
+
+  const map = {
+    start:startScreen,
+    select:selectScreen,
+    editor:editorScreen,
+    play:playScreen
+  };
+
+  map[name].classList.add(
+    "active"
+  );
+
+  currentScreen =
+    name;
+
+}
+
+
+/* =========================================================
+   localStorage
+========================================================= */
+
+function loadStages(){
+
+  try{
+
+    const raw =
+      localStorage.getItem(
+        STORAGE_KEY
+      );
+
+    if(!raw){
+      return [];
+    }
+
+    const data =
+      JSON.parse(raw);
+
+    if(
+      !Array.isArray(data)
+    ){
+
+      return [];
+
+    }
+
+    return data;
+
+  }catch(error){
+
+    console.warn(
+      "stage load error",
+      error
+    );
+
+    return [];
+
+  }
+
+}
+
+
+function saveStages(
+  stages
+){
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(
+      stages
+    )
+  );
+
+}
+
+
+/* =========================================================
+   キャンバスサイズ
+========================================================= */
+
+function resizeCanvas(
+  canvas,
+  ctx
+){
+
+  const dpr =
+    Math.max(
+      1,
+      Math.min(
+        2,
+        window.devicePixelRatio || 1
+      )
+    );
+
+  const rect =
+    canvas.getBoundingClientRect();
+
+  canvas.width =
+    Math.round(
+      rect.width*dpr
+    );
+
+  canvas.height =
+    Math.round(
+      rect.height*dpr
+    );
+
+  ctx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
+  );
+
+}
+
+
+function resizeAll(){
+
+  resizeCanvas(
+    editorCanvas,
+    editorCtx
+  );
+
+  resizeCanvas(
+    playCanvas,
+    playCtx
+  );
+
+}
+
+
+window.addEventListener(
+  "resize",
+  resizeAll
+);
+
+
+/* =========================================================
+   座標変換
+========================================================= */
+
+function worldToScreen(
+  x,
+  y,
+  canvas,
+  camera
+){
+
+  const rect =
+    canvas.getBoundingClientRect();
+
+  return {
+    x:
+      (x-camera.x) *
+      camera.zoom +
+      rect.width/2,
+
+    y:
+      (y-camera.y) *
+      camera.zoom +
+      rect.height/2
+  };
+
+}
+
+
+function screenToWorld(
+  x,
+  y,
+  canvas,
+  camera
+){
+
+  const rect =
+    canvas.getBoundingClientRect();
+
+  return {
+    x:
+      (x-rect.width/2) /
+      camera.zoom +
+      camera.x,
+
+    y:
+      (y-rect.height/2) /
+      camera.zoom +
+      camera.y
+  };
+
+}
+
+
+/* =========================================================
+   マテリアル
+========================================================= */
+
+function materialOptions(
+  type
+){
+
+  const mat =
+    MATERIALS[type];
+
+  return {
+    density:mat.density,
+    friction:mat.friction,
+    restitution:mat.restitution
+  };
+
+}
+
+
+/* =========================================================
+   エディタ初期化
+========================================================= */
+
+function initEditor(
+  stage
+){
+
+  if(
+    editorEngine
+  ){
+
+    Engine.clear(
+      editorEngine
+    );
+
+  }
+
+  editorEngine =
+    Engine.create();
+
+  editorEngine.gravity.y =
+    GRAVITY;
+
+  editorEngine.positionIterations =
+    8;
+
+  editorEngine.velocityIterations =
+    6;
+
+  editorWorld =
+    editorEngine.world;
+
+  editorBodies =
+    [];
+
+  editorGround =
+    Bodies.rectangle(
+      0,
+      WORLD_GROUND_Y,
+      200000,
+      100,
+      {
+        isStatic:true,
+        label:"editor-ground",
+        gameType:"ground",
+        render:{
+          visible:false
+        }
+      }
+    );
+
+  World.add(
+    editorWorld,
+    editorGround
+  );
+
+  if(
+    stage &&
+    Array.isArray(
+      stage.objects
+    )
+  ){
+
+    stage.objects.forEach(
+      function(o){
+
+        addEditorObject(
+          o.type,
+          o.x,
+          o.y,
+          o.width,
+          o.height,
+          o.radius,
+          o.angle || 0,
+          false
+        );
+
+      }
+    );
+
+  }
+
+  fitEditorCamera();
+
+  lastEditorBodyCount =
+    editorBodies.length;
+
+  editorAnimationStarted();
+
+}
+
+
+/* =========================================================
+   エディタ物体追加
+========================================================= */
+
+function addEditorObject(
+  type,
+  x,
+  y,
+  width,
+  height,
+  radius,
+  angle,
+  wake
+){
+
+  let body;
+
+  if(
+    type === "enemy"
+  ){
+
+    radius =
+      radius ||
+      22;
+
+    body =
+      Bodies.circle(
+        x,
+        y,
+        radius,
+        {
+          restitution:0.15,
+          friction:0.5,
+          density:0.004,
+          label:"enemy",
+          gameType:"enemy",
+          enemyAlive:true,
+          enemyRadius:radius
+        }
+      );
+
+  }else if(
+    type === "bomb"
+  ){
+
+    body =
+      Bodies.circle(
+        x,
+        y,
+        13,
+        {
+          isStatic:true,
+          label:"bomb",
+          gameType:"bomb"
+        }
+      );
+
+  }else{
+
+    const mat =
+      MATERIALS[type];
+
+    if(!mat){
+      return null;
+    }
+
+    width =
+      width ||
+      mat.width;
+
+    height =
+      height ||
+      mat.height;
+
+    const options =
+      materialOptions(
+        type
+      );
+
+    body =
+      Bodies.rectangle(
+        x,
+        y,
+        width,
+        height,
+        {
+          ...options,
+          label:"block",
+          gameType:"block",
+          materialType:type,
+          hp:mat.hp,
+          maxHp:mat.hp,
+          damageThreshold:
+            mat.threshold,
+          gameWidth:width,
+          gameHeight:height
+        }
+      );
+
+  }
+
+  Body.setAngle(
+    body,
+    angle || 0
+  );
+
+  editorBodies.push(
+    body
+  );
+
+  World.add(
+    editorWorld,
+    body
+  );
+
+  if(wake !== false){
+
+    Sleeping.set(
+      body,
+      false
+    );
+
+  }
+
+  return body;
+
+}
+
+
+/* =========================================================
+   エディタ物体検索
+========================================================= */
+
+function findEditorBodyAt(
+  x,
+  y
+){
+
+  const candidates =
+    editorBodies.filter(
+      function(body){
+
+        return (
+          body.gameType !==
+          "ground"
+        );
+
+      }
+    );
+
+  for(
+    let i=candidates.length-1;
+    i>=0;
+    i--
+  ){
+
+    const body =
+      candidates[i];
+
+    if(
+      body.gameType === "enemy" ||
+      body.gameType === "bomb"
+    ){
+
+      const r =
+        body.gameType === "enemy"
+          ? body.enemyRadius
+          : 13;
+
+      if(
+        Math.hypot(
+          x-body.position.x,
+          y-body.position.y
+        ) <= r
+      ){
+
+        return body;
+
+      }
+
+    }else{
+
+      if(
+        x >= body.bounds.min.x &&
+        x <= body.bounds.max.x &&
+        y >= body.bounds.min.y &&
+        y <= body.bounds.max.y
+      ){
+
+        return body;
+
+      }
+
+    }
+
+  }
+
+  return null;
+
+}
+
+
+/* =========================================================
+   エディタ削除
+========================================================= */
+
+function removeEditorBody(
+  body
+){
+
+  if(!body){
+    return;
+  }
+
+  World.remove(
+    editorWorld,
+    body
+  );
+
+  const index =
+    editorBodies.indexOf(
+      body
+    );
+
+  if(index >= 0){
+
+    editorBodies.splice(
+      index,
+      1
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   エディタ配置
+========================================================= */
+
+function handleEditorTap(
+  clientX,
+  clientY
+){
+
+  const point =
+    screenToWorld(
+      clientX,
+      clientY,
+      editorCanvas,
+      editorCamera
+    );
+
+  if(
+    selectedTool === "erase"
+  ){
+
+    const body =
+      findEditorBodyAt(
+        point.x,
+        point.y
+      );
+
+    if(body){
+
+      removeEditorBody(
+        body
+      );
+
+    }
+
+    selectedEditorBody =
+      null;
+
+    updateEditorInfo();
+
+    return;
+
+  }
+
+
+  const existing =
+    findEditorBodyAt(
+      point.x,
+      point.y
+    );
+
+  if(
+    existing
+  ){
+
+    selectedEditorBody =
+      existing;
+
+    return;
+
+  }
+
+
+  const x =
+    point.x;
+
+  const y =
+    point.y;
+
+  if(
+    selectedTool === "wood" ||
+    selectedTool === "glass" ||
+    selectedTool === "stone"
+  ){
+
+    const mat =
+      MATERIALS[selectedTool];
+
+    const width =
+      mat.width *
+      editorBlockScale;
+
+    const height =
+      mat.height *
+      editorBlockScale;
+
+    selectedEditorBody =
+      addEditorObject(
+        selectedTool,
+        x,
+        y,
+        width,
+        height,
+        null,
+        0,
+        true
+      );
+
+  }else{
+
+    selectedEditorBody =
+      addEditorObject(
+        selectedTool,
+        x,
+        y,
+        null,
+        null,
+        null,
+        0,
+        true
+      );
+
+  }
+
+  updateEditorInfo();
+
+}
+
+
+/* =========================================================
+   エディタ物理衝突
+========================================================= */
+
+function computeCollisionImpact(
+  a,
+  b,
+  target
+){
+
+  if(
+    !a ||
+    !b ||
+    !target
+  ){
+
+    return 0;
+
+  }
+
+  const relative =
+    Vector.sub(
+      a.velocity,
+      b.velocity
+    );
+
+  const speed =
+    Vector.magnitude(
+      relative
+    );
+
+  const mass =
+    Math.min(
+      target.mass ||
+      1,
+      IMPACT_MASS_CAP
+    );
+
+  return speed*mass;
+
+}
+
+
+function damageBlock(
+  block,
+  amount
+){
+
+  if(
+    !block ||
+    block.isDestroyed
+  ){
+    return;
+  }
+
+  block.hp -=
+    amount;
+
+  if(
+    block.hp <= 0
+  ){
+
+    destroyBlock(
+      block,
+      "impact"
+    );
+
+  }
+
+}
+
+
+function destroyBlock(
+  block,
+  reason
+){
+
+  if(
+    !block ||
+    block.isDestroyed
+  ){
+    return;
+  }
+
+  block.isDestroyed =
+    true;
+
+  createBreakParticles(
+    block
+  );
+
+  World.remove(
+    block._world ||
+    playWorld ||
+    editorWorld,
+    block
+  );
+
+  if(
+    currentScreen === "play"
+  ){
+
+    const index =
+      playBodies.indexOf(
+        block
+      );
+
+    if(index >= 0){
+
+      playBodies.splice(
+        index,
+        1
+      );
+
+    }
+
+  }else{
+
+    const index =
+      editorBodies.indexOf(
+        block
+      );
+
+    if(index >= 0){
+
+      editorBodies.splice(
+        index,
+        1
+      );
+
+    }
+
+  }
+
+}
+
+
+function killEnemy(
+  enemy,
+  reason
+){
+
+  if(
+    !enemy ||
+    !enemy.enemyAlive
+  ){
+    return;
+  }
+
+  enemy.enemyAlive =
+    false;
+
+  enemy.isDestroyed =
+    true;
+
+  playStats.enemiesKilled++;
+
+  createEnemyDeathParticles(
+    enemy
+  );
+
+  World.remove(
+    playWorld,
+    enemy
+  );
+
+  const index =
+    playBodies.indexOf(
+      enemy
+    );
+
+  if(index >= 0){
+
+    playBodies.splice(
+      index,
+      1
+    );
+
+  }
+
+  checkPlayResult();
+
+}
+
+
+/* =========================================================
+   衝突処理
+========================================================= */
+
+function processBlockCollision(
+  a,
+  b
+){
+
+  let block =
+    null;
+
+  let other =
+    null;
+
+  if(
+    a.gameType === "block"
+  ){
+
+    block =
+      a;
+
+    other =
+      b;
+
+  }else if(
+    b.gameType === "block"
+  ){
+
+    block =
+      b;
+
+    other =
+      a;
+
+  }
+
+  if(!block){
+    return;
+  }
+
+  const impact =
+    computeCollisionImpact(
+      block,
+      other,
+      block
+    );
+
+  if(
+    impact < 4
+  ){
+    return;
+  }
+
+  const threshold =
+    block.damageThreshold ||
+    10;
+
+  let damage =
+    Math.floor(
+      impact /
+      threshold
+    );
+
+  damage =
+    Math.max(
+      1,
+      damage
+    );
+
+  damageBlock(
+    block,
+    damage
+  );
+
+}
+
+
+function processEnemyCollision(
+  a,
+  b
+){
+
+  let enemy =
+    null;
+
+  let other =
+    null;
+
+  if(
+    a.gameType === "enemy"
+  ){
+
+    enemy =
+      a;
+
+    other =
+      b;
+
+  }else if(
+    b.gameType === "enemy"
+  ){
+
+    enemy =
+      b;
+
+    other =
+      a;
+
+  }
+
+  if(
+    !enemy ||
+    !enemy.enemyAlive
+  ){
+    return;
+  }
+
+  const impact =
+    computeCollisionImpact(
+      enemy,
+      other,
+      enemy
+    );
+
+  const projectile =
+    other.gameType ===
+      "bomb";
+
+  const minimum =
+    projectile
+      ? 0.8
+      : 2.5;
+
+  if(
+    impact < minimum
+  ){
+    return;
+  }
+
+  const multiplier =
+    projectile
+      ? 1.8
+      : 1;
+
+  if(
+    impact*multiplier >=
+    ENEMY_KILL_IMPACT
+  ){
+
+    killEnemy(
+      enemy,
+      "collision"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   爆発
+========================================================= */
+
+function explodeAt(
+  x,
+  y,
+  radius
+){
+
+  radius =
+    radius ||
+    EXPLOSION_RADIUS;
+
+  playStats.explosions++;
+
+  explosions.push({
+    x:x,
+    y:y,
+    radius:radius,
+    life:1
+  });
+
+  applyCameraShake(
+    8
+  );
+
+  const bodies =
+    playBodies.slice();
+
+  bodies.forEach(
+    function(body){
+
+      if(
+        !body ||
+        body.isDestroyed
+      ){
+        return;
+      }
+
+      const d =
+        Math.hypot(
+          body.position.x-x,
+          body.position.y-y
+        );
+
+      if(
+        d >
+        EXPLOSION_FORCE_RADIUS
+      ){
+        return;
+      }
+
+      const fall =
+        1 -
+        d /
+        EXPLOSION_FORCE_RADIUS;
+
+      const dx =
+        body.position.x-x;
+
+      const dy =
+        body.position.y-y;
+
+      const len =
+        Math.max(
+          1,
+          Math.hypot(
+            dx,
+            dy
+          )
+        );
+
+      const force =
+        EXPLOSION_FORCE *
+        fall;
+
+      Body.applyForce(
+        body,
+        body.position,
+        {
+          x:
+            dx/len*force,
+          y:
+            dy/len*force
+        }
+      );
+
+      Sleeping.set(
+        body,
+        false
+      );
+
+      if(
+        body.gameType ===
+        "block"
+      ){
+
+        const damage =
+          Math.max(
+            1,
+            Math.floor(
+              EXPLOSION_BLOCK_DAMAGE *
+              fall
+            )
+          );
+
+        damageBlock(
+          body,
+          damage
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * 敵への爆風ダメージ。
+   */
+  playBodies
+    .slice()
+    .forEach(
+      function(enemy){
+
+        if(
+          !enemy ||
+          enemy.gameType !==
+            "enemy" ||
+          !enemy.enemyAlive
+        ){
+          return;
+        }
+
+        const d =
+          Math.hypot(
+            enemy.position.x-x,
+            enemy.position.y-y
+          );
+
+        if(
+          d <
+          radius*.95
+        ){
+
+          killEnemy(
+            enemy,
+            "blast"
+          );
+
+        }
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   全爆破
+========================================================= */
+
+function explodeAll(){
+
+  if(
+    playBombs.length === 0
+  ){
+    return;
+  }
+
+  const bombs =
+    playBombs.slice();
+
+  playBombs =
+    [];
+
+  bombs.forEach(
+    function(bomb){
+
+      if(
+        playWorld
+      ){
+
+        World.remove(
+          playWorld,
+          bomb
+        );
+
+      }
+
+      explodeAt(
+        bomb.position.x,
+        bomb.position.y,
+        EXPLOSION_RADIUS
+      );
+
+    }
+  );
+
+  updateBombCount();
+
+}
+
+
+/* =========================================================
+   プレイワールド作成
+========================================================= */
+
+function createPlayWorld(
+  stage
+){
+
+  if(playEngine){
+
+    Engine.clear(
+      playEngine
+    );
+
+  }
+
+  playEngine =
+    Engine.create();
+
+  playEngine.gravity.y =
+    GRAVITY;
+
+  playEngine.positionIterations =
+    8;
+
+  playEngine.velocityIterations =
+    6;
+
+  playWorld =
+    playEngine.world;
+
+  playBodies =
+    [];
+
+  playBombs =
+    [];
+
+  const ground =
+    Bodies.rectangle(
+      0,
+      WORLD_GROUND_Y,
+      200000,
+      100,
+      {
+        isStatic:true,
+        label:"ground",
+        gameType:"ground"
+      }
+    );
+
+  World.add(
+    playWorld,
+    ground
+  );
+
+  stage.objects.forEach(
+    function(data){
+
+      if(
+        data.type === "wood" ||
+        data.type === "glass" ||
+        data.type === "stone"
+      ){
+
+        const mat =
+          MATERIALS[
+            data.type
+          ];
+
+        const body =
+          Bodies.rectangle(
+            data.x,
+            data.y,
+            data.width ||
+              mat.width,
+            data.height ||
+              mat.height,
+            {
+              ...materialOptions(
+                data.type
+              ),
+              angle:
+                data.angle || 0,
+              label:"block",
+              gameType:"block",
+              materialType:
+                data.type,
+              hp:mat.hp,
+              maxHp:mat.hp,
+              damageThreshold:
+                mat.threshold,
+              gameWidth:
+                data.width ||
+                mat.width,
+              gameHeight:
+                data.height ||
+                mat.height
+            }
+          );
+
+        playBodies.push(
+          body
+        );
+
+        World.add(
+          playWorld,
+          body
+        );
+
+      }else if(
+        data.type === "enemy"
+      ){
+
+        const r =
+          data.radius ||
+          22;
+
+        const enemy =
+          Bodies.circle(
+            data.x,
+            data.y,
+            r,
+            {
+              angle:
+                data.angle || 0,
+              density:0.004,
+              friction:0.5,
+              restitution:0.15,
+              label:"enemy",
+              gameType:"enemy",
+              enemyAlive:true,
+              enemyRadius:r
+            }
+          );
+
+        playBodies.push(
+          enemy
+        );
+
+        World.add(
+          playWorld,
+          enemy
+        );
+
+      }
+
+    }
+  );
+
+  refreshEnemyStartCount();
+
+  Events.on(
+    playEngine,
+    "collisionStart",
+    function(event){
+
+      event.pairs.forEach(
+        function(pair){
+
+          processBlockCollision(
+            pair.bodyA,
+            pair.bodyB
+          );
+
+          processEnemyCollision(
+            pair.bodyA,
+            pair.bodyB
+          );
+
+        }
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   ステージ範囲
+========================================================= */
+
+function calculateStageBounds(
+  stage
+){
+
+  const objects =
+    stage.objects || [];
+
+  if(
+    objects.length === 0
+  ){
+
+    return {
+      minX:-200,
+      minY:0,
+      maxX:200,
+      maxY:400,
+      width:400,
+      height:400,
+      centerX:0,
+      centerY:200
+    };
+
+  }
+
+  let minX =
+    Infinity;
+
+  let minY =
+    Infinity;
+
+  let maxX =
+    -Infinity;
+
+  let maxY =
+    -Infinity;
+
+  objects.forEach(
+    function(o){
+
+      if(
+        o.type === "enemy"
+      ){
+
+        const r =
+          o.radius ||
+          22;
+
+        minX =
+          Math.min(
+            minX,
+            o.x-r
+          );
+
+        maxX =
+          Math.max(
+            maxX,
+            o.x+r
+          );
+
+        minY =
+          Math.min(
+            minY,
+            o.y-r
+          );
+
+        maxY =
+          Math.max(
+            maxY,
+            o.y+r
+          );
+
+      }else{
+
+        const w =
+          o.width ||
+          80;
+
+        const h =
+          o.height ||
+          30;
+
+        const angle =
+          o.angle || 0;
+
+        const c =
+          Math.abs(
+            Math.cos(angle)
+          );
+
+        const s =
+          Math.abs(
+            Math.sin(angle)
+          );
+
+        const hw =
+          (
+            w*c+
+            h*s
+          )/2;
+
+        const hh =
+          (
+            w*s+
+            h*c
+          )/2;
+
+        minX =
+          Math.min(
+            minX,
+            o.x-hw
+          );
+
+        maxX =
+          Math.max(
+            maxX,
+            o.x+hw
+          );
+
+        minY =
+          Math.min(
+            minY,
+            o.y-hh
+          );
+
+        maxY =
+          Math.max(
+            maxY,
+            o.y+hh
+          );
+
+      }
+
+    }
+  );
+
+  return {
+    minX,
+    minY,
+    maxX,
+    maxY,
+    width:maxX-minX,
+    height:maxY-minY,
+    centerX:
+      (minX+maxX)/2,
+    centerY:
+      (minY+maxY)/2
+  };
+
+}
+
+
+/* =========================================================
+   プレイカメラ
+========================================================= */
+
+function fitPlayCamera(){
+
+  if(!currentPlayStage){
+    return;
+  }
+
+  const bounds =
+    calculateStageBounds(
+      currentPlayStage
+    );
+
+  const rect =
+    playCanvas.getBoundingClientRect();
+
+  const padding =
+    85;
+
+  const zoomX =
+    (
+      rect.width-
+      padding*2
+    ) /
+    Math.max(
+      200,
+      bounds.width
+    );
+
+  const zoomY =
+    (
+      rect.height-
+      padding*2
+    ) /
+    Math.max(
+      200,
+      bounds.height
+    );
+
+  playCamera.zoom =
+    clamp(
+      Math.min(
+        zoomX,
+        zoomY
+      ),
+      0.12,
+      2.5
+    );
+
+  playCamera.x =
+    bounds.centerX;
+
+  playCamera.y =
+    bounds.centerY;
+
+}
+
+
+/* =========================================================
+   エディタカメラ
+========================================================= */
+
+function getEditorBounds(){
+
+  const bodies =
+    editorBodies;
+
+  if(
+    bodies.length === 0
+  ){
+
+    return {
+      minX:-200,
+      minY:0,
+      maxX:200,
+      maxY:400,
+      width:400,
+      height:400,
+      centerX:0,
+      centerY:200
+    };
+
+  }
+
+  let minX =
+    Infinity;
+
+  let minY =
+    Infinity;
+
+  let maxX =
+    -Infinity;
+
+  let maxY =
+    -Infinity;
+
+  bodies.forEach(
+    function(body){
+
+      if(
+        body.gameType ===
+        "enemy"
+      ){
+
+        const r =
+          body.enemyRadius;
+
+        minX =
+          Math.min(
+            minX,
+            body.position.x-r
+          );
+
+        maxX =
+          Math.max(
+            maxX,
+            body.position.x+r
+          );
+
+        minY =
+          Math.min(
+            minY,
+            body.position.y-r
+          );
+
+        maxY =
+          Math.max(
+            maxY,
+            body.position.y+r
+          );
+
+      }else{
+
+        minX =
+          Math.min(
+            minX,
+            body.bounds.min.x
+          );
+
+        maxX =
+          Math.max(
+            maxX,
+            body.bounds.max.x
+          );
+
+        minY =
+          Math.min(
+            minY,
+            body.bounds.min.y
+          );
+
+        maxY =
+          Math.max(
+            maxY,
+            body.bounds.max.y
+          );
+
+      }
+
+    }
+  );
+
+  return {
+    minX,
+    minY,
+    maxX,
+    maxY,
+    width:maxX-minX,
+    height:maxY-minY,
+    centerX:
+      (minX+maxX)/2,
+    centerY:
+      (minY+maxY)/2
+  };
+
+}
+
+
+function fitEditorCamera(){
+
+  const bounds =
+    getEditorBounds();
+
+  const rect =
+    editorCanvas.getBoundingClientRect();
+
+  const padding =
+    120;
+
+  const zx =
+    (
+      rect.width-
+      padding*2
+    ) /
+    Math.max(
+      200,
+      bounds.width
+    );
+
+  const zy =
+    (
+      rect.height-
+      padding*2
+    ) /
+    Math.max(
+      200,
+      bounds.height
+    );
+
+  editorCamera.zoom =
+    clamp(
+      Math.min(
+        zx,
+        zy
+      ),
+      0.08,
+      2.5
+    );
+
+  editorCamera.x =
+    bounds.centerX;
+
+  editorCamera.y =
+    bounds.centerY;
+
+}
+
+
+/* =========================================================
+   ズーム
+========================================================= */
+
+function setEditorZoom(
+  newZoom,
+  clientX,
+  clientY
+){
+
+  const before =
+    screenToWorld(
+      clientX,
+      clientY,
+      editorCanvas,
+      editorCamera
+    );
+
+  editorCamera.zoom =
+    clamp(
+      newZoom,
+      0.08,
+      4
+    );
+
+  const after =
+    screenToWorld(
+      clientX,
+      clientY,
+      editorCanvas,
+      editorCamera
+    );
+
+  editorCamera.x +=
+    before.x-after.x;
+
+  editorCamera.y +=
+    before.y-after.y;
+
+}
+
+
+/* =========================================================
+   ステージ保存データ
+========================================================= */
+
+function serializeEditorStage(){
+
+  return editorBodies.map(
+    function(body){
+
+      if(
+        body.gameType ===
+        "enemy"
+      ){
+
+        return {
+          type:"enemy",
+          x:body.position.x,
+          y:body.position.y,
+          radius:
+            body.enemyRadius,
+          angle:body.angle
+        };
+
+      }
+
+      if(
+        body.gameType ===
+        "bomb"
+      ){
+
+        return {
+          type:"bomb",
+          x:body.position.x,
+          y:body.position.y,
+          radius:13,
+          angle:0
+        };
+
+      }
+
+      return {
+        type:
+          body.materialType,
+
+        x:
+          body.position.x,
+
+        y:
+          body.position.y,
+
+        width:
+          body.gameWidth,
+
+        height:
+          body.gameHeight,
+
+        angle:
+          body.angle
+      };
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   ステージ保存
+========================================================= */
+
+function requestSaveStage(){
+
+  const stage =
+    getEditingStage();
+
+  stageNameInput.value =
+    stage
+      ? stage.name
+      : "新しいステージ";
+
+  saveModalLayer.classList.remove(
+    "hidden"
+  );
+
+  setTimeout(
+    function(){
+
+      stageNameInput.focus();
+      stageNameInput.select();
+
+    },
+    50
+  );
+
+}
+
+
+function getEditingStage(){
+
+  if(
+    !editingStageId
+  ){
+    return null;
+  }
+
+  return loadStages().find(
+    function(stage){
+
+      return stage.id ===
+        editingStageId;
+
+    }
+  ) || null;
+
+}
+
+
+function confirmSaveStage(){
+
+  let name =
+    stageNameInput.value.trim();
+
+  if(!name){
+
+    name =
+      "無題のステージ";
+
+  }
+
+  const stages =
+    loadStages();
+
+  const objects =
+    serializeEditorStage();
+
+  if(
+    editingStageId
+  ){
+
+    const index =
+      stages.findIndex(
+        function(stage){
+
+          return stage.id ===
+            editingStageId;
+
+        }
+      );
+
+    if(index >= 0){
+
+      stages[index] = {
+        ...stages[index],
+        name:name,
+        objects:objects,
+        updatedAt:
+          new Date().toISOString()
+      };
+
+    }
+
+  }else{
+
+    const stage = {
+      id:createId(),
+      name:name,
+      objects:objects,
+      createdAt:
+        new Date().toISOString(),
+      updatedAt:
+        new Date().toISOString()
+    };
+
+    editingStageId =
+      stage.id;
+
+    stages.push(
+      stage
+    );
+
+  }
+
+  saveStages(
+    stages
+  );
+
+  editorTitle.textContent =
+    name;
+
+  saveModalLayer.classList.add(
+    "hidden"
+  );
+
+  renderStageList();
+
+}
+
+
+/* =========================================================
+   ステージ一覧
+========================================================= */
+
+function renderStageList(){
+
+  stageList.innerHTML = "";
+
+  const stages =
+    loadStages();
+
+  if(
+    stages.length === 0
+  ){
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "emptyStage";
+
+    empty.innerHTML =
+      "保存されたステージはありません。<br><br>" +
+      "「ステージを作る」から<br>" +
+      "最初のステージを作成してください。";
+
+    stageList.appendChild(
+      empty
+    );
+
+    return;
+
+  }
+
+  stages.forEach(
+    function(stage){
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+      card.className =
+        "stageCard";
+
+      const title =
+        document.createElement(
+          "div"
+        );
+
+      title.className =
+        "stageCardTitle";
+
+      title.textContent =
+        stage.name ||
+        "無題のステージ";
+
+      const info =
+        document.createElement(
+          "div"
+        );
+
+      info.className =
+        "stageCardInfo";
+
+      const objects =
+        stage.objects || [];
+
+      const enemies =
+        objects.filter(
+          o =>
+            o.type === "enemy"
+        ).length;
+
+      const blocks =
+        objects.filter(
+          o =>
+            o.type === "wood" ||
+            o.type === "glass" ||
+            o.type === "stone"
+        ).length;
+
+      info.textContent =
+        "建築物：" +
+        blocks +
+        "　敵：" +
+        enemies;
+
+      const buttons =
+        document.createElement(
+          "div"
+        );
+
+      buttons.className =
+        "stageCardButtons";
+
+      const play =
+        document.createElement(
+          "button"
+        );
+
+      play.className =
+        "smallButton orange";
+
+      play.textContent =
+        "遊ぶ";
+
+      play.onclick =
+        function(){
+
+          startPlayStage(
+            stage
+          );
+
+        };
+
+      const edit =
+        document.createElement(
+          "button"
+        );
+
+      edit.className =
+        "smallButton";
+
+      edit.textContent =
+        "編集";
+
+      edit.onclick =
+        function(){
+
+          openEditor(
+            stage
+          );
+
+        };
+
+      const copy =
+        document.createElement(
+          "button"
+        );
+
+      copy.className =
+        "smallButton";
+
+      copy.textContent =
+        "複製";
+
+      copy.onclick =
+        function(){
+
+          duplicateStage(
+            stage
+          );
+
+        };
+
+      const del =
+        document.createElement(
+          "button"
+        );
+
+      del.className =
+        "smallButton";
+
+      del.textContent =
+        "削除";
+
+      del.onclick =
+        function(){
+
+          if(
+            !confirm(
+              "このステージを削除しますか？"
+            )
+          ){
+            return;
+          }
+
+          deleteStage(
+            stage.id
+          );
+
+        };
+
+      buttons.append(
+        play,
+        edit,
+        copy,
+        del
+      );
+
+      card.append(
+        title,
+        info,
+        buttons
+      );
+
+      stageList.appendChild(
+        card
+      );
+
+    }
+  );
+
+}
+
+
+function deleteStage(
+  id
+){
+
+  const stages =
+    loadStages().filter(
+      function(stage){
+
+        return stage.id !== id;
+
+      }
+    );
+
+  saveStages(
+    stages
+  );
+
+  renderStageList();
+
+}
+
+
+function duplicateStage(
+  stage
+){
+
+  const copy = {
+    id:createId(),
+    name:
+      (
+        stage.name ||
+        "無題のステージ"
+      ) +
+      " コピー",
+
+    objects:
+      JSON.parse(
+        JSON.stringify(
+          stage.objects || []
+        )
+      ),
+
+    createdAt:
+      new Date().toISOString(),
+
+    updatedAt:
+      new Date().toISOString()
+  };
+
+  const stages =
+    loadStages();
+
+  stages.push(
+    copy
+  );
+
+  saveStages(
+    stages
+  );
+
+  renderStageList();
+
+}
+
+
+/* =========================================================
+   エディタを開く
+========================================================= */
+
+function openEditor(
+  stage
+){
+
+  editingStageId =
+    stage
+      ? stage.id
+      : null;
+
+  if(stage){
+
+    editorTitle.textContent =
+      stage.name ||
+      "無題のステージ";
+
+  }else{
+
+    editorTitle.textContent =
+      "新しいステージ";
+
+  }
+
+  showScreen(
+    "editor"
+  );
+
+  initEditor(
+    stage
+  );
+
+  updateEditorInfo();
+
+}
+
+
+/* =========================================================
+   プレイ開始
+========================================================= */
+
+function startPlayStage(
+  stage
+){
+
+  currentPlayStage =
+    JSON.parse(
+      JSON.stringify(
+        stage
+      )
+    );
+
+  /*
+   * エディタ上の爆弾は
+   * ステージの建築物としてではなく
+   * プレイ開始時には除外。
+   */
+  currentPlayStage.objects =
+    (
+      currentPlayStage.objects ||
+      []
+    ).filter(
+      function(o){
+
+        return o.type !==
+          "bomb";
+
+      }
+    );
+
+  playTitle.textContent =
+    currentPlayStage.name ||
+    "ステージ";
+
+  resultShown =
+    false;
+
+  resultModalLayer.classList.add(
+    "hidden"
+  );
+
+  showScreen(
+    "play"
+  );
+
+  createPlayWorld(
+    currentPlayStage
+  );
+
+  fitPlayCamera();
+
+  stabilizePlayStart();
+
+  updateBombCount();
+  updateEnemyCount();
+
+}
+
+
+/* =========================================================
+   プレイ初期安定化
+========================================================= */
+
+function stabilizePlayStart(){
+
+  if(!playEngine){
+    return;
+  }
+
+  for(
+    let i=0;
+    i<5;
+    i++
+  ){
+
+    Engine.update(
+      playEngine,
+      1000/60
+    );
+
+  }
+
+  playBodies.forEach(
+    function(body){
+
+      if(
+        !body.isStatic
+      ){
+
+        Sleeping.set(
+          body,
+          false
+        );
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   敵数
+========================================================= */
+
+function refreshEnemyStartCount(){
+
+  playStats.enemiesStart =
+    playBodies.filter(
+      function(body){
+
+        return body.gameType ===
+          "enemy";
+
+      }
+    ).length;
+
+}
+
+
+function getAliveEnemyCount(){
+
+  return playBodies.filter(
+    function(body){
+
+      return (
+        body.gameType ===
+        "enemy" &&
+        body.enemyAlive
+      );
+
+    }
+  ).length;
+
+}
+
+
+function updateEnemyCount(){
+
+  enemyCounter.textContent =
+    "敵：" +
+    getAliveEnemyCount();
+
+}
+
+
+/* =========================================================
+   爆弾設置
+========================================================= */
+
+function placeBomb(
+  x,
+  y
+){
+
+  if(
+    currentScreen !==
+    "play"
+  ){
+    return;
+  }
+
+  const bomb =
+    Bodies.circle(
+      x,
+      y,
+      13,
+      {
+        isStatic:true,
+        label:"bomb",
+        gameType:"bomb"
+      }
+    );
+
+  playBombs.push(
+    bomb
+  );
+
+  World.add(
+    playWorld,
+    bomb
+  );
+
+  createBombParticles(
+    x,
+    y
+  );
+
+  updateBombCount();
+
+}
+
+
+function updateBombCount(){
+
+  bombCounter.textContent =
+    "爆弾：" +
+    playBombs.length;
+
+}
+
+
+/* =========================================================
+   プレイ結果
+========================================================= */
+
+function isStageCleared(){
+
+  return (
+    playStats.enemiesStart > 0 &&
+    getAliveEnemyCount() === 0 &&
+    playStats.explosions > 0
+  );
+
+}
+
+
+function checkPlayResult(){
+
+  updateEnemyCount();
+
+  if(
+    resultShown
+  ){
+    return;
+  }
+
+  if(
+    isStageCleared()
+  ){
+
+    resultShown =
+      true;
+
+    setTimeout(
+      function(){
+
+        showPlayResult();
+
+      },
+      600
+    );
+
+  }
+
+}
+
+
+function showPlayResult(){
+
+  document.getElementById(
+    "resultTitle"
+  ).textContent =
+    "CLEAR!";
+
+  document.getElementById(
+    "resultText"
+  ).innerHTML =
+    "敵をすべて倒しました！<br>" +
+    "爆発回数：" +
+    playStats.explosions;
+
+  resultModalLayer.classList.remove(
+    "hidden"
+  );
+
+}
+
+
+/* =========================================================
+   エフェクト
+========================================================= */
+
+function createBreakParticles(
+  body
+){
+
+  if(!body){
+    return;
+  }
+
+  const count =
+    body.materialType === "stone"
+      ? 12
+      : 8;
+
+  for(
+    let i=0;
+    i<count;
+    i++
+  ){
+
+    particles.push({
+      x:body.position.x,
+      y:body.position.y,
+      vx:
+        (Math.random()-.5)*
+        8,
+      vy:
+        (Math.random()-.8)*
+        7,
+      life:1,
+      size:
+        3+
+        Math.random()*5,
+      type:
+        body.materialType
+    });
+
+  }
+
+}
+
+
+function createEnemyDeathParticles(
+  enemy
+){
+
+  for(
+    let i=0;
+    i<18;
+    i++
+  ){
+
+    particles.push({
+      x:enemy.position.x,
+      y:enemy.position.y,
+      vx:
+        (Math.random()-.5)*
+        9,
+      vy:
+        (Math.random()-.5)*
+        9,
+      life:1,
+      size:
+        4+
+        Math.random()*5,
+      type:"enemy"
+    });
+
+  }
+
+}
+
+
+function createBombParticles(
+  x,
+  y
+){
+
+  for(
+    let i=0;
+    i<6;
+    i++
+  ){
+
+    particles.push({
+      x:x,
+      y:y,
+      vx:
+        (Math.random()-.5)*
+        2,
+      vy:
+        (Math.random()-.5)*
+        2,
+      life:1,
+      size:3,
+      type:"bomb"
+    });
+
+  }
+
+}
+
+
+/* =========================================================
+   描画
+========================================================= */
+
+function clearCanvas(
+  ctx,
+  canvas
+){
+
+  const rect =
+    canvas.getBoundingClientRect();
+
+  ctx.clearRect(
+    0,
+    0,
+    rect.width,
+    rect.height
+  );
+
+}
+
+
+function drawBackground(
+  ctx,
+  canvas,
+  camera
+){
+
+  const rect =
+    canvas.getBoundingClientRect();
+
+  ctx.fillStyle =
+    "#dcecf0";
+
+  ctx.fillRect(
+    0,
+    0,
+    rect.width,
+    rect.height
+  );
+
+  /*
+   * 空のグラデーション。
+   */
+  const gradient =
+    ctx.createLinearGradient(
+      0,
+      0,
+      0,
+      rect.height
+    );
+
+  gradient.addColorStop(
+    0,
+    "#a9d8e8"
+  );
+
+  gradient.addColorStop(
+    .7,
+    "#e9f0dc"
+  );
+
+  gradient.addColorStop(
+    1,
+    "#d4b17f"
+  );
+
+  ctx.fillStyle =
+    gradient;
+
+  ctx.fillRect(
+    0,
+    0,
+    rect.width,
+    rect.height
+  );
+
+  /*
+   * 地面。
+   */
+  const ground =
+    worldToScreen(
+      0,
+      WORLD_GROUND_Y,
+      canvas,
+      camera
+    );
+
+  if(
+    ground.y <
+    rect.height+100
+  ){
+
+    ctx.fillStyle =
+      "#b48a58";
+
+    ctx.fillRect(
+      0,
+      ground.y,
+      rect.width,
+      rect.height-ground.y
+    );
+
+  }
+
+}
+
+
+function drawGrid(
+  ctx,
+  canvas,
+  camera
+){
+
+  const rect =
+    canvas.getBoundingClientRect();
+
+  const grid =
+    100;
+
+  const left =
+    camera.x-
+    rect.width/
+    (2*camera.zoom);
+
+  const right =
+    camera.x+
+    rect.width/
+    (2*camera.zoom);
+
+  const top =
+    camera.y-
+    rect.height/
+    (2*camera.zoom);
+
+  const bottom =
+    camera.y+
+    rect.height/
+    (2*camera.zoom);
+
+  const startX =
+    Math.floor(
+      left/grid
+    )*grid;
+
+  const startY =
+    Math.floor(
+      top/grid
+    )*grid;
+
+  ctx.save();
+
+  ctx.lineWidth =
+    1;
+
+  ctx.strokeStyle =
+    "#7b654d22";
+
+  for(
+    let x=startX;
+    x<=right;
+    x+=grid
+  ){
+
+    const p =
+      worldToScreen(
+        x,
+        0,
+        canvas,
+        camera
+      );
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      p.x,
+      0
+    );
+
+    ctx.lineTo(
+      p.x,
+      rect.height
+    );
+
+    ctx.stroke();
+
+  }
+
+  for(
+    let y=startY;
+    y<=bottom;
+    y+=grid
+  ){
+
+    const p =
+      worldToScreen(
+        0,
+        y,
+        canvas,
+        camera
+      );
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      0,
+      p.y
+    );
+
+    ctx.lineTo(
+      rect.width,
+      p.y
+    );
+
+    ctx.stroke();
+
+  }
+
+  ctx.restore();
+
+}
+
+
+/* =========================================================
+   エディタ物体描画
+========================================================= */
+
+function drawBody(
+  ctx,
+  canvas,
+  camera,
+  body
+){
+
+  if(
+    !body ||
+    body.isDestroyed
+  ){
+    return;
+  }
+
+  const p =
+    worldToScreen(
+      body.position.x,
+      body.position.y,
+      canvas,
+      camera
+    );
+
+  ctx.save();
+
+  ctx.translate(
+    p.x,
+    p.y
+  );
+
+  ctx.rotate(
+    body.angle
+  );
+
+  const zoom =
+    camera.zoom;
+
+  if(
+    body.gameType ===
+    "enemy"
+  ){
+
+    const r =
+      body.enemyRadius*
+      zoom;
+
+    /*
+     * 影。
+     */
+    ctx.fillStyle =
+      "#0003";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+      3,
+      5,
+      r,
+      r*.85,
+      0,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    /*
+     * 敵本体。
+     */
+    ctx.fillStyle =
+      "#73b94b";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      0,
+      r,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.strokeStyle =
+      "#386b28";
+
+    ctx.lineWidth =
+      Math.max(
+        1,
+        2*zoom
+      );
+
+    ctx.stroke();
+
+    /*
+     * 目。
+     */
+    ctx.fillStyle =
+      "#fff";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      -r*.32,
+      -r*.12,
+      r*.22,
+      0,
+      Math.PI*2
+    );
+
+    ctx.arc(
+      r*.32,
+      -r*.12,
+      r*.22,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle =
+      "#222";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      -r*.32,
+      -r*.1,
+      r*.09,
+      0,
+      Math.PI*2
+    );
+
+    ctx.arc(
+      r*.32,
+      -r*.1,
+      r*.09,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }else if(
+    body.gameType ===
+    "bomb"
+  ){
+
+    const r =
+      13*zoom;
+
+    ctx.fillStyle =
+      "#222";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      0,
+      r,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.strokeStyle =
+      "#111";
+
+    ctx.lineWidth =
+      2;
+
+    ctx.stroke();
+
+    ctx.strokeStyle =
+      "#f5b642";
+
+    ctx.lineWidth =
+      Math.max(
+        2,
+        3*zoom
+      );
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      r*.45,
+      -r*.65
+    );
+
+    ctx.quadraticCurveTo(
+      r*.9,
+      -r*1.1,
+      r*1.2,
+      -r*.8
+    );
+
+    ctx.stroke();
+
+  }else{
+
+    const w =
+      body.gameWidth*
+      zoom;
+
+    const h =
+      body.gameHeight*
+      zoom;
+
+    if(
+      body.materialType ===
+      "wood"
+    ){
+
+      ctx.fillStyle =
+        "#a96731";
+
+      ctx.fillRect(
+        -w/2,
+        -h/2,
+        w,
+        h
+      );
+
+      ctx.strokeStyle =
+        "#6c3e20";
+
+      ctx.lineWidth =
+        Math.max(
+          1,
+          2*zoom
+        );
+
+      ctx.strokeRect(
+        -w/2,
+        -h/2,
+        w,
+        h
+      );
+
+      ctx.strokeStyle =
+        "#d28b4c";
+
+      ctx.lineWidth =
+        Math.max(
+          1,
+          1*zoom
+        );
+
+      for(
+        let yy=-h/4;
+        yy<h/2;
+        yy+=h/3
+      ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+          -w*.42,
+          yy
+        );
+
+        ctx.quadraticCurveTo(
+          0,
+          yy-3,
+          w*.42,
+          yy+2
+        );
+
+        ctx.stroke();
+
+      }
+
+    }else if(
+      body.materialType ===
+      "glass"
+    ){
+
+      ctx.fillStyle =
+        "#aee8ef88";
+
+      ctx.fillRect(
+        -w/2,
+        -h/2,
+        w,
+        h
+      );
+
+      ctx.strokeStyle =
+        "#4b9ba788";
+
+      ctx.lineWidth =
+        Math.max(
+          1,
+          2*zoom
+        );
+
+      ctx.strokeRect(
+        -w/2,
+        -h/2,
+        w,
+        h
+      );
+
+      ctx.strokeStyle =
+        "#ffffffaa";
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        -w*.35,
+        h*.3
+      );
+
+      ctx.lineTo(
+        w*.2,
+        -h*.3
+      );
+
+      ctx.stroke();
+
+    }else if(
+      body.materialType ===
+      "stone"
+    ){
+
+      ctx.fillStyle =
+        "#77716a";
+
+      ctx.fillRect(
+        -w/2,
+        -h/2,
+        w,
+        h
+      );
+
+      ctx.strokeStyle =
+        "#494640";
+
+      ctx.lineWidth =
+        Math.max(
+          1,
+          2*zoom
+        );
+
+      ctx.strokeRect(
+        -w/2,
+        -h/2,
+        w,
+        h
+      );
+
+      ctx.strokeStyle =
+        "#9b958b";
+
+      ctx.lineWidth =
+        Math.max(
+          1,
+          1*zoom
+        );
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        -w*.35,
+        -h*.1
+      );
+
+      ctx.lineTo(
+        -w*.05,
+        h*.2
+      );
+
+      ctx.lineTo(
+        w*.3,
+        -h*.2
+      );
+
+      ctx.stroke();
+
+    }
+
+    /*
+     * ダメージによるひび。
+     */
+    if(
+      body.hp <
+      body.maxHp
+    ){
+
+      const damageRatio =
+        1 -
+        body.hp/
+        body.maxHp;
+
+      ctx.strokeStyle =
+        "#3a211bcc";
+
+      ctx.lineWidth =
+        Math.max(
+          1,
+          2*zoom
+        );
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        -w*.25,
+        -h*.4
+      );
+
+      ctx.lineTo(
+        -w*.05,
+        0
+      );
+
+      ctx.lineTo(
+        -w*.2,
+        h*.35
+      );
+
+      if(
+        damageRatio > .5
+      ){
+
+        ctx.moveTo(
+          -w*.05,
+          0
+        );
+
+        ctx.lineTo(
+          w*.25,
+          h*.3
+        );
+
+      }
+
+      ctx.stroke();
+
+    }
+
+  }
+
+  ctx.restore();
+
+}
+
+
+/* =========================================================
+   エディタ選択
+========================================================= */
+
+function drawEditorSelection(){
+
+  if(
+    !selectedEditorBody ||
+    !editorBodies.includes(
+      selectedEditorBody
+    )
+  ){
+    return;
+  }
+
+  const body =
+    selectedEditorBody;
+
+  const p =
+    worldToScreen(
+      body.position.x,
+      body.position.y,
+      editorCanvas,
+      editorCamera
+    );
+
+  editorCtx.save();
+
+  editorCtx.translate(
+    p.x,
+    p.y
+  );
+
+  editorCtx.rotate(
+    body.angle
+  );
+
+  editorCtx.strokeStyle =
+    "#ef8128";
+
+  editorCtx.lineWidth =
+    2;
+
+  editorCtx.setLineDash([
+    6,
+    4
+  ]);
+
+  if(
+    body.gameType ===
+    "enemy"
+  ){
+
+    const r =
+      body.enemyRadius*
+      editorCamera.zoom;
+
+    editorCtx.beginPath();
+
+    editorCtx.arc(
+      0,
+      0,
+      r+6,
+      0,
+      Math.PI*2
+    );
+
+    editorCtx.stroke();
+
+  }else if(
+    body.gameType ===
+    "bomb"
+  ){
+
+    const r =
+      19*
+      editorCamera.zoom;
+
+    editorCtx.beginPath();
+
+    editorCtx.arc(
+      0,
+      0,
+      r,
+      0,
+      Math.PI*2
+    );
+
+    editorCtx.stroke();
+
+  }else{
+
+    const w =
+      body.gameWidth*
+      editorCamera.zoom;
+
+    const h =
+      body.gameHeight*
+      editorCamera.zoom;
+
+    editorCtx.strokeRect(
+      -w/2-5,
+      -h/2-5,
+      w+10,
+      h+10
+    );
+
+  }
+
+  editorCtx.restore();
+
+}
+
+
+/* =========================================================
+   エディタ描画
+========================================================= */
+
+function drawEditor(){
+
+  clearCanvas(
+    editorCtx,
+    editorCanvas
+  );
+
+  drawBackground(
+    editorCtx,
+    editorCanvas,
+    editorCamera
+  );
+
+  drawGrid(
+    editorCtx,
+    editorCanvas,
+    editorCamera
+  );
+
+  editorBodies.forEach(
+    function(body){
+
+      drawBody(
+        editorCtx,
+        editorCanvas,
+        editorCamera,
+        body
+      );
+
+    }
+  );
+
+  drawEditorSelection();
+
+  /*
+   * マウス座標。
+   */
+  const rect =
+    editorCanvas.getBoundingClientRect();
+
+  if(
+    editorMouseWorld &&
+    currentScreen === "editor"
+  ){
+
+    editorCtx.save();
+
+    editorCtx.font =
+      "11px sans-serif";
+
+    editorCtx.fillStyle =
+      "#503a27aa";
+
+    editorCtx.fillText(
+      "X " +
+      Math.round(
+        editorMouseWorld.x
+      ) +
+      "  Y " +
+      Math.round(
+        editorMouseWorld.y
+      ),
+      rect.width-120,
+      rect.height-15
+    );
+
+    editorCtx.restore();
+
+  }
+
+}
+
+
+/* =========================================================
+   プレイ描画
+========================================================= */
+
+function getRenderCamera(){
+
+  if(
+    cameraShake <= 0
+  ){
+
+    return playCamera;
+
+  }
+
+  return {
+    x:
+      playCamera.x +
+      (
+        Math.random()-.5
+      )*
+      cameraShake,
+
+    y:
+      playCamera.y +
+      (
+        Math.random()-.5
+      )*
+      cameraShake,
+
+    zoom:
+      playCamera.zoom
+  };
+
+}
+
+
+function drawPlay(){
+
+  clearCanvas(
+    playCtx,
+    playCanvas
+  );
+
+  const camera =
+    getRenderCamera();
+
+  drawBackground(
+    playCtx,
+    playCanvas,
+    camera
+  );
+
+  if(
+    playBodies
+  ){
+
+    playBodies.forEach(
+      function(body){
+
+        drawBody(
+          playCtx,
+          playCanvas,
+          camera,
+          body
+        );
+
+      }
+    );
+
+  }
+
+  playBombs.forEach(
+    function(bomb){
+
+      drawBody(
+        playCtx,
+        playCanvas,
+        camera,
+        bomb
+      );
+
+    }
+  );
+
+  drawExplosions(
+    camera
+  );
+
+  drawParticles(
+    camera
+  );
+
+  if(
+    playMouse.active
+  ){
+
+    const p =
+      worldToScreen(
+        playMouse.x,
+        playMouse.y,
+        playCanvas,
+        camera
+      );
+
+    playCtx.save();
+
+    playCtx.globalAlpha =
+      .4;
+
+    playCtx.strokeStyle =
+      "#ef8128";
+
+    playCtx.lineWidth =
+      2;
+
+    playCtx.beginPath();
+
+    playCtx.arc(
+      p.x,
+      p.y,
+      EXPLOSION_RADIUS*
+      camera.zoom,
+      0,
+      Math.PI*2
+    );
+
+    playCtx.stroke();
+
+    playCtx.restore();
+
+  }
+
+}
+
+
+/* =========================================================
+   爆発エフェクト
+========================================================= */
+
+function drawExplosions(
+  camera
+){
+
+  explosions.forEach(
+    function(e){
+
+      const p =
+        worldToScreen(
+          e.x,
+          e.y,
+          playCanvas,
+          camera
+        );
+
+      playCtx.save();
+
+      playCtx.globalAlpha =
+        e.life;
+
+      playCtx.strokeStyle =
+        "#ef8128";
+
+      playCtx.lineWidth =
+        7;
+
+      playCtx.beginPath();
+
+      playCtx.arc(
+        p.x,
+        p.y,
+        e.radius*
+        camera.zoom*
+        (1+
+          (1-e.life)*.25
+        ),
+        0,
+        Math.PI*2
+      );
+
+      playCtx.stroke();
+
+      playCtx.strokeStyle =
+        "#ffe2a3";
+
+      playCtx.lineWidth =
+        3;
+
+      playCtx.stroke();
+
+      playCtx.restore();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   パーティクル
+========================================================= */
+
+function drawParticles(
+  camera
+){
+
+  particles.forEach(
+    function(p){
+
+      const screen =
+        worldToScreen(
+          p.x,
+          p.y,
+          playCanvas,
+          camera
+        );
+
+      playCtx.save();
+
+      playCtx.globalAlpha =
+        Math.max(
+          0,
+          p.life
+        );
+
+      if(
+        p.type === "stone"
+      ){
+
+        playCtx.fillStyle =
+          "#6c6861";
+
+      }else if(
+        p.type === "glass"
+      ){
+
+        playCtx.fillStyle =
+          "#b5eef3";
+
+      }else if(
+        p.type === "enemy"
+      ){
+
+        playCtx.fillStyle =
+          "#72b74a";
+
+      }else if(
+        p.type === "bomb"
+      ){
+
+        playCtx.fillStyle =
+          "#ef8128";
+
+      }else{
+
+        playCtx.fillStyle =
+          "#9b5a2a";
+
+      }
+
+      playCtx.fillRect(
+        screen.x,
+        screen.y,
+        p.size*
+          camera.zoom,
+        p.size*
+          camera.zoom
+      );
+
+      playCtx.restore();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   アニメーション
+========================================================= */
+
+let editorAnimationRunning =
+  false;
+
+function editorAnimationStarted(){
+
+  if(
+    editorAnimationRunning
+  ){
+    return;
+  }
+
+  editorAnimationRunning =
+    true;
+
+  function frame(){
+
+    if(
+      editorEngine
+    ){
+
+      Engine.update(
+        editorEngine,
+        1000/60
+      );
+
+    }
+
+    if(
+      currentScreen ===
+      "editor"
+    ){
+
+      drawEditor();
+
+    }
+
+    requestAnimationFrame(
+      frame
+    );
+
+  }
+
+  requestAnimationFrame(
+    frame
+  );
+
+}
+
+
+let playAnimationRunning =
+  false;
+
+function playAnimationStarted(){
+
+  if(
+    playAnimationRunning
+  ){
+    return;
+  }
+
+  playAnimationRunning =
+    true;
+
+  function frame(){
+
+    if(
+      playEngine &&
+      currentScreen ===
+      "play"
+    ){
+
+      Engine.update(
+        playEngine,
+        1000/60
+      );
+
+      checkPlayResult();
+
+      updateEnemyCount();
+
+      updateParticles();
+
+      updateExplosions();
+
+      updateCameraShake();
+
+      drawPlay();
+
+    }
+
+    requestAnimationFrame(
+      frame
+    );
+
+  }
+
+  requestAnimationFrame(
+    frame
+  );
+
+}
+
+
+/* =========================================================
+   エフェクト更新
+========================================================= */
+
+function updateParticles(){
+
+  particles =
+    particles.filter(
+      function(p){
+
+        p.x +=
+          p.vx;
+
+        p.y +=
+          p.vy;
+
+        p.vy +=
+          .35;
+
+        p.vx *=
+          .98;
+
+        p.life -=
+          .035;
+
+        return p.life > 0;
+
+      }
+    );
+
+}
+
+
+function updateExplosions(){
+
+  explosions =
+    explosions.filter(
+      function(e){
+
+        e.life -=
+          .035;
+
+        return e.life > 0;
+
+      }
+    );
+
+}
+
+
+function updateCameraShake(){
+
+  cameraShake *=
+    .88;
+
+  if(
+    cameraShake < .05
+  ){
+
+    cameraShake =
+      0;
+
+  }
+
+}
+
+
+/* =========================================================
+   エディタ操作
+========================================================= */
+
+editorCanvas.addEventListener(
+  "pointerdown",
+  function(event){
+
+    if(
+      currentScreen !==
+      "editor"
+    ){
+      return;
+    }
+
+    editorCanvas.setPointerCapture(
+      event.pointerId
+    );
+
+    const point =
+      screenToWorld(
+        event.clientX,
+        event.clientY,
+        editorCanvas,
+        editorCamera
+      );
+
+    editorMouseWorld =
+      point;
+
+    /*
+     * 既存物体をドラッグ。
+     */
+    const existing =
+      findEditorBodyAt(
+        point.x,
+        point.y
+      );
+
+    if(
+      existing &&
+      selectedTool !==
+        "erase" &&
+      !existing.isStatic
+    ){
+
+      selectedEditorBody =
+        existing;
+
+      editorDraggingBody =
+        existing;
+
+      editorDragOffset = {
+        x:
+          point.x-
+          existing.position.x,
+
+        y:
+          point.y-
+          existing.position.y
+      };
+
+      Sleeping.set(
+        existing,
+        false
+      );
+
+      return;
+
+    }
+
+    /*
+     * 消去または配置。
+     */
+    handleEditorTap(
+      event.clientX,
+      event.clientY
+    );
+
+  }
+);
+
+
+editorCanvas.addEventListener(
+  "pointermove",
+  function(event){
+
+    if(
+      currentScreen !==
+      "editor"
+    ){
+      return;
+    }
+
+    const point =
+      screenToWorld(
+        event.clientX,
+        event.clientY,
+        editorCanvas,
+        editorCamera
+      );
+
+    editorMouseWorld =
+      point;
+
+    if(
+      editorDraggingBody
+    ){
+
+      Body.setPosition(
+        editorDraggingBody,
+        {
+          x:
+            point.x-
+            editorDragOffset.x,
+
+          y:
+            point.y-
+            editorDragOffset.y
+        }
+      );
+
+      Body.setVelocity(
+        editorDraggingBody,
+        {
+          x:0,
+          y:0
+        }
+      );
+
+      Sleeping.set(
+        editorDraggingBody,
+        false
+      );
+
+    }
+
+  }
+);
+
+
+function finishEditorPointer(){
+
+  editorDraggingBody =
+    null;
+
+}
+
+
+editorCanvas.addEventListener(
+  "pointerup",
+  finishEditorPointer
+);
+
+editorCanvas.addEventListener(
+  "pointercancel",
+  finishEditorPointer
+);
+
+
+/* =========================================================
+   エディタパン
+========================================================= */
+
+editorCanvas.addEventListener(
+  "pointerdown",
+  function(event){
+
+    if(
+      currentScreen !==
+      "editor"
+    ){
+      return;
+    }
+
+    if(
+      event.button === 1
+    ){
+
+      editorPanning =
+        true;
+
+      editorPanStart = {
+        x:event.clientX,
+        y:event.clientY
+      };
+
+      editorPanCameraStart = {
+        x:editorCamera.x,
+        y:editorCamera.y
+      };
+
+      event.preventDefault();
+
+    }
+
+  }
+);
+
+
+editorCanvas.addEventListener(
+  "pointermove",
+  function(event){
+
+    if(
+      !editorPanning
+    ){
+      return;
+    }
+
+    editorCamera.x =
+      editorPanCameraStart.x-
+      (
+        event.clientX-
+        editorPanStart.x
+      )/
+      editorCamera.zoom;
+
+    editorCamera.y =
+      editorPanCameraStart.y-
+      (
+        event.clientY-
+        editorPanStart.y
+      )/
+      editorCamera.zoom;
+
+  }
+);
+
+
+editorCanvas.addEventListener(
+  "pointerup",
+  function(){
+
+    editorPanning =
+      false;
+
+  }
+);
+
+
+/* =========================================================
+   マウスホイール
+========================================================= */
+
+editorCanvas.addEventListener(
+  "wheel",
+  function(event){
+
+    if(
+      currentScreen !==
+      "editor"
+    ){
+      return;
+    }
+
+    event.preventDefault();
+
+    const factor =
+      event.deltaY < 0
+        ? 1.12
+        : .89;
+
+    setEditorZoom(
+      editorCamera.zoom*
+      factor,
+      event.clientX,
+      event.clientY
+    );
+
+  },
+  {
+    passive:false
+  }
+);
+
+
+/* =========================================================
+   タッチピンチ
+========================================================= */
+
+const touchPoints =
+  new Map();
+
+let pinchDistance =
+  null;
+
+let pinchZoom =
+  null;
+
+let pinchCenter =
+  null;
+
+
+function getTouchDistance(
+  a,
+  b
+){
+
+  return Math.hypot(
+    a.x-b.x,
+    a.y-b.y
+  );
+
+}
+
+
+function getTouchCenter(
+  a,
+  b
+){
+
+  return {
+    x:
+      (a.x+b.x)/2,
+    y:
+      (a.y+b.y)/2
+  };
+
+}
+
+
+editorCanvas.addEventListener(
+  "pointerdown",
+  function(event){
+
+    touchPoints.set(
+      event.pointerId,
+      {
+        x:event.clientX,
+        y:event.clientY
+      }
+    );
+
+    if(
+      touchPoints.size === 2
+    ){
+
+      const points =
+        Array.from(
+          touchPoints.values()
+        );
+
+      pinchDistance =
+        getTouchDistance(
+          points[0],
+          points[1]
+        );
+
+      pinchZoom =
+        editorCamera.zoom;
+
+      pinchCenter =
+        getTouchCenter(
+          points[0],
+          points[1]
+        );
+
+    }
+
+  }
+);
+
+
+editorCanvas.addEventListener(
+  "pointermove",
+  function(event){
+
+    if(
+      !touchPoints.has(
+        event.pointerId
+      )
+    ){
+      return;
+    }
+
+    touchPoints.set(
+      event.pointerId,
+      {
+        x:event.clientX,
+        y:event.clientY
+      }
+    );
+
+    if(
+      touchPoints.size === 2 &&
+      pinchDistance
+    ){
+
+      const points =
+        Array.from(
+          touchPoints.values()
+        );
+
+      const d =
+        getTouchDistance(
+          points[0],
+          points[1]
+        );
+
+      if(
+        d > 0
+      ){
+
+        setEditorZoom(
+          pinchZoom*
+          d/
+          pinchDistance,
+          pinchCenter.x,
+          pinchCenter.y
+        );
+
+      }
+
+    }
+
+  }
+);
+
+
+function clearTouchPoint(
+  event
+){
+
+  touchPoints.delete(
+    event.pointerId
+  );
+
+  if(
+    touchPoints.size < 2
+  ){
+
+    pinchDistance =
+      null;
+
+    pinchZoom =
+      null;
+
+    pinchCenter =
+      null;
+
+  }
+
+}
+
+
+editorCanvas.addEventListener(
+  "pointerup",
+  clearTouchPoint
+);
+
+editorCanvas.addEventListener(
+  "pointercancel",
+  clearTouchPoint
+);
+
+
+/* =========================================================
+   プレイ操作
+========================================================= */
+
+playCanvas.addEventListener(
+  "pointerdown",
+  function(event){
+
+    if(
+      currentScreen !==
+      "play"
+    ){
+      return;
+    }
+
+    const point =
+      screenToWorld(
+        event.clientX,
+        event.clientY,
+        playCanvas,
+        playCamera
+      );
+
+    placeBomb(
+      point.x,
+      point.y
+    );
+
+  }
+);
+
+
+playCanvas.addEventListener(
+  "pointermove",
+  function(event){
+
+    if(
+      currentScreen !==
+      "play"
+    ){
+      return;
+    }
+
+    playMouse =
+      {
+        ...screenToWorld(
+          event.clientX,
+          event.clientY,
+          playCanvas,
+          playCamera
+        ),
+        active:true
+      };
+
+  }
+);
+
+
+playCanvas.addEventListener(
+  "pointerleave",
+  function(){
+
+    playMouse.active =
+      false;
+
+  }
+);
+
+
+/* =========================================================
+   キーボード
+========================================================= */
+
+window.addEventListener(
+  "keydown",
+  function(event){
+
+    if(
+      currentScreen ===
+      "play" &&
+      event.code ===
+      "Space"
+    ){
+
+      event.preventDefault();
+
+      explodeAll();
+
+    }
+
+    if(
+      currentScreen ===
+      "editor" &&
+      selectedEditorBody
+    ){
+
+      const step =
+        event.shiftKey
+          ? 20
+          : 5;
+
+      if(
+        event.key ===
+        "ArrowLeft"
+      ){
+
+        Body.translate(
+          selectedEditorBody,
+          {
+            x:-step,
+            y:0
+          }
+        );
+
+        event.preventDefault();
+
+      }else if(
+        event.key ===
+        "ArrowRight"
+      ){
+
+        Body.translate(
+          selectedEditorBody,
+          {
+            x:step,
+            y:0
+          }
+        );
+
+        event.preventDefault();
+
+      }else if(
+        event.key ===
+        "ArrowUp"
+      ){
+
+        Body.translate(
+          selectedEditorBody,
+          {
+            x:0,
+            y:-step
+          }
+        );
+
+        event.preventDefault();
+
+      }else if(
+        event.key ===
+        "ArrowDown"
+      ){
+
+        Body.translate(
+          selectedEditorBody,
+          {
+            x:0,
+            y:step
+          }
+        );
+
+        event.preventDefault();
+
+      }else if(
+        event.key ===
+        "Delete"
+      ){
+
+        removeEditorBody(
+          selectedEditorBody
+        );
+
+        selectedEditorBody =
+          null;
+
+        updateEditorInfo();
+
+        event.preventDefault();
+
+      }
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   エディタ情報
+========================================================= */
+
+function updateEditorInfo(){
+
+  const count =
+    editorBodies.length;
+
+  const enemies =
+    editorBodies.filter(
+      function(body){
+
+        return body.gameType ===
+          "enemy";
+
+      }
+    ).length;
+
+  const blocks =
+    editorBodies.filter(
+      function(body){
+
+        return body.gameType ===
+          "block";
+
+      }
+    ).length;
+
+  editorInfo.textContent =
+    "物体 " +
+    count +
+    "個　建築 " +
+    blocks +
+    "　敵 " +
+    enemies;
+
+}
+
+
+/* =========================================================
+   ツール
+========================================================= */
+
+document
+  .querySelectorAll(
+    ".toolButton"
+  )
+  .forEach(
+    function(button){
+
+      button.addEventListener(
+        "click",
+        function(){
+
+          document
+            .querySelectorAll(
+              ".toolButton"
+            )
+            .forEach(
+              function(b){
+
+                b.classList.remove(
+                  "active"
+                );
+
+              }
+            );
+
+          button.classList.add(
+            "active"
+          );
+
+          selectedTool =
+            button.dataset.tool;
+
+        }
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   サイズ変更
+========================================================= */
+
+window.addEventListener(
+  "keydown",
+  function(event){
+
+    if(
+      currentScreen !==
+      "editor"
+    ){
+      return;
+    }
+
+    if(
+      event.key === "1"
+    ){
+
+      editorBlockScale =
+        .75;
+
+    }else if(
+      event.key === "2"
+    ){
+
+      editorBlockScale =
+        1;
+
+    }else if(
+      event.key === "3"
+    ){
+
+      editorBlockScale =
+        1.5;
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   ボタン
+========================================================= */
+
+document
+  .getElementById(
+    "createStageButton"
+  )
+  .addEventListener(
+    "click",
+    function(){
+
+      openEditor(
+        null
+      );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "playStageButton"
+  )
+  .addEventListener(
+    "click",
+    function(){
+
+      renderStageList();
+
+      showScreen(
+        "select"
+      );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "selectBackButton"
+  )
+  .addEventListener(
+    "click",
+    function(){
+
+      showScreen(
+        "start"
+      );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "editorSaveButton"
+  )
+  .addEventListener(
+    "click",
+    requestSaveStage
+  );
+
+
+document
+  .getElementById(
+    "editorFitButton"
+  )
+  .addEventListener(
+    "click",
+    fitEditorCamera
+  );
+
+
+document
+  .getElementById(
+    "editorBackButton"
+  )
+  .addEventListener(
+    "click",
+    function(){
+
+      showScreen(
+        "start"
+      );
+
+      if(editorEngine){
+
+        Engine.clear(
+          editorEngine
+        );
+
+      }
+
+      editorEngine =
+        null;
+
+      editorWorld =
+        null;
+
+      editorBodies =
+        [];
+
+      selectedEditorBody =
+        null;
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "saveCancelButton"
+  )
+  .addEventListener(
+    "click",
+    function(){
+
+      saveModalLayer.classList.add(
+        "hidden"
+      );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "saveConfirmButton"
+  )
+  .addEventListener(
+    "click",
+    confirmSaveStage
+  );
+
+
+document
+  .getElementById(
+    "explodeButton"
+  )
+  .addEventListener(
+    "click",
+    explodeAll
+  );
+
+
+document
+  .getElementById(
+    "playResetButton"
+  )
+  .addEventListener(
+    "click",
+    function(){
+
+      if(
+        currentPlayStage
+      ){
+
+        startPlayStage(
+          currentPlayStage
+        );
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "playBackButton"
+  )
+  .addEventListener(
+    "click",
+    function(){
+
+      if(playEngine){
+
+        Engine.clear(
+          playEngine
+        );
+
+      }
+
+      playEngine =
+        null;
+
+      playWorld =
+        null;
+
+      playBodies =
+        [];
+
+      playBombs =
+        [];
+
+      particles =
+        [];
+
+      explosions =
+        [];
+
+      currentPlayStage =
+        null;
+
+      resultModalLayer.classList.add(
+        "hidden"
+      );
+
+      renderStageList();
+
+      showScreen(
+        "select"
+      );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "resultResetButton"
+  )
+  .addEventListener(
+    "click",
+    function(){
+
+      resultModalLayer.classList.add(
+        "hidden"
+      );
+
+      if(
+        currentPlayStage
+      ){
+
+        startPlayStage(
+          currentPlayStage
+        );
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "resultBackButton"
+  )
+  .addEventListener(
+    "click",
+    function(){
+
+      resultModalLayer.classList.add(
+        "hidden"
+      );
+
+      if(playEngine){
+
+        Engine.clear(
+          playEngine
+        );
+
+      }
+
+      playEngine =
+        null;
+
+      playWorld =
+        null;
+
+      playBodies =
+        [];
+
+      playBombs =
+        [];
+
+      currentPlayStage =
+        null;
+
+      renderStageList();
+
+      showScreen(
+        "select"
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   Enterで保存
+========================================================= */
+
+stageNameInput.addEventListener(
+  "keydown",
+  function(event){
+
+    if(
+      event.key ===
+      "Enter"
+    ){
+
+      event.preventDefault();
+
+      confirmSaveStage();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   ESC
+========================================================= */
+
+window.addEventListener(
+  "keydown",
+  function(event){
+
+    if(
+      event.key !==
+      "Escape"
+    ){
+      return;
+    }
+
+    if(
+      !saveModalLayer.classList.contains(
+        "hidden"
+      )
+    ){
+
+      saveModalLayer.classList.add(
+        "hidden"
+      );
+
+    }
+
+    if(
+      !resultModalLayer.classList.contains(
+        "hidden"
+      )
+    ){
+
+      resultModalLayer.classList.add(
+        "hidden"
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   初期化
+========================================================= */
+
+resizeAll();
+
+playAnimationStarted();
+
+renderStageList();
+
+showScreen(
+  "start"
+);
+
+
+/* =========================================================
+   デバッグ
+========================================================= */
+
+window.CASTLE_BOMBER = {
+  loadStages,
+  saveStages,
+  explodeAll,
+  startPlayStage,
+  openEditor,
+  MATERIALS
+};
+
+</script>
+
+</body>
+</html>
