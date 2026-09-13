@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>日野市の大自然</title>
-
+<title>スライム城くずし ステージメーカー</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
 
 <style>
@@ -12,8 +11,7 @@
   box-sizing:border-box;
 }
 
-html,
-body{
+html,body{
   margin:0;
   width:100%;
   height:100%;
@@ -23,8 +21,7 @@ body{
   color:#333;
 }
 
-button,
-input{
+button,input{
   font:inherit;
 }
 
@@ -43,9 +40,7 @@ button{
   height:100%;
 }
 
-/* =========================
-   タイトル
-========================= */
+/* タイトル */
 
 #titleScreen{
   display:flex;
@@ -84,8 +79,8 @@ button{
 }
 
 .primary-btn{
-  min-height:56px;
-  padding:12px 22px;
+  min-height:54px;
+  padding:11px 22px;
   border:0;
   border-radius:18px;
   color:#fff;
@@ -105,8 +100,8 @@ button{
 }
 
 .secondary-btn{
-  min-height:50px;
-  padding:10px 20px;
+  min-height:48px;
+  padding:9px 19px;
   border:2px solid #eaded2;
   border-radius:16px;
   color:#555;
@@ -115,13 +110,7 @@ button{
   box-shadow:0 4px 12px rgba(80,50,20,.08);
 }
 
-.secondary-btn:active{
-  transform:translateY(2px);
-}
-
-/* =========================
-   ステージ選択
-========================= */
+/* ステージ選択 */
 
 #stageSelectScreen{
   padding:20px;
@@ -167,9 +156,7 @@ button{
   width:100%;
 }
 
-/* =========================
-   ゲーム
-========================= */
+/* ゲーム */
 
 #gameScreen{
   position:relative;
@@ -191,21 +178,19 @@ button{
   touch-action:none;
 }
 
-/* =========================
-   操作バー
-========================= */
+/* 操作バー */
 
 #editorBar,
 #playBar{
   position:absolute;
   left:50%;
-  top:10px;
+  top:9px;
   transform:translateX(-50%);
   z-index:1000;
-  width:min(1080px,calc(100% - 16px));
+  width:min(1120px,calc(100% - 14px));
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:5px;
   flex-wrap:wrap;
   padding:8px;
   border-radius:19px;
@@ -214,22 +199,18 @@ button{
   pointer-events:auto;
 }
 
-#editorBar button,
-#playBar button{
+.tool-btn{
   position:relative;
   z-index:1001;
-  pointer-events:auto;
-}
-
-.tool-btn{
-  min-height:40px;
-  padding:6px 10px;
+  min-height:39px;
+  padding:5px 9px;
   border:2px solid #eaded2;
   border-radius:13px;
   background:#fff;
   color:#4d4239;
   font-size:12px;
   font-weight:800;
+  pointer-events:auto;
 }
 
 .tool-btn.active{
@@ -250,14 +231,38 @@ button{
   font-weight:800;
 }
 
-/* =========================
-   ヒント
-========================= */
+.factor-box{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  padding:3px 6px;
+  border-radius:11px;
+  background:#fff8f0;
+  border:2px solid #eaded2;
+}
+
+#multiplyFactor{
+  width:58px;
+  height:31px;
+  border:1px solid #d9c9b9;
+  border-radius:8px;
+  text-align:center;
+  outline:none;
+  background:#fff;
+  font-weight:800;
+}
+
+.factor-x{
+  font-weight:900;
+  color:#795c42;
+}
+
+/* ヒント */
 
 #hint{
   position:absolute;
   left:50%;
-  bottom:10px;
+  bottom:9px;
   transform:translateX(-50%);
   z-index:900;
   max-width:calc(100% - 20px);
@@ -271,9 +276,7 @@ button{
   text-align:center;
 }
 
-/* =========================
-   保存ダイアログ
-========================= */
+/* 保存 */
 
 #stageNameBox{
   position:absolute;
@@ -308,38 +311,43 @@ button{
   gap:10px;
 }
 
-/* =========================
-   スマホ
-========================= */
-
 @media(max-width:600px){
 
   #editorBar,
   #playBar{
-    top:6px;
+    top:5px;
     padding:6px;
     gap:4px;
     border-radius:16px;
   }
 
   .tool-btn{
-    min-height:37px;
+    min-height:36px;
     padding:5px 7px;
     font-size:11px;
   }
 
+  .tool-label{
+    font-size:11px;
+  }
+
+  .factor-box{
+    padding:2px 5px;
+  }
+
+  #multiplyFactor{
+    width:52px;
+    height:29px;
+  }
+
   #hint{
-    bottom:7px;
+    bottom:6px;
   }
 }
 </style>
 </head>
 
 <body>
-
-<!-- =========================
-     タイトル
-========================= -->
 
 <section id="titleScreen" class="screen">
 
@@ -351,15 +359,11 @@ button{
 
     <div class="menu-buttons">
 
-      <button
-        class="primary-btn"
-        id="makeStageBtn">
+      <button class="primary-btn" id="makeStageBtn">
         ステージを作る
       </button>
 
-      <button
-        class="secondary-btn"
-        id="playStageBtn">
+      <button class="secondary-btn" id="playStageBtn">
         ステージで遊ぶ
       </button>
 
@@ -369,13 +373,8 @@ button{
 
 </section>
 
-<!-- =========================
-     ステージ選択
-========================= -->
 
-<section
-  id="stageSelectScreen"
-  class="screen hidden">
+<section id="stageSelectScreen" class="screen hidden">
 
   <div class="stage-select-card">
 
@@ -383,9 +382,7 @@ button{
 
     <div id="stageList"></div>
 
-    <button
-      class="secondary-btn"
-      id="backFromSelectBtn">
+    <button class="secondary-btn" id="backFromSelectBtn">
       戻る
     </button>
 
@@ -393,119 +390,90 @@ button{
 
 </section>
 
-<!-- =========================
-     ゲーム
-========================= -->
 
-<section
-  id="gameScreen"
-  class="screen hidden">
+<section id="gameScreen" class="screen hidden">
 
   <canvas id="gameCanvas"></canvas>
 
-  <!-- 編集バー -->
 
-  <div
-    id="editorBar"
-    class="hidden">
+  <div id="editorBar" class="hidden">
 
     <span class="tool-label">
       配置
     </span>
 
-    <button
-      class="tool-btn"
-      data-tool="wood">
+    <button class="tool-btn" data-tool="wood">
       木
     </button>
 
-    <button
-      class="tool-btn"
-      data-tool="glass">
+    <button class="tool-btn" data-tool="glass">
       ガラス
     </button>
 
-    <button
-      class="tool-btn"
-      data-tool="stone">
+    <button class="tool-btn" data-tool="stone">
       石
     </button>
 
-    <button
-      class="tool-btn"
-      data-tool="slime">
+    <button class="tool-btn" data-tool="slime">
       スライム
     </button>
 
-    <button
-      class="tool-btn"
-      data-tool="bomb">
+    <button class="tool-btn" data-tool="bomb">
       爆弾
     </button>
 
-    <button
-      class="tool-btn"
-      data-tool="multiply">
+    <button class="tool-btn" data-tool="multiply">
       増殖
     </button>
 
-    <button
-      class="tool-btn"
-      data-tool="bedrock">
+    <div class="factor-box">
+      <span class="factor-x">×</span>
+      <input
+        id="multiplyFactor"
+        type="number"
+        min="1"
+        max="20"
+        step="1"
+        value="2">
+    </div>
+
+    <button class="tool-btn" data-tool="bedrock">
       岩盤
     </button>
 
-    <button
-      class="tool-btn"
-      id="deleteSelectedBtn">
+    <button class="tool-btn" id="deleteSelectedBtn">
       削除
     </button>
 
-    <button
-      class="tool-btn"
-      id="clearStageBtn">
+    <button class="tool-btn" id="clearStageBtn">
       全消去
     </button>
 
-    <button
-      class="tool-btn"
-      id="saveStageBtn">
+    <button class="tool-btn" id="saveStageBtn">
       保存
     </button>
 
-    <button
-      class="tool-btn"
-      id="backEditorBtn">
+    <button class="tool-btn" id="backEditorBtn">
       戻る
     </button>
 
   </div>
 
-  <!-- プレイバー -->
 
-  <div
-    id="playBar"
-    class="hidden">
+  <div id="playBar" class="hidden">
 
-    <button
-      class="primary-btn"
-      id="explodeAllBtn">
+    <button class="primary-btn" id="explodeAllBtn">
       全爆破
     </button>
 
-    <button
-      class="secondary-btn"
-      id="backPlayBtn">
+    <button class="secondary-btn" id="backPlayBtn">
       戻る
     </button>
 
   </div>
 
-  <!-- 保存 -->
 
-  <div
-    id="stageNameBox"
-    class="hidden">
+  <div id="stageNameBox" class="hidden">
 
     <h2>ステージ名</h2>
 
@@ -516,15 +484,11 @@ button{
 
     <div class="dialog-buttons">
 
-      <button
-        class="secondary-btn"
-        id="cancelSaveBtn">
+      <button class="secondary-btn" id="cancelSaveBtn">
         キャンセル
       </button>
 
-      <button
-        class="primary-btn"
-        id="confirmSaveBtn">
+      <button class="primary-btn" id="confirmSaveBtn">
         保存
       </button>
 
@@ -532,287 +496,172 @@ button{
 
   </div>
 
+
   <div id="hint"></div>
 
 </section>
 
-<script>
 
+<script>
 "use strict";
 
-/* =========================================================
-   Matter.js
-========================================================= */
+const Engine=Matter.Engine;
+const World=Matter.World;
+const Bodies=Matter.Bodies;
+const Body=Matter.Body;
+const Composite=Matter.Composite;
+const Events=Matter.Events;
 
-const Engine = Matter.Engine;
-const World = Matter.World;
-const Bodies = Matter.Bodies;
-const Body = Matter.Body;
-const Composite = Matter.Composite;
-const Events = Matter.Events;
+const canvas=document.getElementById("gameCanvas");
+const ctx=canvas.getContext("2d");
 
+const titleScreen=document.getElementById("titleScreen");
+const stageSelectScreen=document.getElementById("stageSelectScreen");
+const gameScreen=document.getElementById("gameScreen");
+const editorBar=document.getElementById("editorBar");
+const playBar=document.getElementById("playBar");
+const hint=document.getElementById("hint");
+const stageNameBox=document.getElementById("stageNameBox");
+const stageNameInput=document.getElementById("stageName");
+const multiplyFactorInput=document.getElementById("multiplyFactor");
 
-/* =========================================================
-   DOM
-========================================================= */
+const SAVE_KEY="slimeCastleMaker_v13";
 
-const canvas =
-  document.getElementById("gameCanvas");
+const FLOOR_HEIGHT=50;
+const MIN_SIZE=20;
 
-const ctx =
-  canvas.getContext("2d");
+let engine=null;
+let floorBody=null;
 
-const titleScreen =
-  document.getElementById("titleScreen");
+let mode=null;
+let currentTool=null;
+let selectedBody=null;
+let pointerData=null;
 
-const stageSelectScreen =
-  document.getElementById("stageSelectScreen");
+let objects=[];
+let explosions=[];
 
-const gameScreen =
-  document.getElementById("gameScreen");
+let canvasWidth=1;
+let canvasHeight=1;
 
-const editorBar =
-  document.getElementById("editorBar");
+let animationFrame=null;
+let lastTime=performance.now();
 
-const playBar =
-  document.getElementById("playBar");
+let explosionQueue=[];
+let insideMultipliers=new WeakMap();
 
-const hint =
-  document.getElementById("hint");
-
-const stageNameBox =
-  document.getElementById("stageNameBox");
-
-const stageNameInput =
-  document.getElementById("stageName");
-
-
-/* =========================================================
-   設定
-========================================================= */
-
-const SAVE_KEY =
-  "slimeCastleMaker_v12";
-
-const FLOOR_HEIGHT =
-  48;
-
-const MIN_SIZE =
-  20;
-
-const objects =
-  [];
-
-let engine =
-  null;
-
-let floorBody =
-  null;
-
-let mode =
-  null;
-
-let currentTool =
-  null;
-
-let selectedBody =
-  null;
-
-let pointerData =
-  null;
-
-let explosions =
-  [];
-
-let canvasWidth =
-  1;
-
-let canvasHeight =
-  1;
-
-let animationFrame =
-  null;
-
-let lastTime =
-  performance.now();
-
-
-/* =========================================================
-   ID
-========================================================= */
 
 function newId(){
 
   if(
     window.crypto &&
-    typeof window.crypto.randomUUID === "function"
+    typeof window.crypto.randomUUID==="function"
   ){
     return window.crypto.randomUUID();
   }
 
-  return (
-    Date.now().toString(36) +
-    Math.random().toString(36).slice(2)
-  );
+  return Date.now().toString(36)+Math.random().toString(36).slice(2);
 }
 
 
-/* =========================================================
-   Canvasサイズ
-========================================================= */
+/* =========================
+   Canvas
+========================= */
 
 function resizeCanvas(){
 
-  const width =
-    Math.max(
-      1,
-      gameScreen.clientWidth
-    );
-
-  const height =
-    Math.max(
-      1,
-      gameScreen.clientHeight
-    );
-
-  canvasWidth =
-    width;
-
-  canvasHeight =
-    height;
-
-  const dpr =
-    Math.min(
-      window.devicePixelRatio || 1,
-      2
-    );
-
-  canvas.width =
-    Math.floor(width*dpr);
-
-  canvas.height =
-    Math.floor(height*dpr);
-
-  canvas.style.width =
-    width+"px";
-
-  canvas.style.height =
-    height+"px";
-
-  ctx.setTransform(
-    dpr,
-    0,
-    0,
-    dpr,
-    0,
-    0
-  );
-
-  if(
-    engine &&
-    floorBody
-  ){
-
-    Body.setPosition(
-      floorBody,
-      {
-        x:width/2,
-        y:height-FLOOR_HEIGHT/2
-      }
-    );
-
-    Body.setVertices(
-      floorBody,
-      [
-        {x:0,y:height-FLOOR_HEIGHT},
-        {x:width,y:height-FLOOR_HEIGHT},
-        {x:width,y:height},
-        {x:0,y:height}
-      ]
-    );
-
-  }
-}
-
-
-function refreshCanvasSize(){
-
-  if(
-    gameScreen.classList.contains("hidden")
-  ){
+  if(gameScreen.classList.contains("hidden")){
     return;
   }
 
-  resizeCanvas();
+  const rect=gameScreen.getBoundingClientRect();
+
+  const width=Math.max(1,Math.floor(rect.width));
+  const height=Math.max(1,Math.floor(rect.height));
+
+  canvasWidth=width;
+  canvasHeight=height;
+
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+
+  canvas.width=Math.floor(width*dpr);
+  canvas.height=Math.floor(height*dpr);
+
+  canvas.style.width=width+"px";
+  canvas.style.height=height+"px";
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  rebuildFloor();
+
   render(performance.now());
 }
 
 
-window.addEventListener(
-  "resize",
-  resizeCanvas
-);
+window.addEventListener("resize",resizeCanvas);
 
 
-/* =========================================================
-   エンジン作成
-========================================================= */
+/* =========================
+   床
+   必ず物理床を作り直す
+========================= */
 
-function createEngine(){
+function rebuildFloor(){
 
-  engine =
-    Engine.create({
-      enableSleeping:false
-    });
+  if(!engine){
+    return;
+  }
 
-  engine.gravity.x =
-    0;
+  if(floorBody){
+    World.remove(engine.world,floorBody);
+  }
 
-  engine.gravity.y =
-    1;
-
-  engine.positionIterations =
-    10;
-
-  engine.velocityIterations =
-    8;
-
-  engine.constraintIterations =
-    4;
-
-  floorBody =
-    Bodies.rectangle(
-      canvasWidth/2,
-      canvasHeight-FLOOR_HEIGHT/2,
-      canvasWidth,
-      FLOOR_HEIGHT,
-      {
-        isStatic:true,
-        label:"floor",
-
-        restitution:0,
-
-        friction:1,
-
-        frictionStatic:2,
-
-        density:1
-      }
-    );
+  floorBody=Bodies.rectangle(
+    canvasWidth/2,
+    canvasHeight-FLOOR_HEIGHT/2,
+    canvasWidth+100,
+    FLOOR_HEIGHT,
+    {
+      label:"groundBedrock",
+      isStatic:true,
+      isGroundBedrock:true,
+      restitution:0,
+      friction:1.2,
+      frictionStatic:3,
+      density:1,
+      slop:.01
+    }
+  );
 
   World.add(
     engine.world,
     floorBody
   );
+}
+
+
+/* =========================
+   Engine
+========================= */
+
+function createEngine(){
+
+  engine=Engine.create({
+    enableSleeping:false
+  });
+
+  engine.gravity.x=0;
+  engine.gravity.y=1;
+
+  engine.positionIterations=12;
+  engine.velocityIterations=10;
+  engine.constraintIterations=5;
+
+  rebuildFloor();
 
   installEngineEvents();
 }
 
-
-/* =========================================================
-   エンジン停止
-   ※ゲームループは止めない
-========================================================= */
 
 function stopEngine(){
 
@@ -824,30 +673,18 @@ function stopEngine(){
       true
     );
 
-    engine =
-      null;
+    engine=null;
   }
 
-  floorBody =
-    null;
-
-  objects.length =
-    0;
-
-  selectedBody =
-    null;
-
-  pointerData =
-    null;
-
-  explosions =
-    [];
+  floorBody=null;
+  objects=[];
+  selectedBody=null;
+  pointerData=null;
+  explosions=[];
+  explosionQueue=[];
+  insideMultipliers=new WeakMap();
 }
 
-
-/* =========================================================
-   Bodyを起こす
-========================================================= */
 
 function wakeBody(body){
 
@@ -855,19 +692,15 @@ function wakeBody(body){
     return;
   }
 
-  Body.setSleeping(
-    body,
-    false
-  );
+  Body.setSleeping(body,false);
 
-  body.isSleeping =
-    false;
+  body.isSleeping=false;
 }
 
 
-/* =========================================================
+/* =========================
    オブジェクト作成
-========================================================= */
+========================= */
 
 function createObject(
   type,
@@ -875,160 +708,115 @@ function createObject(
   y,
   w=70,
   h=50,
-  angle=0
+  angle=0,
+  extra={}
 ){
 
   if(!engine){
     return null;
   }
 
-  const options = {
-
+  const options={
     label:type,
-
     restitution:0,
-
     friction:1,
-
     frictionStatic:2,
-
     frictionAir:.025,
-
     density:.001,
-
-    slop:.02
+    slop:.01
   };
 
+  if(type==="multiply"){
+    options.isSensor=true;
+  }
+
   if(type==="bedrock"){
-
-    options.isStatic =
-      true;
-
+    options.isStatic=true;
   }
 
   let body;
 
   if(type==="slime"){
 
-    const radius =
-      Math.max(
-        10,
-        Math.min(w,h)/2
-      );
+    const radius=Math.max(10,Math.min(w,h)/2);
 
-    body =
-      Bodies.circle(
-        x,
-        y,
-        radius,
-        options
-      );
+    body=Bodies.circle(
+      x,
+      y,
+      radius,
+      options
+    );
 
-    body.baseW =
-      radius*2;
-
-    body.baseH =
-      radius*2;
+    body.baseW=radius*2;
+    body.baseH=radius*2;
 
   }else{
 
-    body =
-      Bodies.rectangle(
-        x,
-        y,
-        Math.max(MIN_SIZE,w),
-        Math.max(MIN_SIZE,h),
-        options
-      );
+    body=Bodies.rectangle(
+      x,
+      y,
+      Math.max(MIN_SIZE,w),
+      Math.max(MIN_SIZE,h),
+      options
+    );
 
-    body.baseW =
-      Math.max(MIN_SIZE,w);
-
-    body.baseH =
-      Math.max(MIN_SIZE,h);
+    body.baseW=Math.max(MIN_SIZE,w);
+    body.baseH=Math.max(MIN_SIZE,h);
   }
 
-  Body.setAngle(
-    body,
-    angle
-  );
+  Body.setAngle(body,angle);
 
-  body.gameId =
-    newId();
+  body.gameId=newId();
 
-  body.maxHp =
-    100;
-
-  body.hp =
-    100;
+  body.maxHp=100;
+  body.hp=100;
 
   if(type==="wood"){
-
-    body.maxHp =
-      80;
-
-    body.hp =
-      80;
+    body.maxHp=80;
+    body.hp=80;
   }
 
   if(type==="glass"){
-
-    body.maxHp =
-      40;
-
-    body.hp =
-      40;
+    body.maxHp=40;
+    body.hp=40;
   }
 
   if(type==="stone"){
-
-    body.maxHp =
-      150;
-
-    body.hp =
-      150;
+    body.maxHp=150;
+    body.hp=150;
   }
 
   if(type==="slime"){
-
-    body.maxHp =
-      70;
-
-    body.hp =
-      70;
+    body.maxHp=70;
+    body.hp=70;
   }
 
   if(type==="bomb"){
-
-    body.maxHp =
-      1;
-
-    body.hp =
-      1;
-
-    body.frictionAir =
-      .015;
+    body.maxHp=1;
+    body.hp=1;
+    body.frictionAir=.015;
   }
 
   if(type==="multiply"){
 
-    body.maxHp =
-      Infinity;
+    body.maxHp=Infinity;
+    body.hp=Infinity;
 
-    body.hp =
-      Infinity;
-
-    body.isSensor =
-      true;
+    body.multiplyFactor=Math.max(
+      1,
+      Math.min(
+        20,
+        Math.floor(
+          Number(extra.multiplyFactor)||2
+        )
+      )
+    );
   }
 
   if(type==="bedrock"){
 
-    body.maxHp =
-      Infinity;
-
-    body.hp =
-      Infinity;
+    body.maxHp=Infinity;
+    body.hp=Infinity;
   }
 
   World.add(
@@ -1040,73 +828,44 @@ function createObject(
 
   wakeBody(body);
 
+  Body.setVelocity(
+    body,
+    {
+      x:0,
+      y:0
+    }
+  );
+
+  Body.setAngularVelocity(
+    body,
+    0
+  );
+
   return body;
 }
 
 
-/* =========================================================
-   データ化
-========================================================= */
+/* =========================
+   データ
+========================= */
 
 function bodyToData(body){
 
   return {
-
-    id:
-      body.gameId,
-
-    type:
-      body.label,
-
-    x:
-      body.position.x,
-
-    y:
-      body.position.y,
-
-    w:
-      body.baseW,
-
-    h:
-      body.baseH,
-
-    angle:
-      body.angle
+    id:body.gameId,
+    type:body.label,
+    x:body.position.x,
+    y:body.position.y,
+    w:body.baseW,
+    h:body.baseH,
+    angle:body.angle,
+    multiplyFactor:
+      body.label==="multiply"
+      ? body.multiplyFactor
+      : undefined
   };
 }
 
-
-/* =========================================================
-   全消去
-========================================================= */
-
-function clearObjects(){
-
-  if(!engine){
-    return;
-  }
-
-  for(
-    const body of [...objects]
-  ){
-
-    World.remove(
-      engine.world,
-      body
-    );
-  }
-
-  objects.length =
-    0;
-
-  selectedBody =
-    null;
-}
-
-
-/* =========================================================
-   データ読み込み
-========================================================= */
 
 function loadData(data){
 
@@ -1116,69 +875,43 @@ function loadData(data){
     return;
   }
 
-  for(
-    const item of data
-  ){
+  for(const item of data){
 
-    const body =
-      createObject(
-        item.type,
-        Number(item.x)||canvasWidth/2,
-        Number(item.y)||100,
-        Number(item.w)||70,
-        Number(item.h)||50,
-        Number(item.angle)||0
-      );
+    const body=createObject(
+      item.type,
+      Number(item.x)||canvasWidth/2,
+      Number(item.y)||100,
+      Number(item.w)||70,
+      Number(item.h)||50,
+      Number(item.angle)||0,
+      {
+        multiplyFactor:
+          Number(item.multiplyFactor)||2
+      }
+    );
 
-    if(
-      body &&
-      item.id
-    ){
-      body.gameId =
-        item.id;
+    if(body && item.id){
+      body.gameId=item.id;
     }
   }
 }
 
 
-/* =========================================================
-   ゲーム画面開始
-========================================================= */
+/* =========================
+   ゲーム開始
+========================= */
 
-function openGame(
-  newMode,
-  data=[]
-){
+function openGame(newMode,data=[]){
 
-  titleScreen.classList.add(
-    "hidden"
-  );
+  titleScreen.classList.add("hidden");
+  stageSelectScreen.classList.add("hidden");
 
-  stageSelectScreen.classList.add(
-    "hidden"
-  );
+  gameScreen.classList.remove("hidden");
 
-  gameScreen.classList.remove(
-    "hidden"
-  );
+  editorBar.classList.add("hidden");
+  playBar.classList.add("hidden");
 
-  editorBar.classList.add(
-    "hidden"
-  );
-
-  playBar.classList.add(
-    "hidden"
-  );
-
-  mode =
-    newMode;
-
-  /*
-    ここが重要。
-    hidden状態のcanvasを測らない。
-  */
-
-  resizeCanvas();
+  mode=newMode;
 
   stopEngine();
 
@@ -1192,226 +925,155 @@ function openGame(
 
   if(mode==="editor"){
 
-    editorBar.classList.remove(
-      "hidden"
-    );
+    editorBar.classList.remove("hidden");
 
-    hint.textContent =
-      "ブロックをタップして選択。ドラッグで移動、四隅でサイズ変更、上の丸で回転。";
+    hint.textContent=
+      "配置ボタンを選んで何個でも配置できます。選択したブロックは移動・回転・サイズ変更できます。";
 
   }else{
 
-    playBar.classList.remove(
-      "hidden"
-    );
+    playBar.classList.remove("hidden");
 
-    hint.textContent =
-      "画面をタップすると爆弾を無制限に置けます。";
-
+    hint.textContent=
+      "画面をタップして爆弾を置き、「全爆破」で爆発します。";
   }
 
   render(performance.now());
 }
 
 
-/* =========================================================
-   タイトルへ
-========================================================= */
-
 function backToTitle(){
 
-  stageNameBox.classList.add(
-    "hidden"
-  );
+  stageNameBox.classList.add("hidden");
 
   stopEngine();
 
-  mode =
-    null;
+  mode=null;
 
-  gameScreen.classList.add(
-    "hidden"
-  );
-
-  stageSelectScreen.classList.add(
-    "hidden"
-  );
-
-  titleScreen.classList.remove(
-    "hidden"
-  );
+  gameScreen.classList.add("hidden");
+  stageSelectScreen.classList.add("hidden");
+  titleScreen.classList.remove("hidden");
 }
 
 
-/* =========================================================
-   ボタン
-========================================================= */
+/* =========================
+   メニュー
+========================= */
 
-document
-  .getElementById("makeStageBtn")
-  .addEventListener(
-    "click",
-    ()=>{
-      openGame(
-        "editor",
-        []
-      );
-    }
-  );
+document.getElementById("makeStageBtn").addEventListener(
+  "click",
+  ()=>{
+    openGame("editor",[]);
+  }
+);
 
 
-document
-  .getElementById("playStageBtn")
-  .addEventListener(
-    "click",
-    showStageList
-  );
+document.getElementById("playStageBtn").addEventListener(
+  "click",
+  showStageList
+);
 
 
-document
-  .getElementById("backEditorBtn")
-  .addEventListener(
-    "click",
-    backToTitle
-  );
+document.getElementById("backFromSelectBtn").addEventListener(
+  "click",
+  ()=>{
+    stageSelectScreen.classList.add("hidden");
+    titleScreen.classList.remove("hidden");
+  }
+);
 
 
-document
-  .getElementById("backPlayBtn")
-  .addEventListener(
-    "click",
-    backToTitle
-  );
+document.getElementById("backEditorBtn").addEventListener(
+  "click",
+  backToTitle
+);
 
 
-document
-  .getElementById("backFromSelectBtn")
-  .addEventListener(
-    "click",
-    ()=>{
-      stageSelectScreen.classList.add(
-        "hidden"
-      );
-
-      titleScreen.classList.remove(
-        "hidden"
-      );
-    }
-  );
+document.getElementById("backPlayBtn").addEventListener(
+  "click",
+  backToTitle
+);
 
 
-/* =========================================================
+/* =========================
    ツール
-========================================================= */
+========================= */
 
-document
-  .querySelectorAll("[data-tool]")
-  .forEach(
-    button=>{
+document.querySelectorAll("[data-tool]").forEach(
+  button=>{
 
-      button.addEventListener(
-        "click",
-        event=>{
+    button.addEventListener(
+      "click",
+      event=>{
 
-          event.stopPropagation();
+        event.stopPropagation();
 
-          currentTool =
-            button.dataset.tool;
+        currentTool=button.dataset.tool;
 
-          document
-            .querySelectorAll("[data-tool]")
-            .forEach(
-              b=>{
-                b.classList.remove(
-                  "active"
-                );
-              }
-            );
+        document.querySelectorAll("[data-tool]").forEach(
+          b=>b.classList.remove("active")
+        );
 
-          button.classList.add(
-            "active"
-          );
+        button.classList.add("active");
 
-          if(
-            currentTool==="bomb"
-          ){
+        if(currentTool==="multiply"){
 
-            hint.textContent =
-              "画面をタップすると爆弾を置けます。";
+          hint.textContent=
+            "倍率を入力してから画面をタップ。×1～×20まで指定できます。";
 
-          }else{
+        }else{
 
-            hint.textContent =
-              "画面をタップすると配置できます。";
-          }
+          hint.textContent=
+            "画面をタップすると「"+
+            button.textContent+
+            "」を配置します。続けて何個でも置けます。";
         }
-      );
-    }
-  );
+      }
+    );
+  }
+);
 
 
-/* =========================================================
-   キャンバス座標
-========================================================= */
+/* =========================
+   Canvas座標
+========================= */
 
 function getCanvasPoint(event){
 
-  const rect =
-    canvas.getBoundingClientRect();
+  const rect=canvas.getBoundingClientRect();
 
   return {
-
-    x:
-      event.clientX-
-      rect.left,
-
-    y:
-      event.clientY-
-      rect.top
+    x:event.clientX-rect.left,
+    y:event.clientY-rect.top
   };
 }
 
 
-/* =========================================================
-   Body内判定
-========================================================= */
+/* =========================
+   Body判定
+========================= */
 
-function pointInBody(
-  point,
-  body
-){
+function pointInBody(point,body){
 
-  const vertices =
-    body.vertices;
+  const vertices=body.vertices;
 
-  let inside =
-    false;
+  let inside=false;
 
   for(
-    let i=0,
-    j=vertices.length-1;
+    let i=0,j=vertices.length-1;
     i<vertices.length;
     j=i++
   ){
 
-    const xi =
-      vertices[i].x;
+    const xi=vertices[i].x;
+    const yi=vertices[i].y;
+    const xj=vertices[j].x;
+    const yj=vertices[j].y;
 
-    const yi =
-      vertices[i].y;
-
-    const xj =
-      vertices[j].x;
-
-    const yj =
-      vertices[j].y;
-
-    const intersect =
+    const intersect=
+      ((yi>point.y)!==(yj>point.y)) &&
       (
-        (yi>point.y)!==(yj>point.y)
-      ) &&
-      (
-        point.x <
+        point.x<
         (xj-xi)*
         (point.y-yi)/
         (yj-yi)+
@@ -1419,8 +1081,7 @@ function pointInBody(
       );
 
     if(intersect){
-      inside =
-        !inside;
+      inside=!inside;
     }
   }
 
@@ -1428,112 +1089,65 @@ function pointInBody(
 }
 
 
-/* =========================================================
-   回転座標へ変換
-========================================================= */
+function localPoint(point,body){
 
-function localPoint(
-  point,
-  body
-){
+  const dx=point.x-body.position.x;
+  const dy=point.y-body.position.y;
 
-  const dx =
-    point.x-
-    body.position.x;
-
-  const dy =
-    point.y-
-    body.position.y;
-
-  const c =
-    Math.cos(-body.angle);
-
-  const s =
-    Math.sin(-body.angle);
+  const c=Math.cos(-body.angle);
+  const s=Math.sin(-body.angle);
 
   return {
-
-    x:
-      dx*c-
-      dy*s,
-
-    y:
-      dx*s+
-      dy*c
+    x:dx*c-dy*s,
+    y:dx*s+dy*c
   };
 }
 
 
-/* =========================================================
-   ハンドル判定
-========================================================= */
+/* =========================
+   ハンドル
+========================= */
 
-function getHandleAt(
-  point,
-  body
-){
+function getHandleAt(point,body){
 
-  const local =
-    localPoint(
-      point,
-      body
-    );
+  if(
+    body.label==="bedrock" ||
+    body.label==="multiply"
+  ){
+    return null;
+  }
 
-  const w =
-    body.baseW;
+  const local=localPoint(point,body);
 
-  const h =
-    body.baseH;
+  const w=body.baseW;
+  const h=body.baseH;
 
-  const handles = [
-
-    {
-      name:"nw",
-      x:-w/2,
-      y:-h/2
-    },
-
-    {
-      name:"ne",
-      x:w/2,
-      y:-h/2
-    },
-
-    {
-      name:"sw",
-      x:-w/2,
-      y:h/2
-    },
-
-    {
-      name:"se",
-      x:w/2,
-      y:h/2
-    }
+  const handles=[
+    {name:"nw",x:-w/2,y:-h/2},
+    {name:"ne",x:w/2,y:-h/2},
+    {name:"sw",x:-w/2,y:h/2},
+    {name:"se",x:w/2,y:h/2}
   ];
 
-  for(
-    const handle of handles
-  ){
+  for(const handle of handles){
 
     if(
       Math.hypot(
         local.x-handle.x,
         local.y-handle.y
-      )<20
+      )<21
     ){
       return handle.name;
     }
   }
 
-  const rotateY =
-    -h/2-52;
+  const rotateY=-h/2-52;
 
   if(
     Math.hypot(
       local.x,
       local.y-rotateY
-    )<22
+    )<23
   ){
     return "rotate";
   }
@@ -1542,33 +1156,12 @@ function getHandleAt(
 }
 
 
-/* =========================================================
-   選択
-========================================================= */
-
-function selectBody(body){
-
-  selectedBody =
-    body || null;
-
-  if(body){
-
-    hint.textContent =
-      "ドラッグで移動。四隅でサイズ変更。上の丸で回転。";
-  }
-}
-
-
-/* =========================================================
+/* =========================
    サイズ変更
-   対角固定なし
    中心固定
-========================================================= */
+========================= */
 
-function resizeBodyFromCenter(
-  body,
-  point
-){
+function resizeBodyFromCenter(body,point){
 
   if(
     body.label==="bedrock" ||
@@ -1577,35 +1170,27 @@ function resizeBodyFromCenter(
     return;
   }
 
-  const local =
-    localPoint(
-      point,
-      body
-    );
+  const local=localPoint(point,body);
 
-  const width =
-    Math.max(
-      MIN_SIZE,
-      Math.abs(local.x)*2
-    );
+  const width=Math.max(
+    MIN_SIZE,
+    Math.abs(local.x)*2
+  );
 
-  const height =
-    Math.max(
-      MIN_SIZE,
-      Math.abs(local.y)*2
-    );
+  const height=Math.max(
+    MIN_SIZE,
+    Math.abs(local.y)*2
+  );
 
-  const oldW =
-    Math.max(
-      MIN_SIZE,
-      body.baseW
-    );
+  const oldW=Math.max(
+    MIN_SIZE,
+    body.baseW
+  );
 
-  const oldH =
-    Math.max(
-      MIN_SIZE,
-      body.baseH
-    );
+  const oldH=Math.max(
+    MIN_SIZE,
+    body.baseH
+  );
 
   Body.scale(
     body,
@@ -1613,13 +1198,8 @@ function resizeBodyFromCenter(
     height/oldH
   );
 
-  body.baseW =
-    width;
-
-  body.baseH =
-    height;
-
-  wakeBody(body);
+  body.baseW=width;
+  body.baseH=height;
 
   Body.setVelocity(
     body,
@@ -1633,42 +1213,27 @@ function resizeBodyFromCenter(
     body,
     0
   );
+
+  wakeBody(body);
 }
 
 
-/* =========================================================
+/* =========================
    回転
-========================================================= */
+========================= */
 
-function rotateBody(
-  body,
-  point
-){
+function rotateBody(body,point){
 
-  if(
-    body.label==="bedrock"
-  ){
+  if(body.label==="bedrock"){
     return;
   }
 
-  const dx =
-    point.x-
-    body.position.x;
-
-  const dy =
-    point.y-
-    body.position.y;
-
-  const angle =
-    Math.atan2(
-      dy,
-      dx
-    )+
-    Math.PI/2;
+  const dx=point.x-body.position.x;
+  const dy=point.y-body.position.y;
 
   Body.setAngle(
     body,
-    angle
+    Math.atan2(dy,dx)+Math.PI/2
   );
 
   Body.setVelocity(
@@ -1688,10 +1253,9 @@ function rotateBody(
 }
 
 
-/* =========================================================
+/* =========================
    Pointer Down
-   すべてここで処理
-========================================================= */
+========================= */
 
 canvas.addEventListener(
   "pointerdown",
@@ -1701,26 +1265,22 @@ canvas.addEventListener(
       return;
     }
 
-    const point =
-      getCanvasPoint(event);
+    const point=getCanvasPoint(event);
 
-    /*
-      プレイモード
-    */
+    /* プレイ中 */
 
     if(mode==="play"){
 
-      const bomb =
-        createObject(
-          "bomb",
-          point.x,
-          Math.max(
-            5,
-            point.y
-          ),
-          34,
-          34
-        );
+      const bomb=createObject(
+        "bomb",
+        point.x,
+        Math.max(
+          5,
+          point.y
+        ),
+        34,
+        34
+      );
 
       if(bomb){
 
@@ -1738,50 +1298,64 @@ canvas.addEventListener(
       return;
     }
 
-    /*
-      エディターでツール配置
-    */
 
-    if(
-      mode==="editor" &&
-      currentTool
-    ){
+    /* エディター */
 
-      const type =
-        currentTool;
+    if(mode!=="editor"){
+      return;
+    }
 
-      const body =
-        createObject(
-          type,
-          point.x,
-          point.y,
-          type==="slime" ? 54 : 70,
-          type==="slime" ? 54 : 50
+
+    /* ツールが選択されている場合は必ず配置 */
+
+    if(currentTool){
+
+      let w=70;
+      let h=50;
+
+      if(currentTool==="slime"){
+        w=54;
+        h=54;
+      }
+
+      if(currentTool==="bomb"){
+        w=34;
+        h=34;
+      }
+
+      const factor=
+        Math.max(
+          1,
+          Math.min(
+            20,
+            Math.floor(
+              Number(
+                multiplyFactorInput.value
+              )||2
+            )
+          )
         );
+
+      const body=createObject(
+        currentTool,
+        point.x,
+        point.y,
+        w,
+        h,
+        0,
+        {
+          multiplyFactor:factor
+        }
+      );
 
       if(body){
 
-        selectedBody =
-          body;
-
-        currentTool =
-          null;
-
-        document
-          .querySelectorAll("[data-tool]")
-          .forEach(
-            b=>{
-              b.classList.remove(
-                "active"
-              );
-            }
-          );
-
-        hint.textContent =
-          "配置しました。ドラッグで移動できます。";
+        selectedBody=body;
 
         /*
-          配置した直後に跳ねさせない
+          重要:
+          ツールを解除しない。
+          これで2個目以降も置ける。
         */
 
         Body.setVelocity(
@@ -1803,132 +1377,92 @@ canvas.addEventListener(
       return;
     }
 
-    /*
-      エディター選択
-    */
 
-    if(mode==="editor"){
+    /* 選択中のハンドル */
 
-      /*
-        まず選択中のハンドル
-      */
+    if(selectedBody){
 
-      if(selectedBody){
+      const handle=getHandleAt(
+        point,
+        selectedBody
+      );
 
-        const handle =
-          getHandleAt(
-            point,
-            selectedBody
-          );
+      if(handle){
 
-        if(handle){
+        pointerData={
+          type:
+            handle==="rotate"
+            ? "rotate"
+            : "resize",
 
-          pointerData = {
+          corner:handle,
 
-            type:
-              handle==="rotate"
-              ? "rotate"
-              : "resize",
+          startX:point.x,
+          startY:point.y,
 
-            corner:
-              handle,
-
-            startX:
-              point.x,
-
-            startY:
-              point.y,
-
-            originalW:
-              selectedBody.baseW,
-
-            originalH:
-              selectedBody.baseH,
-
-            originalAngle:
-              selectedBody.angle
-          };
-
-          wakeBody(
-            selectedBody
-          );
-
-          return;
-        }
-      }
-
-      /*
-        通常の物体選択
-      */
-
-      let found =
-        null;
-
-      for(
-        let i=objects.length-1;
-        i>=0;
-        i--
-      ){
-
-        const body =
-          objects[i];
-
-        if(
-          pointInBody(
-            point,
-            body
-          )
-        ){
-
-          found =
-            body;
-
-          break;
-        }
-      }
-
-      if(found){
-
-        selectedBody =
-          found;
-
-        pointerData = {
-
-          type:"move",
-
-          startX:
-            point.x,
-
-          startY:
-            point.y,
-
-          bodyX:
-            found.position.x,
-
-          bodyY:
-            found.position.y
+          originalW:selectedBody.baseW,
+          originalH:selectedBody.baseH,
+          originalAngle:selectedBody.angle
         };
 
-        wakeBody(
-          found
-        );
+        wakeBody(selectedBody);
 
-      }else{
-
-        selectedBody =
-          null;
-
-        pointerData =
-          null;
+        return;
       }
+    }
+
+
+    /* 通常選択 */
+
+    let found=null;
+
+    for(
+      let i=objects.length-1;
+      i>=0;
+      i--
+    ){
+
+      const body=objects[i];
+
+      if(
+        pointInBody(
+          point,
+          body
+        )
+      ){
+
+        found=body;
+        break;
+      }
+    }
+
+    selectedBody=found;
+
+    if(found){
+
+      pointerData={
+        type:"move",
+
+        startX:point.x,
+        startY:point.y,
+
+        bodyX:found.position.x,
+        bodyY:found.position.y
+      };
+
+      wakeBody(found);
+
+    }else{
+
+      pointerData=null;
     }
   }
 );
 
 
-/* =========================================================
+/* =========================
    Pointer Move
-========================================================= */
+========================= */
 
 canvas.addEventListener(
   "pointermove",
@@ -1942,38 +1476,19 @@ canvas.addEventListener(
       return;
     }
 
-    const point =
-      getCanvasPoint(event);
+    const point=getCanvasPoint(event);
+    const body=selectedBody;
 
-    const body =
-      selectedBody;
+    if(pointerData.type==="move"){
 
-    /*
-      移動
-    */
-
-    if(
-      pointerData.type==="move"
-    ){
-
-      const dx =
-        point.x-
-        pointerData.startX;
-
-      const dy =
-        point.y-
-        pointerData.startY;
+      const dx=point.x-pointerData.startX;
+      const dy=point.y-pointerData.startY;
 
       Body.setPosition(
         body,
         {
-          x:
-            pointerData.bodyX+
-            dx,
-
-          y:
-            pointerData.bodyY+
-            dy
+          x:pointerData.bodyX+dx,
+          y:pointerData.bodyY+dy
         }
       );
 
@@ -1995,13 +1510,7 @@ canvas.addEventListener(
       return;
     }
 
-    /*
-      サイズ
-    */
-
-    if(
-      pointerData.type==="resize"
-    ){
+    if(pointerData.type==="resize"){
 
       resizeBodyFromCenter(
         body,
@@ -2011,13 +1520,7 @@ canvas.addEventListener(
       return;
     }
 
-    /*
-      回転
-    */
-
-    if(
-      pointerData.type==="rotate"
-    ){
+    if(pointerData.type==="rotate"){
 
       rotateBody(
         body,
@@ -2028,319 +1531,170 @@ canvas.addEventListener(
 );
 
 
-/* =========================================================
-   Pointer Up
-========================================================= */
-
 canvas.addEventListener(
   "pointerup",
   ()=>{
     if(selectedBody){
-      wakeBody(
-        selectedBody
-      );
+      wakeBody(selectedBody);
     }
 
-    pointerData =
-      null;
+    pointerData=null;
   }
 );
+
 
 canvas.addEventListener(
   "pointercancel",
   ()=>{
-    pointerData =
-      null;
+    pointerData=null;
   }
 );
 
 
-/* =========================================================
-   選択表示
-========================================================= */
+/* =========================
+   削除
+========================= */
 
-function drawSelection(){
+document.getElementById("deleteSelectedBtn").addEventListener(
+  "click",
+  event=>{
 
-  if(
-    !selectedBody ||
-    mode!=="editor"
-  ){
+    event.stopPropagation();
+
+    if(
+      !selectedBody ||
+      !engine
+    ){
+      return;
+    }
+
+    if(
+      selectedBody.isGroundBedrock
+    ){
+      return;
+    }
+
+    World.remove(
+      engine.world,
+      selectedBody
+    );
+
+    const index=objects.indexOf(selectedBody);
+
+    if(index>=0){
+      objects.splice(index,1);
+    }
+
+    selectedBody=null;
+    pointerData=null;
+  }
+);
+
+
+/* =========================
+   全消去
+   地面は対象外
+========================= */
+
+document.getElementById("clearStageBtn").addEventListener(
+  "click",
+  event=>{
+
+    event.stopPropagation();
+
+    clearObjects();
+  }
+);
+
+
+function clearObjects(){
+
+  if(!engine){
     return;
   }
 
-  const body =
-    selectedBody;
+  for(const body of [...objects]){
 
-  const w =
-    body.baseW;
+    if(body.isGroundBedrock){
+      continue;
+    }
 
-  const h =
-    body.baseH;
-
-  ctx.save();
-
-  ctx.translate(
-    body.position.x,
-    body.position.y
-  );
-
-  ctx.rotate(
-    body.angle
-  );
-
-  ctx.strokeStyle =
-    "#ed7920";
-
-  ctx.lineWidth =
-    2;
-
-  ctx.setLineDash(
-    [6,4]
-  );
-
-  ctx.strokeRect(
-    -w/2,
-    -h/2,
-    w,
-    h
-  );
-
-  ctx.setLineDash([]);
-
-  const handles = [
-
-    [-w/2,-h/2],
-
-    [w/2,-h/2],
-
-    [-w/2,h/2],
-
-    [w/2,h/2]
-  ];
-
-  for(
-    const p of handles
-  ){
-
-    ctx.beginPath();
-
-    ctx.arc(
-      p[0],
-      p[1],
-      7,
-      0,
-      Math.PI*2
+    World.remove(
+      engine.world,
+      body
     );
-
-    ctx.fillStyle =
-      "#fff";
-
-    ctx.fill();
-
-    ctx.strokeStyle =
-      "#ed7920";
-
-    ctx.lineWidth =
-      3;
-
-    ctx.stroke();
   }
 
-  /*
-    回転用の縦線
-  */
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    0,
-    -h/2
+  objects=objects.filter(
+    body=>body.isGroundBedrock
   );
 
-  ctx.lineTo(
-    0,
-    -h/2-45
-  );
-
-  ctx.strokeStyle =
-    "#ed7920";
-
-  ctx.lineWidth =
-    2;
-
-  ctx.stroke();
-
-  /*
-    回転ハンドル
-  */
-
-  ctx.beginPath();
-
-  ctx.arc(
-    0,
-    -h/2-52,
-    8,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fillStyle =
-    "#fff";
-
-  ctx.fill();
-
-  ctx.strokeStyle =
-    "#ed7920";
-
-  ctx.lineWidth =
-    3;
-
-  ctx.stroke();
-
-  ctx.restore();
+  selectedBody=null;
+  pointerData=null;
 }
 
 
-/* =========================================================
-   削除
-========================================================= */
-
-document
-  .getElementById("deleteSelectedBtn")
-  .addEventListener(
-    "click",
-    event=>{
-
-      event.stopPropagation();
-
-      if(
-        !selectedBody ||
-        !engine
-      ){
-        return;
-      }
-
-      World.remove(
-        engine.world,
-        selectedBody
-      );
-
-      const index =
-        objects.indexOf(
-          selectedBody
-        );
-
-      if(index>=0){
-
-        objects.splice(
-          index,
-          1
-        );
-      }
-
-      selectedBody =
-        null;
-
-      pointerData =
-        null;
-    }
-  );
-
-
-/* =========================================================
-   全消去
-========================================================= */
-
-document
-  .getElementById("clearStageBtn")
-  .addEventListener(
-    "click",
-    event=>{
-
-      event.stopPropagation();
-
-      clearObjects();
-    }
-  );
-
-
-/* =========================================================
+/* =========================
    保存
-========================================================= */
+========================= */
 
-document
-  .getElementById("saveStageBtn")
-  .addEventListener(
-    "click",
-    event=>{
+document.getElementById("saveStageBtn").addEventListener(
+  "click",
+  event=>{
 
-      event.stopPropagation();
+    event.stopPropagation();
 
-      stageNameBox.classList.remove(
-        "hidden"
-      );
+    stageNameBox.classList.remove("hidden");
 
-      stageNameInput.value =
-        "";
+    stageNameInput.value="";
 
-      setTimeout(
-        ()=>{
-          stageNameInput.focus();
-        },
-        50
-      );
-    }
-  );
+    setTimeout(
+      ()=>{
+        stageNameInput.focus();
+      },
+      50
+    );
+  }
+);
 
 
-document
-  .getElementById("cancelSaveBtn")
-  .addEventListener(
-    "click",
-    ()=>{
-      stageNameBox.classList.add(
-        "hidden"
-      );
-    }
-  );
+document.getElementById("cancelSaveBtn").addEventListener(
+  "click",
+  ()=>{
+    stageNameBox.classList.add("hidden");
+  }
+);
 
 
-document
-  .getElementById("confirmSaveBtn")
-  .addEventListener(
-    "click",
-    saveStage
-  );
+document.getElementById("confirmSaveBtn").addEventListener(
+  "click",
+  saveStage
+);
 
 
 function saveStage(){
 
-  let name =
-    stageNameInput.value.trim();
+  let name=stageNameInput.value.trim();
 
   if(!name){
-    name =
-      "無題のステージ";
+    name="無題のステージ";
   }
 
-  const stages =
-    loadStages();
+  const stages=loadStages();
 
   stages.push({
 
-    id:
-      newId(),
+    id:newId(),
 
-    name:
-      name,
+    name:name,
 
-    objects:
-      objects.map(
-        bodyToData
-      ),
+    objects:objects
+      .filter(
+        body=>!body.isGroundBedrock
+      )
+      .map(bodyToData),
 
-    createdAt:
-      Date.now()
+    createdAt:Date.now()
   });
 
   localStorage.setItem(
@@ -2348,105 +1702,68 @@ function saveStage(){
     JSON.stringify(stages)
   );
 
-  stageNameBox.classList.add(
-    "hidden"
-  );
+  stageNameBox.classList.add("hidden");
 
-  hint.textContent =
-    "ステージを保存しました。";
+  hint.textContent="ステージを保存しました。";
 }
 
 
-/* =========================================================
-   保存データ読み込み
-========================================================= */
+/* =========================
+   ステージ
+========================= */
 
 function loadStages(){
 
   try{
 
-    const data =
-      JSON.parse(
-        localStorage.getItem(
-          SAVE_KEY
-        ) || "[]"
-      );
+    const data=JSON.parse(
+      localStorage.getItem(SAVE_KEY)||"[]"
+    );
 
-    if(
-      Array.isArray(data)
-    ){
+    if(Array.isArray(data)){
       return data;
     }
 
-  }catch(error){}
+  }catch(e){}
 
   return [];
 }
 
 
-/* =========================================================
-   ステージ一覧
-========================================================= */
-
 function showStageList(){
 
-  const list =
-    document.getElementById(
-      "stageList"
-    );
+  const list=document.getElementById("stageList");
 
-  list.innerHTML =
-    "";
+  list.innerHTML="";
 
-  const stages =
-    loadStages();
+  const stages=loadStages();
 
   if(stages.length===0){
 
-    const empty =
-      document.createElement(
-        "p"
-      );
+    const empty=document.createElement("p");
 
-    empty.textContent =
+    empty.textContent=
       "保存されたステージはありません。";
 
-    list.appendChild(
-      empty
-    );
+    list.appendChild(empty);
 
   }else{
 
-    for(
-      const stage of stages
-    ){
+    for(const stage of stages){
 
-      const item =
-        document.createElement(
-          "div"
-        );
+      const item=document.createElement("div");
 
-      item.className =
-        "stage-item";
+      item.className="stage-item";
 
-      const title =
-        document.createElement(
-          "strong"
-        );
+      const title=document.createElement("strong");
 
-      title.textContent =
-        stage.name;
+      title.textContent=stage.name;
 
-      const play =
-        document.createElement(
-          "button"
-        );
+      const play=document.createElement("button");
 
-      play.className =
-        "primary-btn";
+      play.className="primary-btn";
 
-      play.textContent =
-        "遊ぶ";
+      play.textContent="遊ぶ";
 
       play.addEventListener(
         "click",
@@ -2460,67 +1777,42 @@ function showStageList(){
         }
       );
 
-      item.appendChild(
-        title
-      );
+      item.appendChild(title);
+      item.appendChild(play);
 
-      item.appendChild(
-        play
-      );
-
-      list.appendChild(
-        item
-      );
+      list.appendChild(item);
     }
   }
 
-  titleScreen.classList.add(
-    "hidden"
-  );
-
-  stageSelectScreen.classList.remove(
-    "hidden"
-  );
+  titleScreen.classList.add("hidden");
+  stageSelectScreen.classList.remove("hidden");
 }
 
 
-/* =========================================================
+/* =========================
    爆発
-========================================================= */
+========================= */
 
-function createExplosion(
-  x,
-  y
-){
+function createExplosion(x,y){
 
   explosions.push({
 
-    x:
-      x,
+    x:x,
+    y:y,
 
-    y:
-      y,
+    start:performance.now(),
 
-    start:
-      performance.now(),
-
-    duration:
-      550
+    duration:550
   });
 
   if(!engine){
     return;
   }
 
-  const radius =
-    230;
+  const radius=250;
+  const power=.055;
 
-  const power =
-    .045;
-
-  for(
-    const body of [...objects]
-  ){
+  for(const body of [...objects]){
 
     if(
       body.label==="bedrock" ||
@@ -2529,19 +1821,10 @@ function createExplosion(
       continue;
     }
 
-    const dx =
-      body.position.x-
-      x;
+    const dx=body.position.x-x;
+    const dy=body.position.y-y;
 
-    const dy =
-      body.position.y-
-      y;
-
-    const distance =
-      Math.hypot(
-        dx,
-        dy
-      );
+    const distance=Math.hypot(dx,dy);
 
     if(
       distance>radius ||
@@ -2550,24 +1833,16 @@ function createExplosion(
       continue;
     }
 
-    const force =
+    const force=
       power*
-      (
-        1-
-        distance/radius
-      );
+      (1-distance/radius);
 
     Body.applyForce(
       body,
       body.position,
       {
-        x:
-          dx/distance*
-          force,
-
-        y:
-          dy/distance*
-          force
+        x:dx/distance*force,
+        y:dy/distance*force
       }
     );
 
@@ -2576,75 +1851,53 @@ function createExplosion(
 }
 
 
-/* =========================================================
-   爆弾爆発
-========================================================= */
+/* =========================
+   爆弾
+========================= */
 
-function explodeBomb(
-  bomb
-){
+function explodeBomb(bomb){
 
   if(
     !bomb ||
-    !engine
+    !engine ||
+    bomb._exploded
   ){
     return;
   }
 
-  const x =
-    bomb.position.x;
+  bomb._exploded=true;
 
-  const y =
-    bomb.position.y;
+  const x=bomb.position.x;
+  const y=bomb.position.y;
 
   World.remove(
     engine.world,
     bomb
   );
 
-  const index =
-    objects.indexOf(
-      bomb
-    );
+  const index=objects.indexOf(bomb);
 
   if(index>=0){
-
-    objects.splice(
-      index,
-      1
-    );
+    objects.splice(index,1);
   }
 
-  createExplosion(
-    x,
-    y
-  );
+  createExplosion(x,y);
 
   if(mode==="play"){
-
-    damageObjects(
-      x,
-      y
-    );
+    damageObjects(x,y);
   }
 }
 
 
-/* =========================================================
+/* =========================
    ダメージ
-========================================================= */
+========================= */
 
-function damageObjects(
-  x,
-  y
-){
+function damageObjects(x,y){
 
-  const radius =
-    190;
+  const radius=200;
 
-  for(
-    const body of [...objects]
-  ){
+  for(const body of [...objects]){
 
     if(
       body.label==="bomb" ||
@@ -2654,57 +1907,34 @@ function damageObjects(
       continue;
     }
 
-    const dx =
-      body.position.x-
-      x;
+    const dx=body.position.x-x;
+    const dy=body.position.y-y;
 
-    const dy =
-      body.position.y-
-      y;
+    const distance=Math.hypot(dx,dy);
 
-    const distance =
-      Math.hypot(
-        dx,
-        dy
-      );
-
-    if(
-      distance>radius
-    ){
+    if(distance>radius){
       continue;
     }
 
-    const damage =
-      100*
-      (
-        1-
-        distance/radius
-      );
+    const damage=
+      110*
+      (1-distance/radius);
 
-    body.hp -=
-      damage;
+    body.hp-=damage;
 
-    if(
-      body.hp<=0
-    ){
-
-      destroyBody(
-        body
-      );
+    if(body.hp<=0){
+      destroyBody(body);
     }
   }
 }
 
 
-/* =========================================================
-   破壊
-========================================================= */
+function destroyBody(body){
 
-function destroyBody(
-  body
-){
-
-  if(!engine){
+  if(
+    !engine ||
+    body.isGroundBedrock
+  ){
     return;
   }
 
@@ -2713,85 +1943,96 @@ function destroyBody(
     body
   );
 
-  const index =
-    objects.indexOf(
-      body
-    );
+  const index=objects.indexOf(body);
 
   if(index>=0){
-
-    objects.splice(
-      index,
-      1
-    );
+    objects.splice(index,1);
   }
 
-  if(
-    selectedBody===body
-  ){
-
-    selectedBody =
-      null;
+  if(selectedBody===body){
+    selectedBody=null;
   }
 }
 
 
-/* =========================================================
-   増殖管理
-========================================================= */
+/* =========================
+   増殖
+========================= */
 
-const multipliedBombs =
-  new WeakSet();
+function getInsideSet(bomb){
+
+  let set=insideMultipliers.get(bomb);
+
+  if(!set){
+
+    set=new Set();
+
+    insideMultipliers.set(
+      bomb,
+      set
+    );
+  }
+
+  return set;
+}
 
 
-function multiplyBomb(
-  multiplier,
-  bomb
-){
+function multiplyBomb(multiplier,bomb){
 
   if(
     !multiplier ||
-    !bomb
+    !bomb ||
+    bomb.label!=="bomb" ||
+    bomb._exploded
   ){
     return;
   }
 
-  if(
-    bomb.label!=="bomb"
-  ){
+  const set=getInsideSet(bomb);
+
+  /*
+    まだこの増殖ブロックに入っている間は
+    二度目を発生させない。
+  */
+
+  if(set.has(multiplier.gameId)){
     return;
   }
 
-  if(
-    multipliedBombs.has(
-      bomb
+  set.add(
+    multiplier.gameId
+  );
+
+  const factor=Math.max(
+    1,
+    Math.min(
+      20,
+      Math.floor(
+        Number(multiplier.multiplyFactor)||2
+      )
     )
-  ){
-    return;
-  }
-
-  multipliedBombs.add(
-    bomb
   );
 
   /*
-    増殖ブロックはセンサーなので
-    爆弾を止めない。
-
-    複製した爆弾は必ず
-    増殖ブロックの下に出す。
+    元の爆弾と完全に同じ場所。
   */
 
-  const x =
-    multiplier.position.x;
+  const x=bomb.position.x;
+  const y=bomb.position.y;
 
-  const y =
-    multiplier.position.y+
-    multiplier.baseH/2+
-    38;
+  /*
+    「×2」なら追加で1個。
+    「×3」なら追加で2個。
+  */
 
-  const newBomb =
-    createObject(
+  const additional=Math.max(
+    0,
+    factor-1
+  );
+
+  for(let i=0;i<additional;i++){
+
+    const newBomb=createObject(
       "bomb",
       x,
       y,
@@ -2799,32 +2040,40 @@ function multiplyBomb(
       34
     );
 
-  if(newBomb){
+    if(newBomb){
 
-    Body.setVelocity(
-      newBomb,
-      {
-        x:
-          bomb.velocity.x,
+      Body.setVelocity(
+        newBomb,
+        {
+          x:bomb.velocity.x,
+          y:bomb.velocity.y
+        }
+      );
 
-        y:
-          Math.max(
-            0,
-            bomb.velocity.y
-          )
-      }
-    );
+      Body.setAngularVelocity(
+        newBomb,
+        bomb.angularVelocity
+      );
 
-    wakeBody(
-      newBomb
-    );
+      /*
+        今この瞬間はすでに
+        増殖ブロックの内部なので、
+        直後の衝突で再増殖しない。
+      */
+
+      getInsideSet(newBomb).add(
+        multiplier.gameId
+      );
+
+      wakeBody(newBomb);
+    }
   }
 }
 
 
-/* =========================================================
+/* =========================
    Matterイベント
-========================================================= */
+========================= */
 
 function installEngineEvents(){
 
@@ -2833,41 +2082,25 @@ function installEngineEvents(){
     "collisionStart",
     event=>{
 
-      for(
-        const pair of event.pairs
-      ){
+      for(const pair of event.pairs){
 
-        const a =
-          pair.bodyA;
-
-        const b =
-          pair.bodyB;
+        const a=pair.bodyA;
+        const b=pair.bodyB;
 
         /*
           爆弾
         */
 
-        if(
-          a.label==="bomb"
-        ){
+        if(a.label==="bomb"){
 
-          explodeBomb(
-            a
-          );
-
-          continue;
+          explodeBomb(a);
         }
 
-        if(
-          b.label==="bomb"
-        ){
+        if(b.label==="bomb"){
 
-          explodeBomb(
-            b
-          );
-
-          continue;
+          explodeBomb(b);
         }
+
 
         /*
           増殖
@@ -2878,10 +2111,7 @@ function installEngineEvents(){
           b.label==="bomb"
         ){
 
-          multiplyBomb(
-            a,
-            b
-          );
+          multiplyBomb(a,b);
         }
 
         if(
@@ -2889,61 +2119,47 @@ function installEngineEvents(){
           a.label==="bomb"
         ){
 
-          multiplyBomb(
-            b,
-            a
-          );
+          multiplyBomb(b,a);
         }
 
+
         /*
-          床に接地したとき、
-          上向きの跳ね返りを作らない。
+          床との接触。
+          上向きに跳ね返らない。
         */
 
         if(
-          a.label==="floor" ||
-          b.label==="floor"
+          a.label==="groundBedrock" ||
+          b.label==="groundBedrock"
         ){
 
-          const body =
-            a.label==="floor"
-              ? b
-              : a;
+          const body=
+            a.label==="groundBedrock"
+            ? b
+            : a;
 
           if(
             body &&
             !body.isStatic
           ){
 
-            if(
-              body.velocity.y>0
-            ){
+            if(body.velocity.y>0){
 
               Body.setVelocity(
                 body,
                 {
-                  x:
-                    body.velocity.x*
-                    .88,
-
-                  y:
-                    Math.min(
-                      body.velocity.y,
-                      0
-                    )
+                  x:body.velocity.x*.9,
+                  y:0
                 }
               );
             }
 
             Body.setAngularVelocity(
               body,
-              body.angularVelocity*
-              .35
+              body.angularVelocity*.4
             );
 
-            wakeBody(
-              body
-            );
+            wakeBody(body);
           }
         }
       }
@@ -2952,30 +2168,70 @@ function installEngineEvents(){
 
 
   /*
-    エディターでは壊れない
+    増殖ブロックから離れたら
+    再び増殖可能にする。
+  */
+
+  Events.on(
+    engine,
+    "collisionEnd",
+    event=>{
+
+      for(const pair of event.pairs){
+
+        const a=pair.bodyA;
+        const b=pair.bodyB;
+
+        if(
+          a.label==="multiply" &&
+          b.label==="bomb"
+        ){
+
+          const set=insideMultipliers.get(b);
+
+          if(set){
+            set.delete(a.gameId);
+          }
+        }
+
+        if(
+          b.label==="multiply" &&
+          a.label==="bomb"
+        ){
+
+          const set=insideMultipliers.get(a);
+
+          if(set){
+            set.delete(b.gameId);
+          }
+        }
+      }
+    }
+  );
+
+
+  /*
+    エディターでは壊れない。
   */
 
   Events.on(
     engine,
     "beforeUpdate",
     ()=>{
-      if(
-        mode==="editor"
-      ){
 
-        for(
-          const body of objects
+      if(mode!=="editor"){
+        return;
+      }
+
+      for(const body of objects){
+
+        if(
+          body.label!=="bedrock" &&
+          body.label!=="multiply" &&
+          body.label!=="bomb"
         ){
 
-          if(
-            body.label!=="bedrock" &&
-            body.label!=="multiply" &&
-            body.label!=="bomb"
-          ){
-
-            body.hp =
-              body.maxHp;
-          }
+          body.hp=body.maxHp;
         }
       }
     }
@@ -2983,9 +2239,34 @@ function installEngineEvents(){
 }
 
 
-/* =========================================================
+/* =========================
+   全爆破
+========================= */
+
+document.getElementById("explodeAllBtn").addEventListener(
+  "click",
+  event=>{
+
+    event.stopPropagation();
+
+    if(!engine){
+      return;
+    }
+
+    const bombs=objects.filter(
+      body=>body.label==="bomb"
+    );
+
+    for(const bomb of bombs){
+      explodeBomb(bomb);
+    }
+  }
+);
+
+
+/* =========================
    背景
-========================================================= */
+========================= */
 
 function drawBackground(){
 
@@ -2996,8 +2277,7 @@ function drawBackground(){
     canvasHeight
   );
 
-  ctx.fillStyle =
-    "#f5eadc";
+  ctx.fillStyle="#f5eadc";
 
   ctx.fillRect(
     0,
@@ -3006,31 +2286,18 @@ function drawBackground(){
     canvasHeight
   );
 
-  ctx.globalAlpha =
-    .22;
+  ctx.globalAlpha=.22;
 
-  for(
-    let i=0;
-    i<12;
-    i++
-  ){
+  for(let i=0;i<12;i++){
 
-    const x =
+    const x=
       (i*191)%
-      Math.max(
-        canvasWidth,
-        1
-      );
+      Math.max(canvasWidth,1);
 
-    const y =
+    const y=
       90+
-      (
-        i*103
-      )%
-      Math.max(
-        canvasHeight-160,
-        1
-      );
+      (i*103)%
+      Math.max(canvasHeight-160,1);
 
     ctx.beginPath();
 
@@ -3042,33 +2309,24 @@ function drawBackground(){
       Math.PI*2
     );
 
-    ctx.fillStyle =
-      "#fff";
+    ctx.fillStyle="#fff";
 
     ctx.fill();
   }
 
-  ctx.globalAlpha =
-    1;
+  ctx.globalAlpha=1;
 }
 
 
-/* =========================================================
-   床
-========================================================= */
+/* =========================
+   床描画
+========================= */
 
 function drawFloor(){
 
-  const y =
-    canvasHeight-
-    FLOOR_HEIGHT;
+  const y=canvasHeight-FLOOR_HEIGHT;
 
-  /*
-    土台
-  */
-
-  ctx.fillStyle =
-    "#d9a15f";
+  ctx.fillStyle="#363636";
 
   ctx.fillRect(
     0,
@@ -3077,12 +2335,7 @@ function drawFloor(){
     FLOOR_HEIGHT
   );
 
-  /*
-    上面
-  */
-
-  ctx.fillStyle =
-    "#b9783b";
+  ctx.fillStyle="#555";
 
   ctx.fillRect(
     0,
@@ -3091,21 +2344,10 @@ function drawFloor(){
     7
   );
 
-  /*
-    木目
-  */
+  ctx.strokeStyle="rgba(255,255,255,.1)";
+  ctx.lineWidth=2;
 
-  ctx.strokeStyle =
-    "rgba(100,60,30,.18)";
-
-  ctx.lineWidth =
-    2;
-
-  for(
-    let x=0;
-    x<canvasWidth;
-    x+=35
-  ){
+  for(let x=0;x<canvasWidth;x+=38){
 
     ctx.beginPath();
 
@@ -3115,7 +2357,7 @@ function drawFloor(){
     );
 
     ctx.lineTo(
-      x+18,
+      x+20,
       y+FLOOR_HEIGHT
     );
 
@@ -3124,60 +2366,33 @@ function drawFloor(){
 }
 
 
-/* =========================================================
+/* =========================
    Body描画
-========================================================= */
+========================= */
 
-function drawBody(
-  body
-){
+function drawBody(body){
 
-  if(
-    body.label==="slime"
-  ){
-
-    drawSlime(
-      body
-    );
-
+  if(body.label==="slime"){
+    drawSlime(body);
     return;
   }
 
-  if(
-    body.label==="bomb"
-  ){
-
-    drawBomb(
-      body
-    );
-
+  if(body.label==="bomb"){
+    drawBomb(body);
     return;
   }
 
-  if(
-    body.label==="multiply"
-  ){
-
-    drawMultiply(
-      body
-    );
-
+  if(body.label==="multiply"){
+    drawMultiply(body);
     return;
   }
 
-  if(
-    body.label==="bedrock"
-  ){
-
-    drawBedrock(
-      body
-    );
-
+  if(body.label==="bedrock"){
+    drawBedrock(body);
     return;
   }
 
-  const vertices =
-    body.vertices;
+  const vertices=body.vertices;
 
   ctx.save();
 
@@ -3188,11 +2403,7 @@ function drawBody(
     vertices[0].y
   );
 
-  for(
-    let i=1;
-    i<vertices.length;
-    i++
-  ){
+  for(let i=1;i<vertices.length;i++){
 
     ctx.lineTo(
       vertices[i].x,
@@ -3202,50 +2413,26 @@ function drawBody(
 
   ctx.closePath();
 
-  if(
-    body.label==="wood"
-  ){
-
-    ctx.fillStyle =
-      "#a96b35";
-
-  }else if(
-    body.label==="glass"
-  ){
-
-    ctx.fillStyle =
-      "rgba(120,200,255,.48)";
-
-  }else if(
-    body.label==="stone"
-  ){
-
-    ctx.fillStyle =
-      "#858585";
-
+  if(body.label==="wood"){
+    ctx.fillStyle="#a96b35";
+  }else if(body.label==="glass"){
+    ctx.fillStyle="rgba(120,200,255,.48)";
+  }else if(body.label==="stone"){
+    ctx.fillStyle="#858585";
   }else{
-
-    ctx.fillStyle =
-      "#999";
+    ctx.fillStyle="#999";
   }
 
   ctx.fill();
 
-  ctx.strokeStyle =
-    "rgba(60,40,20,.4)";
-
-  ctx.lineWidth =
-    2;
+  ctx.strokeStyle="rgba(60,40,20,.45)";
+  ctx.lineWidth=2;
 
   ctx.stroke();
 
-  if(
-    body.label==="glass"
-  ){
+  if(body.label==="glass"){
 
-    ctx.fillStyle =
-      "rgba(255,255,255,.35)";
-
+    ctx.fillStyle="rgba(255,255,255,.35)";
     ctx.fill();
   }
 
@@ -3253,33 +2440,20 @@ function drawBody(
 }
 
 
-/* =========================================================
+/* =========================
    スライム
-========================================================= */
+========================= */
 
-function drawSlime(
-  body
-){
+function drawSlime(body){
 
-  const x =
-    body.position.x;
-
-  const y =
-    body.position.y;
-
-  const r =
-    body.baseW/2;
+  const x=body.position.x;
+  const y=body.position.y;
+  const r=body.baseW/2;
 
   ctx.save();
 
-  ctx.translate(
-    x,
-    y
-  );
-
-  ctx.rotate(
-    body.angle
-  );
+  ctx.translate(x,y);
+  ctx.rotate(body.angle);
 
   ctx.beginPath();
 
@@ -3291,31 +2465,21 @@ function drawSlime(
     Math.PI*2
   );
 
-  ctx.fillStyle =
-    "#73c957";
-
+  ctx.fillStyle="#73c957";
   ctx.fill();
 
-  ctx.strokeStyle =
-    "#478e39";
-
-  ctx.lineWidth =
-    3;
-
+  ctx.strokeStyle="#478e39";
+  ctx.lineWidth=3;
   ctx.stroke();
 
-  ctx.fillStyle =
-    "#222";
+  ctx.fillStyle="#222";
 
   ctx.beginPath();
 
   ctx.arc(
     -r*.3,
     -r*.12,
-    Math.max(
-      2,
-      r*.09
-    ),
+    Math.max(2,r*.09),
     0,
     Math.PI*2
   );
@@ -3327,10 +2491,7 @@ function drawSlime(
   ctx.arc(
     r*.3,
     -r*.12,
-    Math.max(
-      2,
-      r*.09
-    ),
+    Math.max(2,r*.09),
     0,
     Math.PI*2
   );
@@ -3341,29 +2502,19 @@ function drawSlime(
 }
 
 
-/* =========================================================
+/* =========================
    爆弾
-========================================================= */
+========================= */
 
-function drawBomb(
-  body
-){
+function drawBomb(body){
 
-  const x =
-    body.position.x;
-
-  const y =
-    body.position.y;
-
-  const r =
-    17;
+  const x=body.position.x;
+  const y=body.position.y;
+  const r=17;
 
   ctx.save();
 
-  ctx.translate(
-    x,
-    y
-  );
+  ctx.translate(x,y);
 
   ctx.beginPath();
 
@@ -3375,39 +2526,24 @@ function drawBomb(
     Math.PI*2
   );
 
-  ctx.fillStyle =
-    "#252525";
-
+  ctx.fillStyle="#252525";
   ctx.fill();
 
-  ctx.strokeStyle =
-    "#111";
-
-  ctx.lineWidth =
-    2;
-
+  ctx.strokeStyle="#111";
+  ctx.lineWidth=2;
   ctx.stroke();
 
   ctx.beginPath();
 
-  ctx.moveTo(
-    7,
-    -13
-  );
+  ctx.moveTo(7,-13);
 
   ctx.quadraticCurveTo(
-    15,
-    -22,
-    18,
-    -15
+    15,-22,
+    18,-15
   );
 
-  ctx.strokeStyle =
-    "#513525";
-
-  ctx.lineWidth =
-    4;
-
+  ctx.strokeStyle="#513525";
+  ctx.lineWidth=4;
   ctx.stroke();
 
   ctx.beginPath();
@@ -3420,48 +2556,31 @@ function drawBomb(
     Math.PI*2
   );
 
-  ctx.fillStyle =
-    "#ff9d25";
-
+  ctx.fillStyle="#ff9d25";
   ctx.fill();
 
   ctx.restore();
 }
 
 
-/* =========================================================
+/* =========================
    増殖
-========================================================= */
+========================= */
 
-function drawMultiply(
-  body
-){
+function drawMultiply(body){
 
-  const x =
-    body.position.x;
+  const x=body.position.x;
+  const y=body.position.y;
 
-  const y =
-    body.position.y;
-
-  const w =
-    body.baseW;
-
-  const h =
-    body.baseH;
+  const w=body.baseW;
+  const h=body.baseH;
 
   ctx.save();
 
-  ctx.translate(
-    x,
-    y
-  );
+  ctx.translate(x,y);
+  ctx.rotate(body.angle);
 
-  ctx.rotate(
-    body.angle
-  );
-
-  ctx.fillStyle =
-    "#b56ee8";
+  ctx.fillStyle="#b56ee8";
 
   ctx.fillRect(
     -w/2,
@@ -3470,11 +2589,8 @@ function drawMultiply(
     h
   );
 
-  ctx.strokeStyle =
-    "#6c3995";
-
-  ctx.lineWidth =
-    3;
+  ctx.strokeStyle="#6c3995";
+  ctx.lineWidth=3;
 
   ctx.strokeRect(
     -w/2,
@@ -3483,20 +2599,14 @@ function drawMultiply(
     h
   );
 
-  ctx.fillStyle =
-    "#fff";
+  ctx.fillStyle="#fff";
 
-  ctx.font =
-    "bold 30px sans-serif";
-
-  ctx.textAlign =
-    "center";
-
-  ctx.textBaseline =
-    "middle";
+  ctx.font="bold 25px sans-serif";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
 
   ctx.fillText(
-    "×2",
+    "×"+body.multiplyFactor,
     0,
     0
   );
@@ -3505,16 +2615,13 @@ function drawMultiply(
 }
 
 
-/* =========================================================
+/* =========================
    岩盤
-========================================================= */
+========================= */
 
-function drawBedrock(
-  body
-){
+function drawBedrock(body){
 
-  const vertices =
-    body.vertices;
+  const vertices=body.vertices;
 
   ctx.save();
 
@@ -3525,11 +2632,7 @@ function drawBedrock(
     vertices[0].y
   );
 
-  for(
-    let i=1;
-    i<vertices.length;
-    i++
-  ){
+  for(let i=1;i<vertices.length;i++){
 
     ctx.lineTo(
       vertices[i].x,
@@ -3539,73 +2642,160 @@ function drawBedrock(
 
   ctx.closePath();
 
-  ctx.fillStyle =
-    "#333";
-
+  ctx.fillStyle="#333";
   ctx.fill();
 
-  ctx.strokeStyle =
-    "#111";
-
-  ctx.lineWidth =
-    3;
-
+  ctx.strokeStyle="#111";
+  ctx.lineWidth=3;
   ctx.stroke();
 
   ctx.restore();
 }
 
 
-/* =========================================================
-   爆発アニメーション
-========================================================= */
+/* =========================
+   選択表示
+========================= */
 
-function drawExplosions(
-  now
-){
+function drawSelection(){
 
-  const alive =
-    [];
-
-  for(
-    const explosion of explosions
+  if(
+    !selectedBody ||
+    mode!=="editor" ||
+    selectedBody.label==="bedrock" ||
+    selectedBody.label==="multiply"
   ){
+    return;
+  }
 
-    const elapsed =
-      now-
-      explosion.start;
+  const body=selectedBody;
 
-    const progress =
+  const w=body.baseW;
+  const h=body.baseH;
+
+  ctx.save();
+
+  ctx.translate(
+    body.position.x,
+    body.position.y
+  );
+
+  ctx.rotate(
+    body.angle
+  );
+
+  ctx.strokeStyle="#ed7920";
+  ctx.lineWidth=2;
+  ctx.setLineDash([6,4]);
+
+  ctx.strokeRect(
+    -w/2,
+    -h/2,
+    w,
+    h
+  );
+
+  ctx.setLineDash([]);
+
+  const handles=[
+    [-w/2,-h/2],
+    [w/2,-h/2],
+    [-w/2,h/2],
+    [w/2,h/2]
+  ];
+
+  for(const p of handles){
+
+    ctx.beginPath();
+
+    ctx.arc(
+      p[0],
+      p[1],
+      7,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fillStyle="#fff";
+    ctx.fill();
+
+    ctx.strokeStyle="#ed7920";
+    ctx.lineWidth=3;
+    ctx.stroke();
+  }
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    0,
+    -h/2
+  );
+
+  ctx.lineTo(
+    0,
+    -h/2-45
+  );
+
+  ctx.strokeStyle="#ed7920";
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    -h/2-52,
+    8,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fillStyle="#fff";
+  ctx.fill();
+
+  ctx.strokeStyle="#ed7920";
+  ctx.lineWidth=3;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+
+/* =========================
+   爆発アニメーション
+========================= */
+
+function drawExplosions(now){
+
+  const alive=[];
+
+  for(const explosion of explosions){
+
+    const elapsed=
+      now-explosion.start;
+
+    const progress=
       Math.min(
         1,
-        elapsed/
-        explosion.duration
+        elapsed/explosion.duration
       );
 
-    if(
-      progress>=1
-    ){
+    if(progress>=1){
       continue;
     }
 
-    alive.push(
-      explosion
-    );
+    alive.push(explosion);
 
-    const radius =
+    const radius=
       20+
       160*
       Math.sin(
-        progress*
-        Math.PI/
-        2
+        progress*Math.PI/2
       );
 
-    const alpha =
-      1-
-      progress;
+    const alpha=1-progress;
 
-    const gradient =
+    const gradient=
       ctx.createRadialGradient(
         explosion.x,
         explosion.y,
@@ -3641,8 +2831,7 @@ function drawExplosions(
       "rgba(255,80,0,0)"
     );
 
-    ctx.fillStyle =
-      gradient;
+    ctx.fillStyle=gradient;
 
     ctx.beginPath();
 
@@ -3657,87 +2846,65 @@ function drawExplosions(
     ctx.fill();
   }
 
-  explosions =
-    alive;
+  explosions=alive;
 }
 
 
-/* =========================================================
-   描画
-========================================================= */
+/* =========================
+   Render
+========================= */
 
-function render(
-  now
-){
+function render(now){
 
-  if(
-    gameScreen.classList.contains(
-      "hidden"
-    )
-  ){
+  if(gameScreen.classList.contains("hidden")){
     return;
   }
 
   drawBackground();
 
   /*
-    床はエンジンの状態とは関係なく
-    必ず描画する。
+    床を先に描く。
   */
 
   drawFloor();
 
   if(engine){
 
-    for(
-      const body of objects
-    ){
+    for(const body of objects){
 
       if(
-        body.position.y>
-          canvasHeight+300 ||
-        body.position.x<
-          -300 ||
-        body.position.x>
-          canvasWidth+300
+        body.position.y>canvasHeight+300 ||
+        body.position.x<-300 ||
+        body.position.x>canvasWidth+300
       ){
         continue;
       }
 
-      drawBody(
-        body
-      );
+      drawBody(body);
     }
 
     drawSelection();
   }
 
-  drawExplosions(
-    now
-  );
+  drawExplosions(now);
 }
 
 
-/* =========================================================
+/* =========================
    メインループ
-   常に1本だけ
-========================================================= */
+========================= */
 
-function gameLoop(
-  now
-){
+function gameLoop(now){
 
-  const dt =
-    Math.min(
-      50,
-      Math.max(
-        0,
-        now-lastTime
-      )
-    );
+  const dt=Math.min(
+    50,
+    Math.max(
+      0,
+      now-lastTime
+    )
+  );
 
-  lastTime =
-    now;
+  lastTime=now;
 
   if(engine){
 
@@ -3747,11 +2914,9 @@ function gameLoop(
     );
   }
 
-  render(
-    now
-  );
+  render(now);
 
-  animationFrame =
+  animationFrame=
     requestAnimationFrame(
       gameLoop
     );
@@ -3760,37 +2925,26 @@ function gameLoop(
 
 function startGameLoop(){
 
-  if(
-    animationFrame!==null
-  ){
+  if(animationFrame!==null){
     return;
   }
 
-  lastTime =
-    performance.now();
+  lastTime=performance.now();
 
-  animationFrame =
+  animationFrame=
     requestAnimationFrame(
       gameLoop
     );
 }
 
 
-/* =========================================================
-   初期化
-========================================================= */
+/* =========================
+   初期状態
+========================= */
 
-titleScreen.classList.remove(
-  "hidden"
-);
-
-stageSelectScreen.classList.add(
-  "hidden"
-);
-
-gameScreen.classList.add(
-  "hidden"
-);
+titleScreen.classList.remove("hidden");
+stageSelectScreen.classList.add("hidden");
+gameScreen.classList.add("hidden");
 
 startGameLoop();
 
