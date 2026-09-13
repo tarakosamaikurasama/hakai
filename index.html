@@ -2,2842 +2,2034 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>スライム城くずし ステージメーカー</title>
-<script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>スライム城メーカー</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
 <style>
 *{
-box-sizing:border-box;
--webkit-tap-highlight-color:transparent;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 html,body{
-margin:0;
-width:100%;
-height:100%;
-overflow:hidden;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
-background:#eef1f5;
-color:#222;
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:#f2f2f2;
+  color:#222;
 }
 button{
-border:0;
-border-radius:10px;
-padding:10px 14px;
-font-size:15px;
-font-weight:700;
-background:#fff;
-color:#222;
-box-shadow:0 2px 7px rgba(0,0,0,.15);
-cursor:pointer;
-touch-action:manipulation;
+  border:0;
+  border-radius:8px;
+  background:#fff;
+  box-shadow:0 2px 5px rgba(0,0,0,.18);
+  padding:10px 14px;
+  font-size:15px;
+  cursor:pointer;
+  touch-action:manipulation;
 }
 button:active{
-transform:scale(.97);
+  transform:scale(.97);
 }
 .screen{
-position:absolute;
-inset:0;
-display:none;
+  width:100%;
+  height:100%;
 }
-.screen.active{
-display:block;
+.hidden{
+  display:none!important;
 }
-#startScreen{
-background:linear-gradient(#f7f9fc,#e5eaf1);
-align-items:center;
-justify-content:center;
+
+#titleScreen{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    linear-gradient(rgba(255,255,255,.78),rgba(255,255,255,.78)),
+    repeating-linear-gradient(0deg,#ddd 0 1px,transparent 1px 32px),
+    repeating-linear-gradient(90deg,#ddd 0 1px,transparent 1px 32px);
 }
-#startScreen.active{
-display:flex;
+.titleBox{
+  width:min(520px,90vw);
+  padding:35px 25px;
+  text-align:center;
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 8px 30px rgba(0,0,0,.18);
 }
-.startBox{
-width:min(92%,500px);
-text-align:center;
-background:#fff;
-padding:35px 25px;
-border-radius:22px;
-box-shadow:0 8px 30px rgba(0,0,0,.15);
+.titleBox h1{
+  margin:0 0 10px;
+  font-size:32px;
 }
-.startBox h1{
-margin:0 0 28px;
-font-size:28px;
+.titleBox p{
+  margin:0 0 25px;
+  color:#666;
 }
-.startButtons{
-display:flex;
-flex-direction:column;
-gap:14px;
+.bigButton{
+  width:100%;
+  margin:7px 0;
+  font-size:18px;
+  padding:14px;
 }
-.startButtons button{
-padding:17px;
-font-size:18px;
-}
+
 #stageScreen{
-background:#eef1f5;
-padding:20px;
-overflow:auto;
+  overflow:auto;
+  padding:25px;
+  background:#eee;
 }
 .stageHeader{
-max-width:900px;
-margin:auto;
-display:flex;
-align-items:center;
-gap:10px;
-margin-bottom:20px;
+  max-width:900px;
+  margin:0 auto 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
 }
 .stageHeader h2{
-flex:1;
-margin:0;
+  margin:0;
 }
-#stageList{
-max-width:900px;
-margin:auto;
-display:flex;
-flex-direction:column;
-gap:12px;
+.stageList{
+  max-width:900px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  gap:14px;
 }
 .stageCard{
-background:#fff;
-border-radius:14px;
-padding:16px;
-box-shadow:0 3px 12px rgba(0,0,0,.1);
-display:flex;
-align-items:center;
-gap:10px;
+  background:#fff;
+  border-radius:12px;
+  padding:15px;
+  box-shadow:0 3px 9px rgba(0,0,0,.14);
 }
-.stageName{
-flex:1;
-font-weight:700;
-font-size:17px;
+.stageCard h3{
+  margin:0 0 8px;
+  word-break:break-word;
 }
-.stageCard button{
-padding:8px 11px;
-font-size:13px;
+.stageCard small{
+  color:#777;
 }
+.stageActions{
+  display:flex;
+  gap:7px;
+  margin-top:12px;
+}
+.stageActions button{
+  flex:1;
+}
+.empty{
+  text-align:center;
+  color:#777;
+  padding:40px;
+}
+
 #gameScreen{
-background:#dce3e9;
-overflow:hidden;
+  position:relative;
+  background:#dff1ff;
 }
 #gameCanvas{
-position:absolute;
-z-index:1;
-left:0;
-top:0;
-width:100%;
-height:100%;
-display:block;
-touch-action:none;
+  display:block;
+  width:100%;
+  height:100%;
+  touch-action:none;
 }
-.topbar{
-position:absolute;
-z-index:100;
-left:10px;
-right:10px;
-top:10px;
-min-height:50px;
-background:rgba(255,255,255,.95);
-border-radius:14px;
-box-shadow:0 3px 15px rgba(0,0,0,.16);
-display:flex;
-align-items:center;
-gap:8px;
-padding:7px;
-pointer-events:auto;
+
+#editorBar,#playBar{
+  position:absolute;
+  z-index:20;
+  left:8px;
+  right:8px;
+  top:8px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+  padding:7px;
+  background:rgba(255,255,255,.94);
+  border-radius:12px;
+  box-shadow:0 3px 12px rgba(0,0,0,.18);
 }
-.topbar .title{
-flex:1;
-min-width:0;
-text-align:center;
-font-weight:800;
-overflow:hidden;
-white-space:nowrap;
-text-overflow:ellipsis;
+#editorBar button,#playBar button{
+  padding:8px 10px;
+  font-size:14px;
 }
-.topbar button{
-padding:8px 11px;
-font-size:13px;
+.toolActive{
+  background:#222;
+  color:#fff;
 }
-#editorTools{
-position:absolute;
-z-index:100;
-left:10px;
-right:10px;
-bottom:10px;
-display:flex;
-flex-wrap:wrap;
-justify-content:center;
-gap:7px;
-pointer-events:auto;
+.spacer{
+  flex:1;
 }
-.tool{
-padding:9px 11px;
-font-size:13px;
+#modeText{
+  font-weight:bold;
+  padding:0 5px;
 }
-.tool.selected{
-background:#222;
-color:#fff;
+
+#bombHint{
+  position:absolute;
+  z-index:19;
+  left:50%;
+  bottom:15px;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,.72);
+  color:#fff;
+  padding:8px 14px;
+  border-radius:20px;
+  pointer-events:none;
+  white-space:nowrap;
 }
-#playTools{
-position:absolute;
-z-index:100;
-left:10px;
-right:10px;
-bottom:10px;
-display:flex;
-justify-content:center;
-gap:10px;
-pointer-events:auto;
-}
-#playTools button{
-padding:13px 18px;
-}
-#message{
-position:absolute;
-z-index:200;
-top:72px;
-left:50%;
-transform:translateX(-50%);
-background:rgba(0,0,0,.75);
-color:#fff;
-border-radius:20px;
-padding:8px 15px;
-font-size:13px;
-pointer-events:none;
-opacity:0;
-transition:opacity .2s;
-}
-#message.show{
-opacity:1;
-}
-.dialogBg{
-position:absolute;
-z-index:300;
-inset:0;
-background:rgba(0,0,0,.45);
-display:none;
-align-items:center;
-justify-content:center;
-}
-.dialogBg.active{
-display:flex;
+
+#stageNameBox{
+  position:absolute;
+  z-index:30;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.38);
 }
 .dialog{
-width:min(90%,430px);
-background:#fff;
-border-radius:18px;
-padding:22px;
-box-shadow:0 10px 35px rgba(0,0,0,.25);
+  width:min(400px,90vw);
+  background:#fff;
+  border-radius:14px;
+  padding:22px;
+  box-shadow:0 8px 30px rgba(0,0,0,.3);
 }
 .dialog h3{
-margin-top:0;
+  margin-top:0;
 }
-#stageNameInput{
-width:100%;
-padding:12px;
-border:1px solid #ccc;
-border-radius:10px;
-font-size:16px;
-margin-bottom:14px;
+.dialog input{
+  width:100%;
+  padding:11px;
+  border:1px solid #bbb;
+  border-radius:7px;
+  font-size:16px;
 }
 .dialogButtons{
-display:flex;
-justify-content:flex-end;
-gap:10px;
+  display:flex;
+  gap:8px;
+  margin-top:15px;
 }
-@media(max-width:600px){
-.tool{
-font-size:12px;
-padding:8px 9px;
-}
-.topbar button{
-font-size:12px;
-}
+.dialogButtons button{
+  flex:1;
 }
 </style>
 </head>
-
 <body>
 
-<div id="app">
-
-<div id="startScreen" class="screen active">
-<div class="startBox">
-<h1>スライム城くずし</h1>
-<div class="startButtons">
-<button id="makeStageButton">ステージを作る</button>
-<button id="playStageButton">ステージで遊ぶ</button>
-</div>
-</div>
+<div id="titleScreen" class="screen">
+  <div class="titleBox">
+    <h1>スライム城メーカー</h1>
+    <p>ブロックを配置して、オリジナルステージを作ろう！</p>
+    <button class="bigButton" id="makeStageBtn">ステージを作る</button>
+    <button class="bigButton" id="playStageBtn">ステージで遊ぶ</button>
+  </div>
 </div>
 
-<div id="stageScreen" class="screen">
-<div class="stageHeader">
-<button id="stageBackButton">← 戻る</button>
-<h2>ステージを選ぶ</h2>
-</div>
-<div id="stageList"></div>
-</div>
-
-<div id="gameScreen" class="screen">
-
-<canvas id="gameCanvas"></canvas>
-
-<div id="editorTop" class="topbar" style="display:none">
-<button id="editorBack">←</button>
-<div class="title" id="editorTitle">新しいステージ</div>
-<button id="saveButton">保存</button>
-<button id="testButton">テスト</button>
-<button id="clearButton">全消去</button>
+<div id="stageScreen" class="screen hidden">
+  <div class="stageHeader">
+    <h2 id="stageScreenTitle">ステージ選択</h2>
+    <button id="stageBackBtn">戻る</button>
+  </div>
+  <div id="stageList" class="stageList"></div>
 </div>
 
-<div id="playTop" class="topbar" style="display:none">
-<button id="playBack">←</button>
-<div class="title" id="playTitle">ステージ</div>
-<button id="restartButton">やり直す</button>
+<div id="gameScreen" class="screen hidden">
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="editorBar" class="hidden">
+    <button data-tool="move">移動</button>
+    <button data-tool="rotate">回転</button>
+    <button data-tool="resize">形変更</button>
+    <button data-tool="wood">木</button>
+    <button data-tool="glass">ガラス</button>
+    <button data-tool="stone">石</button>
+    <button data-tool="enemy">敵</button>
+    <button data-tool="bomb">爆弾</button>
+    <button data-tool="multiply">増殖</button>
+    <button data-tool="bedrock">岩盤</button>
+    <button data-tool="delete">削除</button>
+    <span class="spacer"></span>
+    <button id="saveStageBtn">保存</button>
+    <button id="editorBackBtn">戻る</button>
+  </div>
+
+  <div id="playBar" class="hidden">
+    <span id="modeText">ステージプレイ</span>
+    <span class="spacer"></span>
+    <button id="bombModeBtn">爆弾を置く</button>
+    <button id="explodeAllBtn">全爆破</button>
+    <button id="playBackBtn">戻る</button>
+  </div>
+
+  <div id="bombHint" class="hidden">画面をクリックして爆弾を置けます</div>
 </div>
 
-<div id="editorTools" style="display:none">
-<button class="tool selected" data-tool="move">移動</button>
-<button class="tool" data-tool="wood">木</button>
-<button class="tool" data-tool="glass">ガラス</button>
-<button class="tool" data-tool="stone">石</button>
-<button class="tool" data-tool="enemy">スライム</button>
-<button class="tool" data-tool="bomb">爆弾</button>
-<button class="tool" data-tool="multiply">増殖</button>
-<button class="tool" data-tool="bedrock">岩盤</button>
-<button class="tool" data-tool="delete">消去</button>
-<button class="tool" data-tool="rotate">回転</button>
-<button class="tool" data-tool="shape">形変更</button>
-</div>
-
-<div id="playTools" style="display:none">
-<button id="bombModeButton">💣 爆弾を置く</button>
-<button id="explodeButton">💥 全爆破</button>
-</div>
-
-<div id="message"></div>
-
-</div>
-
-<div id="nameDialog" class="dialogBg">
-<div class="dialog">
-<h3>ステージ名</h3>
-<input id="stageNameInput" maxlength="40" placeholder="ステージ名">
-<div class="dialogButtons">
-<button id="nameCancel">キャンセル</button>
-<button id="nameOK">決定</button>
-</div>
-</div>
-</div>
-
+<div id="stageNameBox" class="hidden">
+  <div class="dialog">
+    <h3>ステージを保存</h3>
+    <input id="stageNameInput" maxlength="40" placeholder="ステージ名">
+    <div class="dialogButtons">
+      <button id="cancelSaveBtn">キャンセル</button>
+      <button id="confirmSaveBtn">保存</button>
+    </div>
+  </div>
 </div>
 
 <script>
-"use strict";
-
-const Engine=Matter.Engine;
-const World=Matter.World;
-const Bodies=Matter.Bodies;
-const Body=Matter.Body;
-const Events=Matter.Events;
-const Composite=Matter.Composite;
+const {
+  Engine,
+  World,
+  Bodies,
+  Body,
+  Events,
+  Composite,
+  Vector
+}=Matter;
 
 const canvas=document.getElementById("gameCanvas");
 const ctx=canvas.getContext("2d");
 
+const titleScreen=document.getElementById("titleScreen");
+const stageScreen=document.getElementById("stageScreen");
+const gameScreen=document.getElementById("gameScreen");
+const editorBar=document.getElementById("editorBar");
+const playBar=document.getElementById("playBar");
+const bombHint=document.getElementById("bombHint");
+const stageNameBox=document.getElementById("stageNameBox");
+const stageNameInput=document.getElementById("stageNameInput");
+const stageList=document.getElementById("stageList");
+
+const makeStageBtn=document.getElementById("makeStageBtn");
+const playStageBtn=document.getElementById("playStageBtn");
+const stageBackBtn=document.getElementById("stageBackBtn");
+const saveStageBtn=document.getElementById("saveStageBtn");
+const editorBackBtn=document.getElementById("editorBackBtn");
+const playBackBtn=document.getElementById("playBackBtn");
+const bombModeBtn=document.getElementById("bombModeBtn");
+const explodeAllBtn=document.getElementById("explodeAllBtn");
+const cancelSaveBtn=document.getElementById("cancelSaveBtn");
+const confirmSaveBtn=document.getElementById("confirmSaveBtn");
+
 const FLOOR_Y=850;
-const SAVE_KEY="slimeCastleMaker_v9";
+const SAVE_KEY="slimeCastleMaker_v10";
 
 let engine=null;
-let currentMode="none";
+let mode="";
 let currentTool="move";
-
 let selectedBody=null;
 let movingBody=null;
+let resizingBody=null;
 let rotatingBody=null;
-let resizing=null;
-
+let resizeIndex=-1;
 let moveOffset={x:0,y:0};
-
-let stageId=null;
-let stageName="新しいステージ";
-let currentStageObjects=[];
-
-let bombMode=false;
-let nextId=1;
-
+let camera={x:0,y:540,zoom:.72};
 let canvasWidth=1;
 let canvasHeight=1;
 let dpr=1;
+let currentStageId=null;
+let bombMode=false;
 
-const camera={
-x:0,
-y:540,
-zoom:.72
+let multiplierContacts=new Map();
+let explosions=[];
+
+const MATERIALS={
+  wood:{
+    density:.0035,
+    friction:.4,
+    restitution:.08,
+    hp:2
+  },
+  glass:{
+    density:.0028,
+    friction:.15,
+    restitution:.25,
+    hp:1
+  },
+  stone:{
+    density:.008,
+    friction:.6,
+    restitution:.02,
+    hp:3
+  }
 };
 
 function resizeCanvas(){
+  const rect=canvas.getBoundingClientRect();
 
-const rect=canvas.getBoundingClientRect();
+  canvasWidth=Math.max(1,rect.width);
+  canvasHeight=Math.max(1,rect.height);
 
-canvasWidth=Math.max(1,rect.width);
-canvasHeight=Math.max(1,rect.height);
+  dpr=Math.min(window.devicePixelRatio||1,2);
 
-dpr=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=Math.max(1,Math.floor(canvasWidth*dpr));
+  canvas.height=Math.max(1,Math.floor(canvasHeight*dpr));
 
-canvas.width=Math.max(1,Math.floor(canvasWidth*dpr));
-canvas.height=Math.max(1,Math.floor(canvasHeight*dpr));
-
-ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
 }
 
 function refreshCanvasSize(){
-
-resizeCanvas();
-
-requestAnimationFrame(()=>{
-resizeCanvas();
-});
+  resizeCanvas();
+  requestAnimationFrame(()=>{
+    resizeCanvas();
+  });
 }
 
-window.addEventListener("resize",resizeCanvas);
+window.addEventListener("resize",refreshCanvasSize);
 
-function showScreen(id){
+function showScreen(name){
+  titleScreen.classList.add("hidden");
+  stageScreen.classList.add("hidden");
+  gameScreen.classList.add("hidden");
 
-document.querySelectorAll(".screen").forEach(el=>{
-el.classList.remove("active");
-});
+  document.getElementById(name).classList.remove("hidden");
 
-document.getElementById(id).classList.add("active");
-
-if(id==="gameScreen"){
-refreshCanvasSize();
-}
-}
-
-function showMessage(text){
-
-const el=document.getElementById("message");
-
-el.textContent=text;
-el.classList.add("show");
-
-clearTimeout(showMessage.timer);
-
-showMessage.timer=setTimeout(()=>{
-el.classList.remove("show");
-},1300);
-}
-
-function screenToWorld(x,y){
-
-return{
-x:(x-canvasWidth/2)/camera.zoom+camera.x,
-y:(y-canvasHeight/2)/camera.zoom+camera.y
-};
+  if(name==="gameScreen"){
+    refreshCanvasSize();
+  }
 }
 
 function createEngine(){
+  const e=Engine.create({
+    enableSleeping:false
+  });
 
-const e=Engine.create({
-enableSleeping:true
-});
+  e.gravity.y=1;
 
-e.gravity.y=1;
+  const floor=Bodies.rectangle(
+    0,
+    FLOOR_Y+40,
+    100000,
+    80,
+    {
+      isStatic:true,
+      label:"floor",
+      plugin:{
+        gameType:"floor"
+      }
+    }
+  );
 
-const floor=Bodies.rectangle(
-0,
-FLOOR_Y+40,
-100000,
-80,
-{
-isStatic:true,
-label:"floor",
-plugin:{
-gameType:"floor"
-}
-}
-);
+  World.add(e.world,floor);
 
-World.add(e.world,floor);
+  Events.on(e,"collisionStart",collisionStart);
+  Events.on(e,"collisionEnd",collisionEnd);
 
-Events.on(e,"collisionStart",collisionStart);
-Events.on(e,"collisionEnd",collisionEnd);
-
-return e;
+  return e;
 }
 
 function stopEngine(){
+  if(engine){
+    Engine.clear(engine);
+    World.clear(engine.world,false);
+    engine=null;
+  }
 
-if(engine){
-
-Events.off(
-engine,
-"collisionStart",
-collisionStart
-);
-
-Events.off(
-engine,
-"collisionEnd",
-collisionEnd
-);
-
-Events.off(
-engine,
-"beforeUpdate",
-editorBeforeUpdate
-);
+  multiplierContacts.clear();
+  selectedBody=null;
+  movingBody=null;
+  resizingBody=null;
+  rotatingBody=null;
 }
 
-engine=null;
-
-selectedBody=null;
-movingBody=null;
-rotatingBody=null;
-resizing=null;
-}
-
-function startEditor(objects){
-
-stopEngine();
-
-currentMode="editor";
-currentTool="move";
-
-engine=createEngine();
-
-loadObjects(objects||[]);
-
-document.getElementById("editorTop").style.display="flex";
-document.getElementById("playTop").style.display="none";
-document.getElementById("editorTools").style.display="flex";
-document.getElementById("playTools").style.display="none";
-
-document.getElementById("editorTitle").textContent=stageName;
-
-camera.x=0;
-camera.y=540;
-camera.zoom=.72;
-
-Events.on(
-engine,
-"beforeUpdate",
-editorBeforeUpdate
-);
-
-showScreen("gameScreen");
-
-setTool("move");
-
-refreshCanvasSize();
-}
-
-function startPlay(objects){
-
-stopEngine();
-
-currentMode="play";
-
-engine=createEngine();
-
-loadObjects(objects||[]);
-
-document.getElementById("editorTop").style.display="none";
-document.getElementById("playTop").style.display="flex";
-document.getElementById("editorTools").style.display="none";
-document.getElementById("playTools").style.display="flex";
-
-document.getElementById("playTitle").textContent=stageName;
-
-camera.x=0;
-camera.y=540;
-camera.zoom=.72;
-
-bombMode=false;
-
-document.getElementById(
-"bombModeButton"
-).textContent="💣 爆弾を置く";
-
-showScreen("gameScreen");
-
-refreshCanvasSize();
-}
-
-function loadObjects(objects){
-
-objects.forEach(obj=>{
-
-if(obj.type==="block"){
-addBlock(
-obj.material,
-obj.x,
-obj.y,
-obj.w,
-obj.h,
-obj.angle||0
-);
-}
-
-if(obj.type==="enemy"){
-addEnemy(obj.x,obj.y);
-}
-
-if(obj.type==="bomb"){
-addBomb(obj.x,obj.y);
-}
-
-if(obj.type==="multiply"){
-addMultiplier(
-obj.x,
-obj.y,
-obj.w||70,
-obj.h||50
-);
-}
-
-if(obj.type==="bedrock"){
-addBedrock(
-obj.x,
-obj.y,
-obj.w||120,
-obj.h||35
-);
-}
-
-});
-}
-
-function addBlock(material,x,y,w,h,angle){
-
-let density=.0035;
-let friction=.4;
-let restitution=.08;
-let hp=2;
-
-if(material==="glass"){
-density=.0028;
-friction=.15;
-restitution=.25;
-hp=1;
-}
-
-if(material==="stone"){
-density=.008;
-friction=.6;
-restitution=.02;
-hp=3;
-}
-
-const body=Bodies.rectangle(
-x,
-y,
-w||100,
-h||45,
-{
-angle:angle||0,
-density:density,
-friction:friction,
-restitution:restitution,
-label:"block",
-plugin:{
-gameType:"block",
-material:material,
-width:w||100,
-height:h||45,
-hp:hp,
-maxHp:hp,
-id:nextId++
-}
-}
-);
-
-World.add(engine.world,body);
-
-return body;
-}
-
-function addEnemy(x,y){
-
-const body=Bodies.circle(
-x,
-y,
-22,
-{
-density:.0018,
-friction:.5,
-restitution:.12,
-label:"enemy",
-plugin:{
-gameType:"enemy",
-radius:22,
-alive:true,
-id:nextId++
-}
-}
-);
-
-World.add(engine.world,body);
-
-return body;
-}
-
-function addBomb(x,y){
-
-const body=Bodies.circle(
-x,
-y,
-13,
-{
-density:.001,
-friction:.25,
-restitution:.35,
-label:"bomb",
-plugin:{
-gameType:"bomb",
-radius:13,
-id:nextId++
-}
-}
-);
-
-World.add(engine.world,body);
-
-return body;
-}
-
-function addMultiplier(x,y,w,h){
-
-const body=Bodies.rectangle(
-x,
-y,
-w,
-h,
-{
-isStatic:true,
-isSensor:true,
-label:"multiply",
-plugin:{
-gameType:"multiply",
-width:w,
-height:h,
-id:nextId++
-}
-}
-);
-
-World.add(engine.world,body);
-
-return body;
-}
-
-function addBedrock(x,y,w,h){
-
-const body=Bodies.rectangle(
-x,
-y,
-w,
-h,
-{
-isStatic:true,
-label:"bedrock",
-plugin:{
-gameType:"bedrock",
-width:w,
-height:h,
-id:nextId++
-}
-}
-);
-
-World.add(engine.world,body);
-
-return body;
-}
-
-function getBodies(){
-
-if(!engine)return[];
-
-return Composite.allBodies(engine.world)
-.filter(body=>body.label!=="floor");
-}
-
-function removeBody(body){
-
-if(!body||!engine)return;
-
-World.remove(
-engine.world,
-body
-);
-
-if(selectedBody===body){
-selectedBody=null;
-}
-}
-
-function pointInBody(body,p){
-
-return Matter.Vertices.contains(
-body.vertices,
-p
-);
-}
-
-function getBodyAt(p){
-
-const bodies=getBodies();
-
-for(let i=bodies.length-1;i>=0;i--){
-
-if(pointInBody(bodies[i],p)){
-return bodies[i];
-}
-
-}
-
-return null;
+function wakeBody(body){
+  if(!body)return;
+
+  Body.setSleeping(body,false);
+  Body.setVelocity(body,{x:0,y:0});
+  Body.setAngularVelocity(body,0);
 }
 
 function getRectSize(body){
+  const p=body.plugin||{};
 
-return{
-w:body.plugin.width||80,
-h:body.plugin.height||40
-};
+  if(p.width&&p.height){
+    return{
+      w:p.width,
+      h:p.height
+    };
+  }
+
+  const verts=body.vertices;
+
+  let minX=Infinity;
+  let maxX=-Infinity;
+  let minY=Infinity;
+  let maxY=-Infinity;
+
+  for(const v of verts){
+    minX=Math.min(minX,v.x);
+    maxX=Math.max(maxX,v.x);
+    minY=Math.min(minY,v.y);
+    maxY=Math.max(maxY,v.y);
+  }
+
+  return{
+    w:maxX-minX,
+    h:maxY-minY
+  };
+}
+
+function addBlock(x,y,w,h,material,id,angle=0,hp=null){
+  const m=MATERIALS[material]||MATERIALS.wood;
+
+  const body=Bodies.rectangle(
+    x,
+    y,
+    w,
+    h,
+    {
+      density:m.density,
+      friction:m.friction,
+      restitution:m.restitution,
+      label:"block",
+      plugin:{
+        gameType:"block",
+        material,
+        width:w,
+        height:h,
+        hp:hp==null?m.hp:hp,
+        maxHp:m.hp,
+        id:id||crypto.randomUUID()
+      }
+    }
+  );
+
+  Body.setAngle(body,angle);
+  Body.setSleeping(body,false);
+
+  World.add(engine.world,body);
+
+  return body;
+}
+
+function addEnemy(x,y,w=34,h=34,angle=0,id){
+  const body=Bodies.rectangle(
+    x,y,w,h,
+    {
+      density:.002,
+      friction:.4,
+      restitution:.1,
+      label:"enemy",
+      plugin:{
+        gameType:"enemy",
+        width:w,
+        height:h,
+        id:id||crypto.randomUUID()
+      }
+    }
+  );
+
+  Body.setAngle(body,angle);
+  Body.setSleeping(body,false);
+
+  World.add(engine.world,body);
+
+  return body;
+}
+
+function addBomb(x,y,r=16){
+  const body=Bodies.circle(
+    x,
+    y,
+    r,
+    {
+      density:.002,
+      friction:.35,
+      restitution:.2,
+      label:"bomb",
+      plugin:{
+        gameType:"bomb",
+        radius:r
+      }
+    }
+  );
+
+  Body.setSleeping(body,false);
+
+  World.add(engine.world,body);
+
+  return body;
+}
+
+function addMultiplier(x,y,w=70,h=45,angle=0,id){
+  const body=Bodies.rectangle(
+    x,
+    y,
+    w,
+    h,
+    {
+      isStatic:true,
+      isSensor:true,
+      label:"multiply",
+      plugin:{
+        gameType:"multiply",
+        width:w,
+        height:h,
+        id:id||crypto.randomUUID()
+      }
+    }
+  );
+
+  Body.setAngle(body,angle);
+
+  World.add(engine.world,body);
+
+  return body;
+}
+
+function addBedrock(x,y,w=100,h=35,angle=0,id){
+  const body=Bodies.rectangle(
+    x,
+    y,
+    w,
+    h,
+    {
+      isStatic:true,
+      label:"bedrock",
+      plugin:{
+        gameType:"bedrock",
+        width:w,
+        height:h,
+        id:id||crypto.randomUUID()
+      }
+    }
+  );
+
+  Body.setAngle(body,angle);
+
+  World.add(engine.world,body);
+
+  return body;
+}
+
+function getBodies(){
+  return Composite.allBodies(engine.world);
+}
+
+function saveObjects(){
+  const objects=[];
+
+  for(const body of getBodies()){
+    const type=body.plugin?.gameType;
+
+    if(
+      type==="floor"||
+      type==="bomb"
+    ){
+      continue;
+    }
+
+    const size=getRectSize(body);
+
+    objects.push({
+      type,
+      x:body.position.x,
+      y:body.position.y,
+      width:size.w,
+      height:size.h,
+      angle:body.angle,
+      material:body.plugin?.material,
+      hp:body.plugin?.hp,
+      id:body.plugin?.id
+    });
+  }
+
+  return objects;
+}
+
+function loadObjects(objects){
+  if(!Array.isArray(objects))return;
+
+  for(const o of objects){
+    if(o.type==="block"){
+      addBlock(
+        o.x,
+        o.y,
+        o.width||80,
+        o.height||40,
+        o.material||"wood",
+        o.id,
+        o.angle||0,
+        o.hp
+      );
+    }
+
+    if(o.type==="enemy"){
+      addEnemy(
+        o.x,
+        o.y,
+        o.width||34,
+        o.height||34,
+        o.angle||0,
+        o.id
+      );
+    }
+
+    if(o.type==="multiply"){
+      addMultiplier(
+        o.x,
+        o.y,
+        o.width||70,
+        o.height||45,
+        o.angle||0,
+        o.id
+      );
+    }
+
+    if(o.type==="bedrock"){
+      addBedrock(
+        o.x,
+        o.y,
+        o.width||100,
+        o.height||35,
+        o.angle||0,
+        o.id
+      );
+    }
+  }
+}
+
+function startEditor(objects=[]){
+  stopEngine();
+
+  mode="editor";
+  currentTool="move";
+
+  engine=createEngine();
+
+  loadObjects(objects);
+
+  editorBar.classList.remove("hidden");
+  playBar.classList.add("hidden");
+  bombHint.classList.add("hidden");
+
+  camera.x=0;
+  camera.y=540;
+  camera.zoom=.72;
+
+  showScreen("gameScreen");
+  setTool("move");
+
+  refreshCanvasSize();
+}
+
+function startPlay(objects=[]){
+  stopEngine();
+
+  mode="play";
+  bombMode=false;
+
+  engine=createEngine();
+
+  loadObjects(objects);
+
+  editorBar.classList.add("hidden");
+  playBar.classList.remove("hidden");
+  bombHint.classList.add("hidden");
+
+  camera.x=0;
+  camera.y=540;
+  camera.zoom=.72;
+
+  showScreen("gameScreen");
+
+  refreshCanvasSize();
+}
+
+function screenToWorld(x,y){
+  return{
+    x:(x-canvasWidth/2)/camera.zoom+camera.x,
+    y:(y-canvasHeight/2)/camera.zoom+camera.y
+  };
+}
+
+function worldToScreen(x,y){
+  return{
+    x:(x-camera.x)*camera.zoom+canvasWidth/2,
+    y:(y-camera.y)*camera.zoom+canvasHeight/2
+  };
+}
+
+function getPointerPosition(e){
+  const rect=canvas.getBoundingClientRect();
+
+  return{
+    x:e.clientX-rect.left,
+    y:e.clientY-rect.top
+  };
+}
+
+function getBodyAt(world){
+  const bodies=getBodies().filter(b=>b.plugin?.gameType!=="floor");
+
+  const hits=Matter.Query.point(bodies,world);
+
+  if(hits.length)return hits[hits.length-1];
+
+  return null;
+}
+
+function distance(a,b){
+  return Math.hypot(a.x-b.x,a.y-b.y);
 }
 
 function getShapeHandles(body){
+  const size=getRectSize(body);
 
-const size=getRectSize(body);
+  const hw=size.w/2;
+  const hh=size.h/2;
 
-const hw=size.w/2;
-const hh=size.h/2;
+  const c=Math.cos(body.angle);
+  const s=Math.sin(body.angle);
 
-const c=Math.cos(body.angle);
-const s=Math.sin(body.angle);
+  const local=[
+    {x:-hw,y:-hh},
+    {x:hw,y:-hh},
+    {x:hw,y:hh},
+    {x:-hw,y:hh}
+  ];
 
-const local=[
-{x:-hw,y:-hh},
-{x:hw,y:-hh},
-{x:hw,y:hh},
-{x:-hw,y:hh}
-];
-
-return local.map(v=>({
-
-x:body.position.x+
-v.x*c-
-v.y*s,
-
-y:body.position.y+
-v.x*s+
-v.y*c
-
-}));
+  return local.map(v=>({
+    x:body.position.x+v.x*c-v.y*s,
+    y:body.position.y+v.x*s+v.y*c
+  }));
 }
 
 function getRotateHandle(body){
+  const size=getRectSize(body);
+  const d=Math.max(size.w,size.h)/2+42;
 
-const size=getRectSize(body);
-
-const d=
-Math.max(size.w,size.h)/2+42;
-
-return{
-
-x:body.position.x+
-Math.sin(body.angle)*d,
-
-y:body.position.y-
-Math.cos(body.angle)*d
-
-};
+  return{
+    x:body.position.x+Math.sin(body.angle)*d,
+    y:body.position.y-Math.cos(body.angle)*d
+  };
 }
 
-function dist(a,b){
+function worldToLocal(body,p){
+  const dx=p.x-body.position.x;
+  const dy=p.y-body.position.y;
 
-return Math.hypot(
-a.x-b.x,
-a.y-b.y
-);
+  const c=Math.cos(body.angle);
+  const s=Math.sin(body.angle);
+
+  return{
+    x:dx*c+dy*s,
+    y:-dx*s+dy*c
+  };
 }
-
-/*
-形変更
-
-対角固定はしない。
-
-ブロックの中心をそのまま基準にして、
-ドラッグした角までの距離から
-新しい幅・高さを決める。
-
-そのため反対側の角も動く。
-*/
 
 function resizeBody(body,index,pointer){
+  const center={
+    x:body.position.x,
+    y:body.position.y
+  };
 
-if(!body||body.label!=="block"){
-return;
-}
+  const local=worldToLocal(body,pointer);
 
-const old=getRectSize(body);
+  let halfW=Math.abs(local.x);
+  let halfH=Math.abs(local.y);
 
-const angle=body.angle;
+  halfW=Math.max(15,Math.min(1000,halfW));
+  halfH=Math.max(10,Math.min(1000,halfH));
 
-const c=Math.cos(angle);
-const s=Math.sin(angle);
+  const newW=halfW*2;
+  const newH=halfH*2;
 
-const dx=
-pointer.x-body.position.x;
+  const c=Math.cos(body.angle);
+  const s=Math.sin(body.angle);
 
-const dy=
-pointer.y-body.position.y;
+  const localVertices=[
+    {x:-halfW,y:-halfH},
+    {x:halfW,y:-halfH},
+    {x:halfW,y:halfH},
+    {x:-halfW,y:halfH}
+  ];
 
-/*
-画面上の座標をブロックの
-ローカル座標へ変換
-*/
+  const vertices=localVertices.map(v=>({
+    x:center.x+v.x*c-v.y*s,
+    y:center.y+v.x*s+v.y*c
+  }));
 
-let localX=
-dx*c+
-dy*s;
+  wakeBody(body);
 
-let localY=
--dx*s+
-dy*c;
+  Body.setVertices(body,vertices);
 
-/*
-どの角を動かしているかによって
-幅と高さの正負を決定
-*/
+  body.plugin.width=newW;
+  body.plugin.height=newH;
 
-let signX=
-(index===0||index===3)
-?-1
-:1;
+  Body.setPosition(body,center);
+  Body.setAngle(body,body.angle);
 
-let signY=
-(index===0||index===1)
-?-1
-:1;
-
-/*
-中心からドラッグした角までの距離を
-そのまま新しい半幅・半高さにする
-*/
-
-let halfW=Math.abs(localX);
-let halfH=Math.abs(localY);
-
-halfW=Math.max(
-15,
-Math.min(1000,halfW)
-);
-
-halfH=Math.max(
-10,
-Math.min(1000,halfH)
-);
-
-const newW=halfW*2;
-const newH=halfH*2;
-
-const vertices=[
-{
-x:body.position.x+
-(-halfW)*c-
-(-halfH)*s,
-y:body.position.y+
-(-halfW)*s+
-(-halfH)*c
-},
-{
-x:body.position.x+
-halfW*c-
-(-halfH)*s,
-y:body.position.y+
-halfW*s+
-(-halfH)*c
-},
-{
-x:body.position.x+
-halfW*c-
-halfH*s,
-y:body.position.y+
-halfW*s+
-halfH*c
-},
-{
-x:body.position.x+
-(-halfW)*c-
-halfH*s,
-y:body.position.y+
-(-halfW)*s+
-halfH*c
-}
-];
-
-Body.setVelocity(
-body,
-{x:0,y:0}
-);
-
-Body.setAngularVelocity(
-body,
-0
-);
-
-Body.setVertices(
-body,
-vertices
-);
-
-body.plugin.width=newW;
-body.plugin.height=newH;
-
-Body.setVelocity(
-body,
-{x:0,y:0}
-);
-
-Body.setAngularVelocity(
-body,
-0
-);
+  Body.setSleeping(body,false);
+  Body.setVelocity(body,{x:0,y:0});
+  Body.setAngularVelocity(body,0);
 }
 
 function rotateBody(body,pointer){
+  const angle=
+    Math.atan2(
+      pointer.y-body.position.y,
+      pointer.x-body.position.x
+    )+Math.PI/2;
 
-if(!body)return;
-
-if(body.label==="bedrock"){
-return;
-}
-
-const dx=
-pointer.x-body.position.x;
-
-const dy=
-pointer.y-body.position.y;
-
-const angle=
-Math.atan2(dx,-dy);
-
-Body.setVelocity(
-body,
-{x:0,y:0}
-);
-
-Body.setAngularVelocity(
-body,
-0
-);
-
-Body.setAngle(
-body,
-angle
-);
-
-Body.setVelocity(
-body,
-{x:0,y:0}
-);
-
-Body.setAngularVelocity(
-body,
-0
-);
+  wakeBody(body);
+  Body.setAngle(body,angle);
 }
 
 function setTool(tool){
+  currentTool=tool;
 
-currentTool=tool;
-
-document.querySelectorAll(".tool")
-.forEach(btn=>{
-
-btn.classList.toggle(
-"selected",
-btn.dataset.tool===tool
-);
-
-});
+  document.querySelectorAll("#editorBar button[data-tool]").forEach(btn=>{
+    btn.classList.toggle(
+      "toolActive",
+      btn.dataset.tool===tool
+    );
+  });
 }
 
-document.querySelectorAll(".tool")
-.forEach(btn=>{
+function pointerDown(e){
+  if(!engine)return;
 
-btn.addEventListener(
-"click",
-()=>{
-setTool(btn.dataset.tool);
-}
-);
+  const screen=getPointerPosition(e);
+  const world=screenToWorld(screen.x,screen.y);
 
-});
+  if(mode==="play"){
+    if(bombMode){
+      addBomb(world.x,world.y);
+      return;
+    }
 
-function getPointer(e){
+    return;
+  }
 
-const rect=
-canvas.getBoundingClientRect();
+  if(mode!=="editor")return;
 
-return{
-x:e.clientX-rect.left,
-y:e.clientY-rect.top
-};
-}
+  if(currentTool==="wood"){
+    addBlock(world.x,world.y,80,40,"wood");
+    return;
+  }
 
-canvas.addEventListener(
-"pointerdown",
-function(e){
+  if(currentTool==="glass"){
+    addBlock(world.x,world.y,80,40,"glass");
+    return;
+  }
 
-if(
-currentMode!=="editor"&&
-currentMode!=="play"
-){
-return;
-}
+  if(currentTool==="stone"){
+    addBlock(world.x,world.y,80,40,"stone");
+    return;
+  }
 
-e.preventDefault();
+  if(currentTool==="enemy"){
+    addEnemy(world.x,world.y);
+    return;
+  }
 
-try{
-canvas.setPointerCapture(
-e.pointerId
-);
-}catch(_){}
+  if(currentTool==="bomb"){
+    addBomb(world.x,world.y);
+    return;
+  }
 
-const screen=getPointer(e);
+  if(currentTool==="multiply"){
+    addMultiplier(world.x,world.y);
+    return;
+  }
 
-const p=screenToWorld(
-screen.x,
-screen.y
-);
+  if(currentTool==="bedrock"){
+    addBedrock(world.x,world.y);
+    return;
+  }
 
-if(currentMode==="play"){
+  if(currentTool==="delete"){
+    const body=getBodyAt(world);
 
-if(bombMode){
-addBomb(
-p.x,
-p.y
-);
-}
+    if(body){
+      World.remove(engine.world,body);
 
-return;
-}
+      if(selectedBody===body){
+        selectedBody=null;
+      }
+    }
 
-/*
-形変更
-*/
+    return;
+  }
 
-if(currentTool==="shape"){
+  if(currentTool==="resize"){
+    if(
+      selectedBody &&
+      selectedBody.plugin?.gameType==="block"
+    ){
+      const handles=getShapeHandles(selectedBody);
 
-if(
-selectedBody&&
-selectedBody.label==="block"
-){
+      for(let i=0;i<handles.length;i++){
+        if(distance(handles[i],world)<18/camera.zoom){
+          resizingBody=selectedBody;
+          resizeIndex=i;
+          wakeBody(resizingBody);
+          return;
+        }
+      }
+    }
 
-const handles=
-getShapeHandles(
-selectedBody
-);
+    const body=getBodyAt(world);
 
-for(
-let i=0;
-i<handles.length;
-i++
-){
+    if(
+      body &&
+      body.plugin?.gameType==="block"
+    ){
+      selectedBody=body;
+    }
 
-if(
-dist(handles[i],p)<
-32/camera.zoom
-){
+    return;
+  }
 
-resizing={
-body:selectedBody,
-corner:i
-};
+  if(currentTool==="rotate"){
+    if(selectedBody){
+      const handle=getRotateHandle(selectedBody);
 
-Body.setVelocity(
-selectedBody,
-{x:0,y:0}
-);
+      if(distance(handle,world)<22/camera.zoom){
+        rotatingBody=selectedBody;
+        wakeBody(rotatingBody);
+        return;
+      }
+    }
 
-Body.setAngularVelocity(
-selectedBody,
-0
-);
+    const body=getBodyAt(world);
 
-return;
-}
+    if(
+      body &&
+      body.plugin?.gameType!=="bedrock" &&
+      body.plugin?.gameType!=="multiply"
+    ){
+      selectedBody=body;
+    }
 
-}
-}
+    return;
+  }
 
-const hit=getBodyAt(p);
+  if(currentTool==="move"){
+    const body=getBodyAt(world);
 
-if(
-hit&&
-hit.label==="block"
-){
+    if(
+      body &&
+      body.plugin?.gameType!=="bedrock" &&
+      body.plugin?.gameType!=="multiply"
+    ){
+      selectedBody=body;
+      movingBody=body;
 
-selectedBody=hit;
+      moveOffset={
+        x:body.position.x-world.x,
+        y:body.position.y-world.y
+      };
 
-}else{
-
-selectedBody=null;
-
-}
-
-return;
-}
-
-/*
-回転
-*/
-
-if(currentTool==="rotate"){
-
-if(selectedBody){
-
-const handle=
-getRotateHandle(
-selectedBody
-);
-
-if(
-dist(handle,p)<
-40/camera.zoom
-){
-
-rotatingBody=
-selectedBody;
-
-return;
+      wakeBody(body);
+    }
+  }
 }
 
+function pointerMove(e){
+  if(!engine)return;
+
+  const screen=getPointerPosition(e);
+  const world=screenToWorld(screen.x,screen.y);
+
+  if(resizingBody){
+    resizeBody(resizingBody,resizeIndex,world);
+    return;
+  }
+
+  if(rotatingBody){
+    rotateBody(rotatingBody,world);
+    return;
+  }
+
+  if(movingBody){
+    Body.setSleeping(movingBody,false);
+
+    Body.setPosition(
+      movingBody,
+      {
+        x:world.x+moveOffset.x,
+        y:world.y+moveOffset.y
+      }
+    );
+
+    Body.setVelocity(movingBody,{x:0,y:0});
+    Body.setAngularVelocity(movingBody,0);
+
+    return;
+  }
 }
 
-const hit=getBodyAt(p);
+function pointerUp(){
+  if(resizingBody){
+    wakeBody(resizingBody);
+  }
 
-if(hit){
-selectedBody=hit;
-}else{
-selectedBody=null;
+  if(rotatingBody){
+    wakeBody(rotatingBody);
+  }
+
+  if(movingBody){
+    wakeBody(movingBody);
+  }
+
+  resizingBody=null;
+  rotatingBody=null;
+  movingBody=null;
+  resizeIndex=-1;
 }
 
-return;
-}
-
-/*
-移動
-*/
-
-if(currentTool==="move"){
-
-const hit=getBodyAt(p);
-
-if(hit){
-
-selectedBody=hit;
-
-if(
-hit.label!=="bedrock"&&
-hit.label!=="multiply"
-){
-
-movingBody=hit;
-
-moveOffset={
-x:p.x-hit.position.x,
-y:p.y-hit.position.y
-};
-
-Body.setVelocity(
-hit,
-{x:0,y:0}
-);
-
-Body.setAngularVelocity(
-hit,
-0
-);
-}
-
-}else{
-
-selectedBody=null;
-
-}
-
-return;
-}
-
-/*
-消去
-*/
-
-if(currentTool==="delete"){
-
-const hit=getBodyAt(p);
-
-if(hit){
-removeBody(hit);
-}
-
-return;
-}
-
-/*
-木
-*/
-
-if(currentTool==="wood"){
-
-addBlock(
-"wood",
-p.x,
-p.y,
-100,
-45,
-0
-);
-
-return;
-}
-
-/*
-ガラス
-*/
-
-if(currentTool==="glass"){
-
-addBlock(
-"glass",
-p.x,
-p.y,
-100,
-45,
-0
-);
-
-return;
-}
-
-/*
-石
-*/
-
-if(currentTool==="stone"){
-
-addBlock(
-"stone",
-p.x,
-p.y,
-100,
-45,
-0
-);
-
-return;
-}
-
-/*
-スライム
-*/
-
-if(currentTool==="enemy"){
-
-addEnemy(
-p.x,
-p.y
-);
-
-return;
-}
-
-/*
-爆弾
-*/
-
-if(currentTool==="bomb"){
-
-addBomb(
-p.x,
-p.y
-);
-
-return;
-}
-
-/*
-増殖
-*/
-
-if(currentTool==="multiply"){
-
-addMultiplier(
-p.x,
-p.y,
-70,
-50
-);
-
-return;
-}
-
-/*
-岩盤
-*/
-
-if(currentTool==="bedrock"){
-
-addBedrock(
-p.x,
-p.y,
-120,
-35
-);
-
-return;
-}
-
-}
-);
-
-canvas.addEventListener(
-"pointermove",
-function(e){
-
-if(currentMode!=="editor"){
-return;
-}
-
-const screen=getPointer(e);
-
-const p=screenToWorld(
-screen.x,
-screen.y
-);
-
-if(resizing){
-
-resizeBody(
-resizing.body,
-resizing.corner,
-p
-);
-
-e.preventDefault();
-
-return;
-}
-
-if(rotatingBody){
-
-rotateBody(
-rotatingBody,
-p
-);
-
-e.preventDefault();
-
-return;
-}
-
-if(movingBody){
-
-Body.setPosition(
-movingBody,
-{
-x:p.x-moveOffset.x,
-y:p.y-moveOffset.y
-}
-);
-
-Body.setVelocity(
-movingBody,
-{x:0,y:0}
-);
-
-Body.setAngularVelocity(
-movingBody,
-0
-);
-
-e.preventDefault();
-
-return;
-}
-
-}
-);
-
-function endPointer(){
-
-if(resizing){
-
-Body.setVelocity(
-resizing.body,
-{x:0,y:0}
-);
-
-Body.setAngularVelocity(
-resizing.body,
-0
-);
-
-resizing=null;
-}
-
-if(rotatingBody){
-
-Body.setVelocity(
-rotatingBody,
-{x:0,y:0}
-);
-
-Body.setAngularVelocity(
-rotatingBody,
-0
-);
-
-rotatingBody=null;
-}
-
-if(movingBody){
-
-Body.setVelocity(
-movingBody,
-{x:0,y:0}
-);
-
-Body.setAngularVelocity(
-movingBody,
-0
-);
-
-movingBody=null;
-}
-
-}
-
-canvas.addEventListener(
-"pointerup",
-endPointer
-);
-
-canvas.addEventListener(
-"pointercancel",
-endPointer
-);
+canvas.addEventListener("pointerdown",pointerDown);
+canvas.addEventListener("pointermove",pointerMove);
+canvas.addEventListener("pointerup",pointerUp);
+canvas.addEventListener("pointercancel",pointerUp);
 
 function editorBeforeUpdate(){
+  if(mode!=="editor"||!engine)return;
 
-if(!engine)return;
+  for(const body of getBodies()){
+    const type=body.plugin?.gameType;
 
-getBodies().forEach(body=>{
+    if(type==="block"){
+      body.plugin.hp=body.plugin.maxHp;
+    }
 
-if(
-body.label==="block"&&
-body.plugin
-){
-
-body.plugin.hp=
-body.plugin.maxHp;
-}
-
-if(
-body.label==="bedrock"
-){
-
-Body.setVelocity(
-body,
-{x:0,y:0}
-);
-
-Body.setAngularVelocity(
-body,
-0
-);
-
-}
-
-});
-
-}
-
-const multiplierContacts=
-new Map();
-
-function getMultiplierPair(a,b){
-
-if(
-a.label==="multiply"&&
-b.label==="bomb"
-){
-
-return{
-multi:a,
-bomb:b
-};
-}
-
-if(
-b.label==="multiply"&&
-a.label==="bomb"
-){
-
-return{
-multi:b,
-bomb:a
-};
-}
-
-return null;
+    if(type==="bedrock"){
+      Body.setVelocity(body,{x:0,y:0});
+      Body.setAngularVelocity(body,0);
+    }
+  }
 }
 
 function collisionStart(event){
+  for(const pair of event.pairs){
+    const a=pair.bodyA;
+    const b=pair.bodyB;
 
-event.pairs.forEach(pair=>{
+    handleMultiplierCollision(a,b);
+    handleMultiplierCollision(b,a);
 
-const a=pair.bodyA;
-const b=pair.bodyB;
+    if(mode==="play"){
+      const ta=a.plugin?.gameType;
+      const tb=b.plugin?.gameType;
 
-const data=
-getMultiplierPair(a,b);
+      if(
+        (ta==="bomb"&&tb==="block")||
+        (ta==="block"&&tb==="bomb")
+      ){
+        const bomb=ta==="bomb"?a:b;
+        const block=ta==="block"?a:b;
 
-if(data){
+        damageBlock(block,1);
 
-const multi=data.multi;
-const bomb=data.bomb;
-
-if(
-!multiplierContacts.has(
-multi.id
-)
-){
-
-multiplierContacts.set(
-multi.id,
-new Set()
-);
-
-}
-
-const set=
-multiplierContacts.get(
-multi.id
-);
-
-if(
-!set.has(
-bomb.plugin.id
-)
-){
-
-set.add(
-bomb.plugin.id
-);
-
-spawnMultipliedBomb(
-multi
-);
-
-}
-
-}
-
-if(currentMode==="play"){
-
-if(
-(a.label==="bomb"&&
-b.label==="block")||
-(b.label==="bomb"&&
-a.label==="block")
-){
-
-const block=
-a.label==="block"
-?a
-:b;
-
-damageBlock(
-block,
-1
-);
-
-}
-
-}
-
-});
+        if(engine&&Composite.get(engine.world,bomb.id)){
+          World.remove(engine.world,bomb);
+          createExplosion(
+            bomb.position.x,
+            bomb.position.y
+          );
+        }
+      }
+    }
+  }
 }
 
 function collisionEnd(event){
+  for(const pair of event.pairs){
+    const a=pair.bodyA;
+    const b=pair.bodyB;
 
-event.pairs.forEach(pair=>{
-
-const data=
-getMultiplierPair(
-pair.bodyA,
-pair.bodyB
-);
-
-if(!data)return;
-
-const set=
-multiplierContacts.get(
-data.multi.id
-);
-
-if(set){
-
-set.delete(
-data.bomb.plugin.id
-);
-
+    removeMultiplierContact(a,b);
+    removeMultiplierContact(b,a);
+  }
 }
 
-});
+function handleMultiplierCollision(multi,other){
+  if(
+    multi.plugin?.gameType!=="multiply"||
+    other.plugin?.gameType!=="bomb"
+  ){
+    return;
+  }
+
+  let set=multiplierContacts.get(multi.id);
+
+  if(!set){
+    set=new Set();
+    multiplierContacts.set(multi.id,set);
+  }
+
+  if(set.has(other.id)){
+    return;
+  }
+
+  set.add(other.id);
+
+  const size=getRectSize(multi);
+
+  const x=
+    multi.position.x+
+    (Math.random()-.5)*
+    Math.max(10,size.w*.7);
+
+  const y=
+    multi.position.y+
+    size.h/2+
+    35;
+
+  addBomb(x,y);
 }
 
-function spawnMultipliedBomb(multi){
+function removeMultiplierContact(a,b){
+  if(
+    a.plugin?.gameType!=="multiply"||
+    b.plugin?.gameType!=="bomb"
+  ){
+    return;
+  }
 
-if(!engine)return;
+  const set=multiplierContacts.get(a.id);
 
-const w=
-multi.plugin.width||70;
-
-const h=
-multi.plugin.height||50;
-
-const x=
-multi.position.x+
-(Math.random()-.5)*w*.6;
-
-const y=
-multi.position.y+
-h/2+
-35;
-
-const bomb=
-addBomb(x,y);
-
-Body.setVelocity(
-bomb,
-{
-x:(Math.random()-.5),
-y:0
-}
-);
+  if(set){
+    set.delete(b.id);
+  }
 }
 
-function damageBlock(block,amount){
+function damageBlock(block,damage){
+  if(
+    !block||
+    block.plugin?.gameType!=="block"
+  ){
+    return;
+  }
 
-if(currentMode!=="play")return;
+  if(mode==="editor"){
+    block.plugin.hp=block.plugin.maxHp;
+    return;
+  }
 
-if(
-!block||
-block.label!=="block"
-)return;
+  block.plugin.hp-=damage;
 
-block.plugin.hp-=amount;
+  if(block.plugin.hp<=0){
+    const p={
+      x:block.position.x,
+      y:block.position.y
+    };
 
-if(block.plugin.hp<=0){
+    World.remove(engine.world,block);
 
-const p={
-x:block.position.x,
-y:block.position.y
-};
-
-World.remove(
-engine.world,
-block
-);
-
-createExplosion(
-p.x,
-p.y
-);
-
-}
+    createExplosion(p.x,p.y);
+  }
 }
 
 function createExplosion(x,y){
+  explosions.push({
+    x,
+    y,
+    start:performance.now(),
+    duration:550
+  });
 
-const radius=155;
-const force=.045;
+  const bodies=getBodies();
 
-getBodies().forEach(body=>{
+  for(const body of bodies){
+    if(
+      body.plugin?.gameType==="floor"||
+      body.plugin?.gameType==="multiply"||
+      body.plugin?.gameType==="bedrock"||
+      body.plugin?.gameType==="bomb"
+    ){
+      continue;
+    }
 
-if(body.isStatic)return;
+    const dx=body.position.x-x;
+    const dy=body.position.y-y;
+    const dist=Math.max(25,Math.hypot(dx,dy));
 
-const dx=
-body.position.x-x;
+    if(dist>260)continue;
 
-const dy=
-body.position.y-y;
+    const force=
+      Math.max(0,1-dist/260)*0.035;
 
-const d=
-Math.hypot(dx,dy);
+    Body.applyForce(
+      body,
+      body.position,
+      {
+        x:(dx/dist)*force*body.mass,
+        y:(dy/dist)*force*body.mass-.015*body.mass
+      }
+    );
 
-if(
-d>radius||
-d===0
-){
-return;
-}
+    if(mode==="play"){
+      if(body.plugin?.gameType==="block"){
+        damageBlock(body,2);
+      }
 
-const power=
-1-d/radius;
-
-Body.applyForce(
-body,
-body.position,
-{
-x:dx/d*force*power,
-y:dy/d*force*power
-}
-);
-
-if(currentMode==="play"){
-
-if(body.label==="block"){
-damageBlock(body,2);
-}
-
-if(body.label==="enemy"){
-
-World.remove(
-engine.world,
-body
-);
-
-}
-
-}
-
-});
+      if(body.plugin?.gameType==="enemy"){
+        World.remove(engine.world,body);
+      }
+    }
+  }
 }
 
 function explodeAll(){
+  if(!engine)return;
 
-if(!engine)return;
+  const bombs=getBodies().filter(
+    b=>b.plugin?.gameType==="bomb"
+  );
 
-const bombs=
-getBodies().filter(
-b=>b.label==="bomb"
-);
+  for(const bomb of bombs){
+    const x=bomb.position.x;
+    const y=bomb.position.y;
 
-bombs.forEach(bomb=>{
-
-const p={
-x:bomb.position.x,
-y:bomb.position.y
-};
-
-World.remove(
-engine.world,
-bomb
-);
-
-createExplosion(
-p.x,
-p.y
-);
-
-});
+    World.remove(engine.world,bomb);
+    createExplosion(x,y);
+  }
 }
 
 function drawBackground(){
+  ctx.fillStyle="#dff1ff";
+  ctx.fillRect(0,0,canvasWidth,canvasHeight);
 
-ctx.fillStyle="#dce3e9";
+  const grid=50*camera.zoom;
 
-ctx.fillRect(
-camera.x-canvasWidth/camera.zoom,
-camera.y-canvasHeight/camera.zoom,
-canvasWidth/camera.zoom*2,
-canvasHeight/camera.zoom*2
-);
+  const originX=
+    canvasWidth/2-camera.x*camera.zoom;
 
-ctx.strokeStyle=
-"rgba(0,0,0,.045)";
+  const originY=
+    canvasHeight/2-camera.y*camera.zoom;
 
-ctx.lineWidth=1;
+  ctx.beginPath();
 
-const left=
-camera.x-canvasWidth/camera.zoom;
+  for(
+    let x=originX%grid;
+    x<canvasWidth;
+    x+=grid
+  ){
+    ctx.moveTo(x,0);
+    ctx.lineTo(x,canvasHeight);
+  }
 
-const right=
-camera.x+canvasWidth/camera.zoom;
+  for(
+    let y=originY%grid;
+    y<canvasHeight;
+    y+=grid
+  ){
+    ctx.moveTo(0,y);
+    ctx.lineTo(canvasWidth,y);
+  }
 
-const top=
-camera.y-canvasHeight/camera.zoom;
-
-const bottom=
-camera.y+canvasHeight/camera.zoom;
-
-for(
-let x=Math.floor(left/50)*50;
-x<right;
-x+=50
-){
-
-ctx.beginPath();
-ctx.moveTo(x,top);
-ctx.lineTo(x,bottom);
-ctx.stroke();
-
-}
-
-for(
-let y=Math.floor(top/50)*50;
-y<bottom;
-y+=50
-){
-
-ctx.beginPath();
-ctx.moveTo(left,y);
-ctx.lineTo(right,y);
-ctx.stroke();
-
-}
+  ctx.strokeStyle="rgba(100,150,180,.18)";
+  ctx.lineWidth=1;
+  ctx.stroke();
 }
 
 function drawFloor(){
+  const left=worldToScreen(-50000,FLOOR_Y).x;
+  const right=worldToScreen(50000,FLOOR_Y).x;
+  const top=worldToScreen(0,FLOOR_Y).y;
 
-ctx.fillStyle="#3b4148";
+  ctx.fillStyle="#777";
+  ctx.fillRect(
+    left,
+    top,
+    right-left,
+    80*camera.zoom
+  );
 
-ctx.fillRect(
--50000,
-FLOOR_Y,
-100000,
-80
-);
+  ctx.fillStyle="#555";
+  ctx.fillRect(
+    left,
+    top,
+    right-left,
+    8*camera.zoom
+  );
 
-ctx.fillStyle="#59616a";
+  ctx.save();
 
-ctx.fillRect(
--50000,
-FLOOR_Y,
-100000,
-8
-);
-}
+  ctx.strokeStyle="rgba(255,255,255,.18)";
+  ctx.lineWidth=2;
 
-function drawPolygon(vertices,fill){
+  const step=30*camera.zoom;
 
-ctx.beginPath();
+  for(let x=left;x<right;x+=step){
+    ctx.beginPath();
+    ctx.moveTo(x,top+8*camera.zoom);
+    ctx.lineTo(x+20*camera.zoom,top+28*camera.zoom);
+    ctx.stroke();
+  }
 
-vertices.forEach((v,i)=>{
-
-if(i===0){
-ctx.moveTo(v.x,v.y);
-}else{
-ctx.lineTo(v.x,v.y);
-}
-
-});
-
-ctx.closePath();
-
-ctx.fillStyle=fill;
-ctx.fill();
-
-ctx.strokeStyle="#30343a";
-ctx.lineWidth=2;
-ctx.stroke();
+  ctx.restore();
 }
 
 function drawBlock(body){
+  const size=getRectSize(body);
 
-let fill="#a86b32";
+  ctx.save();
 
-if(body.plugin.material==="glass"){
-fill="rgba(114,201,232,.65)";
-}
+  const p=worldToScreen(
+    body.position.x,
+    body.position.y
+  );
 
-if(body.plugin.material==="stone"){
-fill="#777";
-}
+  ctx.translate(p.x,p.y);
+  ctx.rotate(body.angle);
 
-drawPolygon(
-body.vertices,
-fill
-);
+  const w=size.w*camera.zoom;
+  const h=size.h*camera.zoom;
+
+  const material=body.plugin.material;
+
+  if(material==="wood"){
+    ctx.fillStyle="#a96b32";
+    ctx.strokeStyle="#6c401e";
+  }
+
+  if(material==="glass"){
+    ctx.fillStyle="rgba(120,210,255,.48)";
+    ctx.strokeStyle="#3c9bc0";
+  }
+
+  if(material==="stone"){
+    ctx.fillStyle="#888";
+    ctx.strokeStyle="#555";
+  }
+
+  ctx.lineWidth=3;
+  ctx.fillRect(-w/2,-h/2,w,h);
+  ctx.strokeRect(-w/2,-h/2,w,h);
+
+  if(material==="wood"){
+    ctx.strokeStyle="rgba(70,35,10,.35)";
+    ctx.lineWidth=2;
+
+    for(let x=-w/2+10;x<w/2;x+=22){
+      ctx.beginPath();
+      ctx.moveTo(x,-h/2);
+      ctx.lineTo(x+4,h/2);
+      ctx.stroke();
+    }
+  }
+
+  if(material==="glass"){
+    ctx.strokeStyle="rgba(255,255,255,.65)";
+    ctx.lineWidth=2;
+
+    ctx.beginPath();
+    ctx.moveTo(-w*.35,-h*.35);
+    ctx.lineTo(w*.35,h*.35);
+    ctx.stroke();
+  }
+
+  ctx.restore();
 }
 
 function drawEnemy(body){
+  const size=getRectSize(body);
 
-const p=body.position;
+  const p=worldToScreen(
+    body.position.x,
+    body.position.y
+  );
 
-ctx.beginPath();
+  ctx.save();
+  ctx.translate(p.x,p.y);
+  ctx.rotate(body.angle);
 
-ctx.arc(
-p.x,
-p.y,
-22,
-0,
-Math.PI*2
-);
+  const w=size.w*camera.zoom;
+  const h=size.h*camera.zoom;
 
-ctx.fillStyle="#56c94d";
-ctx.fill();
+  ctx.fillStyle="#59c33a";
+  ctx.strokeStyle="#2d7b20";
+  ctx.lineWidth=3;
 
-ctx.strokeStyle="#236523";
-ctx.lineWidth=2;
-ctx.stroke();
+  ctx.beginPath();
+  ctx.roundRect(
+    -w/2,
+    -h/2,
+    w,
+    h,
+    Math.min(12,w*.2)
+  );
+  ctx.fill();
+  ctx.stroke();
 
-ctx.fillStyle="#111";
+  ctx.fillStyle="#fff";
 
-ctx.beginPath();
+  ctx.beginPath();
+  ctx.arc(-w*.18,-h*.08,Math.max(2,w*.1),0,Math.PI*2);
+  ctx.arc(w*.18,-h*.08,Math.max(2,w*.1),0,Math.PI*2);
+  ctx.fill();
 
-ctx.arc(
-p.x-7,
-p.y-4,
-3,
-0,
-Math.PI*2
-);
+  ctx.fillStyle="#222";
 
-ctx.arc(
-p.x+7,
-p.y-4,
-3,
-0,
-Math.PI*2
-);
+  ctx.beginPath();
+  ctx.arc(-w*.18,-h*.08,Math.max(1,w*.045),0,Math.PI*2);
+  ctx.arc(w*.18,-h*.08,Math.max(1,w*.045),0,Math.PI*2);
+  ctx.fill();
 
-ctx.fill();
+  ctx.restore();
 }
 
 function drawBomb(body){
+  const p=worldToScreen(
+    body.position.x,
+    body.position.y
+  );
 
-const p=body.position;
+  const r=(body.plugin?.radius||16)*camera.zoom;
 
-ctx.beginPath();
+  ctx.save();
 
-ctx.arc(
-p.x,
-p.y,
-13,
-0,
-Math.PI*2
-);
+  ctx.fillStyle="#222";
+  ctx.strokeStyle="#111";
+  ctx.lineWidth=3;
 
-ctx.fillStyle="#222";
-ctx.fill();
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,r,0,Math.PI*2);
+  ctx.fill();
+  ctx.stroke();
 
-ctx.strokeStyle="#111";
-ctx.lineWidth=2;
-ctx.stroke();
+  ctx.strokeStyle="#c87919";
+  ctx.lineWidth=Math.max(2,3*camera.zoom);
 
-ctx.strokeStyle="#8b4a22";
-ctx.lineWidth=4;
+  ctx.beginPath();
+  ctx.moveTo(p.x+r*.45,p.y-r*.75);
+  ctx.quadraticCurveTo(
+    p.x+r*.9,
+    p.y-r*1.3,
+    p.x+r*1.1,
+    p.y-r*1.55
+  );
+  ctx.stroke();
 
-ctx.beginPath();
+  ctx.fillStyle="#ffcc33";
+  ctx.beginPath();
+  ctx.arc(
+    p.x+r*1.12,
+    p.y-r*1.58,
+    Math.max(2,r*.18),
+    0,
+    Math.PI*2
+  );
+  ctx.fill();
 
-ctx.moveTo(
-p.x+7,
-p.y-9
-);
-
-ctx.quadraticCurveTo(
-p.x+12,
-p.y-17,
-p.x+9,
-p.y-22
-);
-
-ctx.stroke();
-
-ctx.fillStyle="#ffca28";
-
-ctx.beginPath();
-
-ctx.arc(
-p.x+9,
-p.y-22,
-4,
-0,
-Math.PI*2
-);
-
-ctx.fill();
+  ctx.restore();
 }
 
 function drawMultiplier(body){
+  const size=getRectSize(body);
 
-const size=
-getRectSize(body);
+  const p=worldToScreen(
+    body.position.x,
+    body.position.y
+  );
 
-ctx.save();
+  ctx.save();
 
-ctx.translate(
-body.position.x,
-body.position.y
-);
+  ctx.translate(p.x,p.y);
+  ctx.rotate(body.angle);
 
-ctx.rotate(
-body.angle
-);
+  const w=size.w*camera.zoom;
+  const h=size.h*camera.zoom;
 
-ctx.fillStyle="#b17cff";
+  ctx.fillStyle="#9b55d5";
+  ctx.strokeStyle="#663096";
+  ctx.lineWidth=3;
 
-ctx.fillRect(
--size.w/2,
--size.h/2,
-size.w,
-size.h
-);
+  ctx.beginPath();
+  ctx.roundRect(
+    -w/2,
+    -h/2,
+    w,
+    h,
+    10*camera.zoom
+  );
 
-ctx.strokeStyle="#5d3c9c";
-ctx.lineWidth=3;
+  ctx.fill();
+  ctx.stroke();
 
-ctx.strokeRect(
--size.w/2,
--size.h/2,
-size.w,
-size.h
-);
+  ctx.fillStyle="#fff";
+  ctx.font=`bold ${Math.max(18,28*camera.zoom)}px sans-serif`;
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.fillText("×2",0,0);
 
-ctx.fillStyle="#fff";
-ctx.font="bold 25px sans-serif";
-ctx.textAlign="center";
-ctx.textBaseline="middle";
-
-ctx.fillText(
-"×2",
-0,
-0
-);
-
-ctx.restore();
+  ctx.restore();
 }
 
 function drawBedrock(body){
+  const size=getRectSize(body);
 
-const size=
-getRectSize(body);
+  const p=worldToScreen(
+    body.position.x,
+    body.position.y
+  );
 
-ctx.save();
+  ctx.save();
 
-ctx.translate(
-body.position.x,
-body.position.y
-);
+  ctx.translate(p.x,p.y);
+  ctx.rotate(body.angle);
 
-ctx.rotate(
-body.angle
-);
+  const w=size.w*camera.zoom;
+  const h=size.h*camera.zoom;
 
-ctx.fillStyle="#30343b";
+  ctx.fillStyle="#303030";
+  ctx.strokeStyle="#111";
+  ctx.lineWidth=3;
 
-ctx.fillRect(
--size.w/2,
--size.h/2,
-size.w,
-size.h
-);
+  ctx.fillRect(-w/2,-h/2,w,h);
+  ctx.strokeRect(-w/2,-h/2,w,h);
 
-ctx.strokeStyle="#17191d";
-ctx.lineWidth=3;
+  ctx.fillStyle="#fff";
+  ctx.font=`bold ${Math.max(10,13*camera.zoom)}px sans-serif`;
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.fillText("岩盤",0,0);
 
-ctx.strokeRect(
--size.w/2,
--size.h/2,
-size.w,
-size.h
-);
-
-ctx.fillStyle="#aaa";
-ctx.font="bold 15px sans-serif";
-ctx.textAlign="center";
-ctx.textBaseline="middle";
-
-ctx.fillText(
-"岩盤",
-0,
-0
-);
-
-ctx.restore();
+  ctx.restore();
 }
 
-function drawSelection(body){
+function drawSelected(){
+  if(!selectedBody)return;
+  if(!engine)return;
 
-if(body.label==="block"){
+  const type=selectedBody.plugin?.gameType;
 
-const handles=
-getShapeHandles(body);
+  if(type==="bedrock"||type==="multiply")return;
 
-const size=
-getRectSize(body);
+  if(
+    !Composite.get(
+      engine.world,
+      selectedBody.id
+    )
+  ){
+    selectedBody=null;
+    return;
+  }
 
-ctx.save();
+  const size=getRectSize(selectedBody);
+  const p=worldToScreen(
+    selectedBody.position.x,
+    selectedBody.position.y
+  );
 
-ctx.translate(
-body.position.x,
-body.position.y
+  ctx.save();
+
+  ctx.translate(p.x,p.y);
+  ctx.rotate(selectedBody.angle);
+
+  ctx.strokeStyle="#007aff";
+  ctx.lineWidth=2;
+  ctx.setLineDash([6,5]);
+
+  ctx.strokeRect(
+    -size.w/2*camera.zoom,
+    -size.h/2*camera.zoom,
+    size.w*camera.zoom,
+    size.h*camera.zoom
+  );
+
+  ctx.setLineDash([]);
+
+  ctx.restore();
+
+  const handles=getShapeHandles(selectedBody);
+
+  for(const h of handles){
+    const p2=worldToScreen(h.x,h.y);
+
+    ctx.fillStyle="#fff";
+    ctx.strokeStyle="#007aff";
+    ctx.lineWidth=2;
+
+    ctx.beginPath();
+    ctx.arc(p2.x,p2.y,7,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  if(currentTool==="rotate"){
+    const r=getRotateHandle(selectedBody);
+    const rp=worldToScreen(r.x,r.y);
+
+    ctx.strokeStyle="#ff7a00";
+    ctx.lineWidth=2;
+
+    ctx.beginPath();
+    ctx.moveTo(p.x,p.y);
+    ctx.lineTo(rp.x,rp.y);
+    ctx.stroke();
+
+    ctx.fillStyle="#fff";
+    ctx.strokeStyle="#ff7a00";
+
+    ctx.beginPath();
+    ctx.arc(rp.x,rp.y,8,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
+function drawExplosions(){
+  const now=performance.now();
+
+  explosions=explosions.filter(ex=>{
+    const elapsed=now-ex.start;
+
+    if(elapsed>=ex.duration){
+      return false;
+    }
+
+    const t=elapsed/ex.duration;
+    const ease=1-Math.pow(1-t,2);
+
+    const p=worldToScreen(ex.x,ex.y);
+
+    const radius=(35+155*ease)*camera.zoom;
+
+    ctx.save();
+
+    const alpha=1-t;
+
+    const gradient=ctx.createRadialGradient(
+      p.x,
+      p.y,
+      0,
+      p.x,
+      p.y,
+      radius
+    );
+
+    gradient.addColorStop(
+      0,
+      `rgba(255,255,230,${alpha})`
+    );
+
+    gradient.addColorStop(
+      .2,
+      `rgba(255,220,60,${.95*alpha})`
+    );
+
+    gradient.addColorStop(
+      .5,
+      `rgba(255,90,10,${.7*alpha})`
+    );
+
+    gradient.addColorStop(
+      1,
+      `rgba(255,40,0,0)`
+    );
+
+    ctx.fillStyle=gradient;
+
+    ctx.beginPath();
+    ctx.arc(
+      p.x,
+      p.y,
+      radius,
+      0,
+      Math.PI*2
+    );
+    ctx.fill();
+
+    ctx.restore();
+
+    return true;
+  });
+}
+
+function render(){
+  if(!engine)return;
+
+  drawBackground();
+  drawFloor();
+
+  drawExplosions();
+
+  for(const body of getBodies()){
+    const type=body.plugin?.gameType;
+
+    if(type==="block"){
+      drawBlock(body);
+    }
+
+    if(type==="enemy"){
+      drawEnemy(body);
+    }
+
+    if(type==="bomb"){
+      drawBomb(body);
+    }
+
+    if(type==="multiply"){
+      drawMultiplier(body);
+    }
+
+    if(type==="bedrock"){
+      drawBedrock(body);
+    }
+  }
+
+  drawSelected();
+
+  requestAnimationFrame(render);
+}
+
+Events.on(
+  engine=null,
+  "beforeUpdate",
+  ()=>{}
 );
 
-ctx.rotate(
-body.angle
-);
+let editorUpdateAttached=false;
 
-ctx.strokeStyle="#1677ff";
-ctx.lineWidth=3;
-ctx.setLineDash([7,5]);
+function attachEditorUpdate(){
+  if(!engine)return;
 
-ctx.strokeRect(
--size.w/2,
--size.h/2,
-size.w,
-size.h
-);
-
-ctx.restore();
-
-ctx.setLineDash([]);
-
-handles.forEach(p=>{
-
-ctx.beginPath();
-
-ctx.arc(
-p.x,
-p.y,
-9,
-0,
-Math.PI*2
-);
-
-ctx.fillStyle="#fff";
-ctx.fill();
-
-ctx.strokeStyle="#1677ff";
-ctx.lineWidth=3;
-ctx.stroke();
-
-});
+  Events.on(
+    engine,
+    "beforeUpdate",
+    editorBeforeUpdate
+  );
 }
 
-if(currentTool==="rotate"){
+function gameLoop(){
+  if(engine){
+    Engine.update(
+      engine,
+      1000/60
+    );
+  }
 
-const h=
-getRotateHandle(body);
-
-ctx.strokeStyle="#f08000";
-ctx.lineWidth=3;
-
-ctx.beginPath();
-
-ctx.moveTo(
-body.position.x,
-body.position.y
-);
-
-ctx.lineTo(
-h.x,
-h.y
-);
-
-ctx.stroke();
-
-ctx.beginPath();
-
-ctx.arc(
-h.x,
-h.y,
-10,
-0,
-Math.PI*2
-);
-
-ctx.fillStyle="#fff";
-ctx.fill();
-
-ctx.strokeStyle="#f08000";
-ctx.stroke();
-
-}
+  renderLoop=requestAnimationFrame(gameLoop);
 }
 
-function draw(){
+let renderLoop=null;
 
-requestAnimationFrame(draw);
+function startGameLoop(){
+  if(renderLoop){
+    cancelAnimationFrame(renderLoop);
+  }
 
-if(!engine)return;
-
-ctx.clearRect(
-0,
-0,
-canvasWidth,
-canvasHeight
-);
-
-ctx.save();
-
-ctx.translate(
-canvasWidth/2,
-canvasHeight/2
-);
-
-ctx.scale(
-camera.zoom,
-camera.zoom
-);
-
-ctx.translate(
--camera.x,
--camera.y
-);
-
-drawBackground();
-drawFloor();
-
-getBodies().forEach(body=>{
-
-if(body.label==="block"){
-drawBlock(body);
-}
-
-if(body.label==="enemy"){
-drawEnemy(body);
-}
-
-if(body.label==="bomb"){
-drawBomb(body);
-}
-
-if(body.label==="multiply"){
-drawMultiplier(body);
-}
-
-if(body.label==="bedrock"){
-drawBedrock(body);
-}
-
-});
-
-if(
-currentMode==="editor"&&
-selectedBody
-){
-
-drawSelection(
-selectedBody
-);
-
-}
-
-ctx.restore();
-}
-
-function serializeStage(){
-
-const objects=[];
-
-getBodies().forEach(body=>{
-
-const type=
-body.plugin&&
-body.plugin.gameType;
-
-if(type==="block"){
-
-objects.push({
-
-type:"block",
-
-material:
-body.plugin.material,
-
-x:body.position.x,
-y:body.position.y,
-
-w:body.plugin.width,
-h:body.plugin.height,
-
-angle:body.angle
-
-});
-
-}
-
-if(type==="enemy"){
-
-objects.push({
-
-type:"enemy",
-
-x:body.position.x,
-y:body.position.y
-
-});
-
-}
-
-if(type==="bomb"){
-
-objects.push({
-
-type:"bomb",
-
-x:body.position.x,
-y:body.position.y
-
-});
-
-}
-
-if(type==="multiply"){
-
-objects.push({
-
-type:"multiply",
-
-x:body.position.x,
-y:body.position.y,
-
-w:body.plugin.width,
-h:body.plugin.height
-
-});
-
-}
-
-if(type==="bedrock"){
-
-objects.push({
-
-type:"bedrock",
-
-x:body.position.x,
-y:body.position.y,
-
-w:body.plugin.width,
-h:body.plugin.height
-
-});
-
-}
-
-});
-
-return objects;
-}
-
-function getStages(){
-
-try{
-
-const data=
-localStorage.getItem(
-SAVE_KEY
-);
-
-if(!data)return[];
-
-const result=
-JSON.parse(data);
-
-return Array.isArray(result)
-?result
-:[];
-
-}catch(e){
-
-return[];
-
-}
-}
-
-function saveStages(stages){
-
-localStorage.setItem(
-SAVE_KEY,
-JSON.stringify(stages)
-);
+  gameLoop();
 }
 
 function saveCurrentStage(){
-
-if(currentMode!=="editor"){
-return;
+  stageNameBox.classList.remove("hidden");
+  stageNameInput.value="";
+  stageNameInput.focus();
 }
 
-const objects=
-serializeStage();
-
-let stages=getStages();
-
-if(!stageId){
-
-stageId=
-Date.now().toString(36)+
-Math.random()
-.toString(36)
-.slice(2);
-
+function getStages(){
+  try{
+    return JSON.parse(
+      localStorage.getItem(SAVE_KEY)||"[]"
+    );
+  }catch{
+    return[];
+  }
 }
 
-const stage={
-id:stageId,
-name:stageName,
-objects:objects
-};
-
-const index=
-stages.findIndex(
-x=>x.id===stageId
-);
-
-if(index>=0){
-
-stages[index]=stage;
-
-}else{
-
-stages.push(stage);
-
-}
-
-saveStages(stages);
-
-currentStageObjects=objects;
-
-showMessage(
-"保存しました"
-);
+function setStages(stages){
+  localStorage.setItem(
+    SAVE_KEY,
+    JSON.stringify(stages)
+  );
 }
 
 function renderStageList(){
+  const stages=getStages();
 
-const list=
-document.getElementById(
-"stageList"
-);
+  stageList.innerHTML="";
 
-list.innerHTML="";
+  if(!stages.length){
+    stageList.innerHTML=
+      `<div class="empty">保存されたステージはありません。</div>`;
+    return;
+  }
 
-const stages=getStages();
+  for(const stage of stages){
+    const card=document.createElement("div");
+    card.className="stageCard";
 
-if(stages.length===0){
+    const title=document.createElement("h3");
+    title.textContent=stage.name||"無題のステージ";
 
-const empty=
-document.createElement("div");
+    const info=document.createElement("small");
+    info.textContent=
+      `${stage.objects?.length||0}個のオブジェクト`;
 
-empty.style.background="#fff";
-empty.style.padding="25px";
-empty.style.borderRadius="15px";
-empty.style.textAlign="center";
+    const actions=document.createElement("div");
+    actions.className="stageActions";
 
-empty.textContent=
-"保存されたステージはありません。";
+    const play=document.createElement("button");
+    play.textContent="遊ぶ";
 
-list.appendChild(empty);
+    play.addEventListener("click",()=>{
+      currentStageId=stage.id;
+      startPlay(stage.objects||[]);
+    });
 
-return;
+    const edit=document.createElement("button");
+    edit.textContent="編集";
+
+    edit.addEventListener("click",()=>{
+      currentStageId=stage.id;
+      startEditor(stage.objects||[]);
+    });
+
+    const del=document.createElement("button");
+    del.textContent="削除";
+
+    del.addEventListener("click",()=>{
+      const current=getStages();
+      const next=current.filter(
+        s=>s.id!==stage.id
+      );
+
+      setStages(next);
+      renderStageList();
+    });
+
+    actions.appendChild(play);
+    actions.appendChild(edit);
+    actions.appendChild(del);
+
+    card.appendChild(title);
+    card.appendChild(info);
+    card.appendChild(actions);
+
+    stageList.appendChild(card);
+  }
 }
 
-stages.forEach(stage=>{
+function showStageScreen(){
+  stopEngine();
 
-const card=
-document.createElement("div");
+  renderStageList();
 
-card.className="stageCard";
-
-const name=
-document.createElement("div");
-
-name.className="stageName";
-name.textContent=stage.name;
-
-const play=
-document.createElement("button");
-
-play.textContent="遊ぶ";
-
-play.onclick=()=>{
-
-stageId=stage.id;
-stageName=stage.name;
-
-currentStageObjects=
-JSON.parse(
-JSON.stringify(stage.objects)
-);
-
-startPlay(
-currentStageObjects
-);
-
-};
-
-const edit=
-document.createElement("button");
-
-edit.textContent="編集";
-
-edit.onclick=()=>{
-
-stageId=stage.id;
-stageName=stage.name;
-
-currentStageObjects=
-JSON.parse(
-JSON.stringify(stage.objects)
-);
-
-startEditor(
-currentStageObjects
-);
-
-};
-
-const del=
-document.createElement("button");
-
-del.textContent="削除";
-
-del.onclick=()=>{
-
-const index=
-stages.findIndex(
-x=>x.id===stage.id
-);
-
-if(index>=0){
-stages.splice(index,1);
+  showScreen("stageScreen");
 }
 
-saveStages(stages);
-
-renderStageList();
-
-};
-
-card.appendChild(name);
-card.appendChild(play);
-card.appendChild(edit);
-card.appendChild(del);
-
-list.appendChild(card);
-
+makeStageBtn.addEventListener("click",()=>{
+  currentStageId=null;
+  startEditor([]);
 });
+
+playStageBtn.addEventListener("click",()=>{
+  renderStageList();
+  showScreen("stageScreen");
+});
+
+stageBackBtn.addEventListener("click",()=>{
+  showScreen("titleScreen");
+});
+
+editorBackBtn.addEventListener("click",()=>{
+  stopEngine();
+  showStageScreen();
+});
+
+playBackBtn.addEventListener("click",()=>{
+  stopEngine();
+  showStageScreen();
+});
+
+document.querySelectorAll(
+  "#editorBar button[data-tool]"
+).forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    setTool(btn.dataset.tool);
+  });
+});
+
+saveStageBtn.addEventListener("click",()=>{
+  saveCurrentStage();
+});
+
+cancelSaveBtn.addEventListener("click",()=>{
+  stageNameBox.classList.add("hidden");
+});
+
+confirmSaveBtn.addEventListener("click",()=>{
+  let name=stageNameInput.value.trim();
+
+  if(!name){
+    name="無題のステージ";
+  }
+
+  const stages=getStages();
+
+  const objects=saveObjects();
+
+  if(currentStageId){
+    const index=stages.findIndex(
+      s=>s.id===currentStageId
+    );
+
+    if(index>=0){
+      stages[index].name=name;
+      stages[index].objects=objects;
+    }else{
+      stages.push({
+        id:crypto.randomUUID(),
+        name,
+        objects
+      });
+    }
+  }else{
+    const stage={
+      id:crypto.randomUUID(),
+      name,
+      objects
+    };
+
+    currentStageId=stage.id;
+    stages.push(stage);
+  }
+
+  setStages(stages);
+
+  stageNameBox.classList.add("hidden");
+});
+
+bombModeBtn.addEventListener("click",()=>{
+  bombMode=!bombMode;
+
+  bombModeBtn.classList.toggle(
+    "toolActive",
+    bombMode
+  );
+
+  bombHint.classList.toggle(
+    "hidden",
+    !bombMode
+  );
+
+  bombModeBtn.textContent=
+    bombMode?"爆弾配置中":"爆弾を置く";
+});
+
+explodeAllBtn.addEventListener("click",()=>{
+  explodeAll();
+});
+
+function tick(){
+  if(engine){
+    Engine.update(
+      engine,
+      1000/60
+    );
+  }
+
+  requestAnimationFrame(tick);
 }
 
-document.getElementById(
-"makeStageButton"
-).onclick=()=>{
-
-stageId=null;
-stageName="新しいステージ";
-currentStageObjects=[];
-
-document.getElementById(
-"stageNameInput"
-).value=
-"新しいステージ";
-
-document.getElementById(
-"nameDialog"
-).classList.add(
-"active"
-);
-
-};
-
-document.getElementById(
-"playStageButton"
-).onclick=()=>{
-
-renderStageList();
-
-showScreen(
-"stageScreen"
-);
-
-};
-
-document.getElementById(
-"stageBackButton"
-).onclick=()=>{
-
-showScreen(
-"startScreen"
-);
-
-};
-
-document.getElementById(
-"nameCancel"
-).onclick=()=>{
-
-document.getElementById(
-"nameDialog"
-).classList.remove(
-"active"
-);
-
-};
-
-document.getElementById(
-"nameOK"
-).onclick=()=>{
-
-const input=
-document.getElementById(
-"stageNameInput"
-);
-
-stageName=
-input.value.trim()||
-"新しいステージ";
-
-document.getElementById(
-"nameDialog"
-).classList.remove(
-"active"
-);
-
-startEditor([]);
-
-};
-
-document.getElementById(
-"editorBack"
-).onclick=()=>{
-
-saveCurrentStage();
-
-stopEngine();
-
-currentMode="none";
-
-showScreen(
-"startScreen"
-);
-
-};
-
-document.getElementById(
-"saveButton"
-).onclick=()=>{
-
-saveCurrentStage();
-
-};
-
-document.getElementById(
-"testButton"
-).onclick=()=>{
-
-currentStageObjects=
-serializeStage();
-
-startPlay(
-JSON.parse(
-JSON.stringify(
-currentStageObjects
-)
-)
-);
-
-};
-
-document.getElementById(
-"clearButton"
-).onclick=()=>{
-
-getBodies().forEach(
-body=>{
-removeBody(body);
-}
-);
-
-selectedBody=null;
-
-};
-
-document.getElementById(
-"playBack"
-).onclick=()=>{
-
-stopEngine();
-
-currentMode="none";
-
-renderStageList();
-
-showScreen(
-"stageScreen"
-);
-
-};
-
-document.getElementById(
-"restartButton"
-).onclick=()=>{
-
-startPlay(
-JSON.parse(
-JSON.stringify(
-currentStageObjects
-)
-)
-);
-
-};
-
-document.getElementById(
-"bombModeButton"
-).onclick=()=>{
-
-bombMode=!bombMode;
-
-document.getElementById(
-"bombModeButton"
-).textContent=
-bombMode
-?"💣 爆弾配置中"
-:"💣 爆弾を置く";
-
-};
-
-document.getElementById(
-"explodeButton"
-).onclick=()=>{
-
-explodeAll();
-
-};
-
-resizeCanvas();
-draw();
-
-function physicsLoop(){
-
-requestAnimationFrame(
-physicsLoop
-);
-
-if(engine){
-
-Engine.update(
-engine,
-1000/60
-);
-
-}
-
-}
-
-physicsLoop();
-
+startGameLoop();
+tick();
 </script>
 
 </body>
