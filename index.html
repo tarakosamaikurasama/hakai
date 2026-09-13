@@ -3,2819 +3,2659 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>日野市の街並みの歴史</title>
+<title>スライム城くずし ステージメーカー</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
-
 <style>
 *{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
 }
-
 html,body{
-  margin:0;
-  padding:0;
-  width:100%;
-  min-height:100%;
-  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
-  background:#fff7ee;
-  color:#333;
+margin:0;
+padding:0;
+width:100%;
+min-height:100%;
+font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+background:#fff7ee;
+color:#333;
 }
-
 body{
-  overflow-x:hidden;
+overflow-x:hidden;
 }
-
-button,
-input{
-  font:inherit;
+button,input{
+font:inherit;
 }
-
 button{
-  border:0;
-  cursor:pointer;
-  touch-action:manipulation;
+border:0;
+cursor:pointer;
+touch-action:manipulation;
 }
-
-.screen{
-  width:100%;
-  min-height:100vh;
-}
-
 .hidden{
-  display:none!important;
+display:none!important;
 }
-
-/* =========================
-   TOP
-========================= */
-
+.screen{
+width:100%;
+min-height:100vh;
+}
 #titleScreen{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:25px 16px;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:25px 16px;
 }
-
 .title-card{
-  width:min(680px,100%);
-  background:#fff;
-  border-radius:24px;
-  padding:35px 22px;
-  box-shadow:0 8px 30px rgba(120,70,20,.15);
-  text-align:center;
+width:min(680px,100%);
+background:#fff;
+border-radius:24px;
+padding:35px 22px;
+box-shadow:0 8px 30px rgba(120,70,20,.15);
+text-align:center;
 }
-
 .logo{
-  font-size:clamp(30px,7vw,52px);
-  font-weight:900;
-  color:#f27b19;
-  text-shadow:0 3px 0 #ffd2a7;
-  margin-bottom:8px;
+font-size:clamp(30px,7vw,52px);
+font-weight:900;
+color:#f27b19;
+text-shadow:0 3px 0 #ffd2a7;
+margin-bottom:8px;
 }
-
 .subtitle{
-  color:#777;
-  font-size:15px;
-  margin-bottom:28px;
+color:#777;
+font-size:15px;
+margin-bottom:28px;
 }
-
 .menu-buttons{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
+display:flex;
+flex-direction:column;
+gap:14px;
 }
-
 .main-button{
-  min-height:62px;
-  border-radius:20px;
-  color:white;
-  font-size:20px;
-  font-weight:900;
-  background:linear-gradient(#ffad50,#ed7316);
-  box-shadow:0 5px 0 #c85d0b,0 8px 15px rgba(230,105,20,.22);
-  transition:.12s;
+min-height:62px;
+border-radius:20px;
+color:white;
+font-size:20px;
+font-weight:900;
+background:linear-gradient(#ffad50,#ed7316);
+box-shadow:0 5px 0 #c85d0b,0 8px 15px rgba(230,105,20,.22);
 }
-
 .main-button:active{
-  transform:translateY(4px);
-  box-shadow:0 1px 0 #c85d0b;
+transform:translateY(4px);
+box-shadow:0 1px 0 #c85d0b;
 }
-
 .sub-button{
-  min-height:52px;
-  border-radius:18px;
-  background:#fff;
-  border:2px solid #eee;
-  color:#555;
-  font-weight:800;
-  box-shadow:0 3px 8px rgba(0,0,0,.08);
+min-height:52px;
+border-radius:18px;
+background:#fff;
+border:2px solid #eee;
+color:#555;
+font-weight:800;
+box-shadow:0 3px 8px rgba(0,0,0,.08);
 }
-
 .sub-button:active{
-  transform:translateY(2px);
+transform:translateY(2px);
 }
-
-.danger-button{
-  background:#fff0ec;
-  color:#d64a32;
-  border:2px solid #ffd2c9;
-}
-
-/* =========================
-   GAME
-========================= */
-
 #gameScreen{
-  min-height:100vh;
-  padding:12px;
+min-height:100vh;
+padding:12px;
 }
-
 .game-wrapper{
-  width:min(1100px,100%);
-  margin:auto;
+width:min(1100px,100%);
+margin:auto;
 }
-
 .topbar{
-  background:#fff;
-  border-radius:18px;
-  box-shadow:0 5px 20px rgba(100,60,20,.12);
-  padding:10px 12px;
-  margin-bottom:10px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap;
-  position:relative;
-  z-index:100;
+background:#fff;
+border-radius:18px;
+box-shadow:0 5px 20px rgba(100,60,20,.12);
+padding:10px 12px;
+margin-bottom:10px;
+display:flex;
+align-items:center;
+gap:8px;
+flex-wrap:wrap;
+position:relative;
+z-index:100;
 }
-
 .topbar-title{
-  font-weight:900;
-  color:#e96d15;
-  margin-right:auto;
+font-weight:900;
+color:#e96d15;
+margin-right:auto;
 }
-
 .topbar button{
-  padding:9px 14px;
-  border-radius:13px;
-  background:#fff;
-  border:1px solid #eee;
-  font-weight:800;
+padding:9px 14px;
+border-radius:13px;
+background:#fff;
+border:1px solid #eee;
+font-weight:800;
 }
-
-.topbar button:active{
-  transform:translateY(2px);
-}
-
 .stage-wrapper{
-  position:relative;
-  width:100%;
-  height:min(70vh,680px);
-  min-height:420px;
-  background:#dff3ff;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 8px 25px rgba(70,100,120,.16);
+position:relative;
+width:100%;
+height:min(70vh,680px);
+min-height:420px;
+background:#dff3ff;
+border-radius:18px;
+overflow:hidden;
+box-shadow:0 8px 25px rgba(70,100,120,.16);
 }
-
 #gameCanvas{
-  display:block;
-  width:100%;
-  height:100%;
-  touch-action:none;
+display:block;
+width:100%;
+height:100%;
+touch-action:none;
 }
-
 .toolbar{
-  margin-top:10px;
-  background:#fff;
-  border-radius:20px;
-  padding:12px;
-  box-shadow:0 5px 20px rgba(100,60,20,.12);
-  position:relative;
-  z-index:200;
+margin-top:10px;
+background:#fff;
+border-radius:20px;
+padding:12px;
+box-shadow:0 5px 20px rgba(100,60,20,.12);
+position:relative;
+z-index:200;
 }
-
 .tool-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(105px,1fr));
-  gap:8px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(105px,1fr));
+gap:8px;
 }
-
 .tool{
-  min-height:48px;
-  border-radius:15px;
-  background:#fff;
-  border:2px solid #eee;
-  font-weight:900;
-  color:#555;
+min-height:48px;
+border-radius:15px;
+background:#fff;
+border:2px solid #eee;
+font-weight:900;
+color:#555;
 }
-
 .tool.active{
-  border-color:#f18a2c;
-  background:#fff2e4;
-  color:#df6811;
-  box-shadow:inset 0 0 0 2px #ffd09e;
+border-color:#f18a2c;
+background:#fff2e4;
+color:#df6811;
+box-shadow:inset 0 0 0 2px #ffd09e;
 }
-
-.tool:active{
-  transform:translateY(2px);
-}
-
 .action-row{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:10px;
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-top:10px;
 }
-
 .action-row button{
-  flex:1 1 150px;
-  min-height:48px;
-  border-radius:16px;
-  font-weight:900;
+flex:1 1 150px;
+min-height:48px;
+border-radius:16px;
+font-weight:900;
 }
-
 .explode{
-  color:#fff;
-  background:linear-gradient(#ff9f45,#e66b12);
-  box-shadow:0 4px 0 #c45a0b;
+color:#fff;
+background:linear-gradient(#ff9f45,#e66b12);
+box-shadow:0 4px 0 #c45a0b;
 }
-
 .back{
-  background:#fff;
-  border:2px solid #eee;
+background:#fff;
+border:2px solid #eee;
 }
-
 .factor-area{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-top:10px;
-  padding:10px;
-  border-radius:15px;
-  background:#fff8f0;
+display:flex;
+align-items:center;
+gap:8px;
+margin-top:10px;
+padding:10px;
+border-radius:15px;
+background:#fff8f0;
 }
-
 .factor-area input{
-  width:90px;
-  height:42px;
-  border:2px solid #ffd2a6;
-  border-radius:12px;
-  text-align:center;
-  font-size:18px;
-  font-weight:900;
-  background:#fff;
+width:90px;
+height:42px;
+border:2px solid #ffd2a6;
+border-radius:12px;
+text-align:center;
+font-size:18px;
+font-weight:900;
+background:#fff;
 }
-
-/* =========================
-   STAGE LIST
-========================= */
-
+.timer-area{
+display:flex;
+align-items:center;
+gap:8px;
+margin-top:10px;
+padding:10px;
+border-radius:15px;
+background:#fff8f0;
+}
+.timer-area input{
+width:100px;
+height:42px;
+border:2px solid #ffd2a6;
+border-radius:12px;
+text-align:center;
+font-size:18px;
+font-weight:900;
+background:#fff;
+}
 #stageListScreen{
-  padding:18px;
+padding:18px;
 }
-
 .list-wrapper{
-  width:min(700px,100%);
-  margin:auto;
+width:min(700px,100%);
+margin:auto;
 }
-
 .list-card{
-  background:#fff;
-  border-radius:22px;
-  padding:20px;
-  box-shadow:0 7px 25px rgba(100,60,20,.12);
+background:#fff;
+border-radius:22px;
+padding:20px;
+box-shadow:0 7px 25px rgba(100,60,20,.12);
 }
-
 .list-card h2{
-  margin-top:0;
-  color:#ed7519;
+margin-top:0;
+color:#ed7519;
 }
-
 .stage-item{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  margin-bottom:10px;
-  padding:12px;
-  border-radius:16px;
-  background:#fff8f0;
+display:flex;
+gap:8px;
+align-items:center;
+margin-bottom:10px;
+padding:12px;
+border-radius:16px;
+background:#fff8f0;
 }
-
 .stage-name{
-  flex:1;
-  font-weight:900;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
+flex:1;
+font-weight:900;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
 }
-
 .stage-item button{
-  border-radius:12px;
-  padding:9px 12px;
-  background:#fff;
-  border:1px solid #eee;
-  font-weight:800;
+border-radius:12px;
+padding:9px 12px;
+background:#fff;
+border:1px solid #eee;
+font-weight:800;
 }
-
 .empty{
-  color:#888;
-  text-align:center;
-  padding:25px;
+color:#888;
+text-align:center;
+padding:25px;
 }
-
-/* =========================
-   MODAL
-========================= */
-
 .modal{
-  position:fixed;
-  inset:0;
-  background:rgba(40,25,10,.32);
-  backdrop-filter:blur(5px);
-  -webkit-backdrop-filter:blur(5px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-  z-index:1000;
+position:fixed;
+inset:0;
+background:rgba(40,25,10,.32);
+backdrop-filter:blur(5px);
+-webkit-backdrop-filter:blur(5px);
+display:flex;
+align-items:center;
+justify-content:center;
+padding:18px;
+z-index:1000;
 }
-
 .modal-card{
-  width:min(500px,100%);
-  background:#fff;
-  border-radius:24px;
-  padding:22px;
-  box-shadow:0 12px 40px rgba(0,0,0,.22);
+width:min(500px,100%);
+background:#fff;
+border-radius:24px;
+padding:22px;
+box-shadow:0 12px 40px rgba(0,0,0,.22);
 }
-
 .modal-card h3{
-  margin-top:0;
-  color:#e96f15;
+margin-top:0;
+color:#e96f15;
 }
-
 .modal-card input{
-  width:100%;
-  height:48px;
-  border:2px solid #eee;
-  border-radius:14px;
-  padding:0 13px;
-  margin-bottom:12px;
+width:100%;
+height:48px;
+border:2px solid #eee;
+border-radius:14px;
+padding:0 13px;
+margin-bottom:12px;
 }
-
 .modal-buttons{
-  display:flex;
-  gap:8px;
+display:flex;
+gap:8px;
 }
-
 .modal-buttons button{
-  flex:1;
-  min-height:48px;
-  border-radius:15px;
-  font-weight:900;
+flex:1;
+min-height:48px;
+border-radius:15px;
+font-weight:900;
 }
-
-/* =========================
-   MOBILE
-========================= */
-
 @media(max-width:600px){
-  #gameScreen{
-    padding:7px;
-  }
-
-  .stage-wrapper{
-    height:55vh;
-    min-height:360px;
-  }
-
-  .topbar-title{
-    width:100%;
-  }
-
-  .tool-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .tool{
-    min-height:46px;
-  }
-
-  .logo{
-    font-size:34px;
-  }
+#gameScreen{
+padding:7px;
+}
+.stage-wrapper{
+height:55vh;
+min-height:360px;
+}
+.topbar-title{
+width:100%;
+}
+.tool-grid{
+grid-template-columns:repeat(2,1fr);
+}
+.logo{
+font-size:34px;
+}
 }
 </style>
 </head>
-
 <body>
 
-<!-- =========================
-     TITLE
-========================= -->
-
 <section id="titleScreen" class="screen">
-  <div class="title-card">
-    <div class="logo">スライム城くずし</div>
-    <div class="subtitle">ステージメーカー</div>
-
-    <div class="menu-buttons">
-      <button class="main-button" id="makeStageBtn">ステージを作る</button>
-      <button class="sub-button" id="playStageBtn">ステージで遊ぶ</button>
-    </div>
-  </div>
+<div class="title-card">
+<div class="logo">スライム城くずし</div>
+<div class="subtitle">ステージメーカー</div>
+<div class="menu-buttons">
+<button class="main-button" id="makeStageBtn">ステージを作る</button>
+<button class="sub-button" id="playStageBtn">ステージで遊ぶ</button>
+</div>
+</div>
 </section>
-
-<!-- =========================
-     GAME
-========================= -->
 
 <section id="gameScreen" class="screen hidden">
+<div class="game-wrapper">
 
-  <div class="game-wrapper">
+<div class="topbar">
+<div class="topbar-title" id="modeTitle">ステージ作成</div>
+<button id="saveBtn">保存</button>
+<button id="stageListBtn">ステージ一覧</button>
+<button id="homeBtn">ホーム</button>
+</div>
 
-    <div class="topbar">
-      <div class="topbar-title" id="modeTitle">ステージ作成</div>
-      <button id="saveBtn">保存</button>
-      <button id="stageListBtn">ステージ一覧</button>
-      <button id="homeBtn">ホーム</button>
-    </div>
+<div class="stage-wrapper">
+<canvas id="gameCanvas"></canvas>
+</div>
 
-    <div class="stage-wrapper">
-      <canvas id="gameCanvas"></canvas>
-    </div>
+<div class="toolbar">
 
-    <div class="toolbar">
+<div class="tool-grid" id="editorTools">
+<button class="tool" data-tool="wood">木</button>
+<button class="tool" data-tool="glass">ガラス</button>
+<button class="tool" data-tool="stone">石</button>
+<button class="tool" data-tool="slime">スライム</button>
+<button class="tool" data-tool="bomb">爆弾</button>
+<button class="tool" data-tool="multiply">倍ブロック</button>
+<button class="tool" data-tool="bedrock">岩盤</button>
+<button class="tool" data-tool="delete">削除</button>
+</div>
 
-      <div class="tool-grid" id="editorTools">
+<div class="factor-area" id="factorArea">
+<strong>倍数</strong>
+<span>×</span>
+<input id="factorInput" type="number" min="2" max="20" value="2">
+</div>
 
-        <button class="tool" data-tool="wood">木</button>
-        <button class="tool" data-tool="glass">ガラス</button>
-        <button class="tool" data-tool="stone">石</button>
-        <button class="tool" data-tool="slime">スライム</button>
-        <button class="tool" data-tool="bomb">爆弾</button>
-        <button class="tool" data-tool="multiply">倍ブロック</button>
-        <button class="tool" data-tool="bedrock">岩盤</button>
-        <button class="tool" data-tool="delete">削除</button>
+<div class="timer-area">
+<strong>爆弾時間</strong>
+<input id="timerInput" type="number" min="0.5" max="60" step="0.5" value="3">
+<span>秒</span>
+</div>
 
-      </div>
+<div class="action-row">
+<button class="explode" id="explodeBtn">全爆破</button>
+<button class="back" id="clearBtn">すべて消す</button>
+</div>
 
-      <div class="factor-area" id="factorArea">
-        <strong>倍数</strong>
-        <span>×</span>
-        <input id="factorInput" type="number" min="2" max="20" value="2">
-      </div>
+<div class="action-row">
+<button class="back" id="editModeBtn">編集</button>
+<button class="back" id="playModeBtn">遊ぶ</button>
+</div>
 
-      <div class="action-row">
-        <button class="explode" id="explodeBtn">全爆破</button>
-        <button class="back" id="clearBtn">すべて消す</button>
-      </div>
-
-      <div class="action-row">
-        <button class="back" id="editModeBtn">編集</button>
-        <button class="back" id="playModeBtn">遊ぶ</button>
-      </div>
-
-    </div>
-
-  </div>
+</div>
+</div>
 </section>
-
-<!-- =========================
-     STAGE LIST
-========================= -->
 
 <section id="stageListScreen" class="screen hidden">
-  <div class="list-wrapper">
-    <div class="list-card">
-      <h2>保存したステージ</h2>
-      <div id="stageList"></div>
-
-      <button class="sub-button" id="listBackBtn" style="width:100%;margin-top:10px;">
-        戻る
-      </button>
-    </div>
-  </div>
+<div class="list-wrapper">
+<div class="list-card">
+<h2>保存したステージ</h2>
+<div id="stageList"></div>
+<button class="sub-button" id="listBackBtn" style="width:100%;margin-top:10px;">戻る</button>
+</div>
+</div>
 </section>
 
-<!-- =========================
-     SAVE MODAL
-========================= -->
-
 <div id="saveModal" class="modal hidden">
-  <div class="modal-card">
-    <h3>ステージを保存</h3>
-    <input id="stageNameInput" type="text" maxlength="40" placeholder="ステージ名">
-
-    <div class="modal-buttons">
-      <button class="sub-button" id="saveCancelBtn">キャンセル</button>
-      <button class="main-button" id="saveConfirmBtn">保存</button>
-    </div>
-  </div>
+<div class="modal-card">
+<h3>ステージを保存</h3>
+<input id="stageNameInput" type="text" maxlength="40" placeholder="ステージ名">
+<div class="modal-buttons">
+<button class="sub-button" id="saveCancelBtn">キャンセル</button>
+<button class="main-button" id="saveConfirmBtn">保存</button>
+</div>
+</div>
 </div>
 
 <script>
 const {
-  Engine,
-  Render,
-  Runner,
-  Bodies,
-  Body,
-  Composite,
-  Events,
-  Vector
-} = Matter;
+Engine,
+Bodies,
+Body,
+Composite,
+Events,
+Bounds,
+Vertices
+}=Matter;
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("gameCanvas");
+const ctx=canvas.getContext("2d");
 
-const titleScreen = document.getElementById("titleScreen");
-const gameScreen = document.getElementById("gameScreen");
-const stageListScreen = document.getElementById("stageListScreen");
-const saveModal = document.getElementById("saveModal");
+const titleScreen=document.getElementById("titleScreen");
+const gameScreen=document.getElementById("gameScreen");
+const stageListScreen=document.getElementById("stageListScreen");
+const saveModal=document.getElementById("saveModal");
 
-const makeStageBtn = document.getElementById("makeStageBtn");
-const playStageBtn = document.getElementById("playStageBtn");
-const saveBtn = document.getElementById("saveBtn");
-const stageListBtn = document.getElementById("stageListBtn");
-const homeBtn = document.getElementById("homeBtn");
-const explodeBtn = document.getElementById("explodeBtn");
-const clearBtn = document.getElementById("clearBtn");
-const editModeBtn = document.getElementById("editModeBtn");
-const playModeBtn = document.getElementById("playModeBtn");
-const factorInput = document.getElementById("factorInput");
-const factorArea = document.getElementById("factorArea");
-const editorTools = document.getElementById("editorTools");
-const modeTitle = document.getElementById("modeTitle");
+const FLOOR_HEIGHT=42;
+const SAVE_KEY="slime_castle_maker_final_v2";
 
-const saveCancelBtn = document.getElementById("saveCancelBtn");
-const saveConfirmBtn = document.getElementById("saveConfirmBtn");
-const stageNameInput = document.getElementById("stageNameInput");
-const stageList = document.getElementById("stageList");
-const listBackBtn = document.getElementById("listBackBtn");
+let engine=null;
+let bodies=[];
+let selectedBody=null;
+let currentTool=null;
+let mode="editor";
 
-const FLOOR_HEIGHT = 42;
-const SAVE_KEY = "slime_castle_maker_final";
+let canvasWidth=0;
+let canvasHeight=0;
 
-let engine = null;
-let bodies = [];
-let currentTool = null;
-let selectedBody = null;
-let mode = "editor";
+let animationFrame=null;
+let lastTime=performance.now();
 
-let canvasWidth = 0;
-let canvasHeight = 0;
+let dragging=false;
+let dragType=null;
+let dragOffset={x:0,y:0};
 
-let animationFrame = null;
-let lastTime = performance.now();
+let explosions=[];
+let multiplierId=1;
 
-let dragging = false;
-let dragType = null;
-let dragOffset = {x:0,y:0};
-
-let explosions = [];
-
-let multiplierId = 1;
-
-/*
-  爆弾ごとに、
-  「すでに入った倍ブロック」を記録する。
-*/
-const multiplierInside = new WeakMap();
+const multiplierInside=new WeakMap();
 
 function newId(){
-  return "m" + Date.now().toString(36) +
-    Math.random().toString(36).slice(2,8);
+return "m"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 }
 
 function resizeCanvas(){
+if(gameScreen.classList.contains("hidden"))return;
 
-  if(gameScreen.classList.contains("hidden")){
-    return;
-  }
+const rect=canvas.getBoundingClientRect();
 
-  const rect = canvas.getBoundingClientRect();
+canvasWidth=Math.max(1,Math.floor(rect.width));
+canvasHeight=Math.max(1,Math.floor(rect.height));
 
-  canvasWidth = Math.max(1, Math.floor(rect.width));
-  canvasHeight = Math.max(1, Math.floor(rect.height));
+const dpr=Math.max(1,window.devicePixelRatio||1);
 
-  const dpr = Math.max(1, window.devicePixelRatio || 1);
+canvas.width=canvasWidth*dpr;
+canvas.height=canvasHeight*dpr;
 
-  canvas.width = canvasWidth * dpr;
-  canvas.height = canvasHeight * dpr;
+ctx.setTransform(dpr,0,0,dpr,0,0);
 
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-
-  rebuildFloor();
+rebuildFloor();
 }
 
 function showScreen(screen){
-
-  titleScreen.classList.add("hidden");
-  gameScreen.classList.add("hidden");
-  stageListScreen.classList.add("hidden");
-
-  screen.classList.remove("hidden");
+titleScreen.classList.add("hidden");
+gameScreen.classList.add("hidden");
+stageListScreen.classList.add("hidden");
+screen.classList.remove("hidden");
 }
 
 function createEngine(){
 
-  engine = Engine.create({
-    enableSleeping:false
-  });
+engine=Engine.create({
+enableSleeping:false
+});
 
-  engine.gravity.x = 0;
-  engine.gravity.y = 1;
+engine.gravity.x=0;
+engine.gravity.y=1;
 
-  engine.positionIterations = 12;
-  engine.velocityIterations = 10;
-  engine.constraintIterations = 5;
+engine.positionIterations=12;
+engine.velocityIterations=10;
+engine.constraintIterations=5;
 
-  installPhysicsEvents();
-  rebuildFloor();
+installPhysicsEvents();
+rebuildFloor();
 }
 
 function rebuildFloor(){
 
-  if(!engine) return;
+if(!engine)return;
 
-  const oldFloor = Composite.allBodies(engine.world)
-    .filter(b => b.isGroundBedrock);
+Composite.allBodies(engine.world)
+.filter(b=>b.isGroundBedrock)
+.forEach(b=>Composite.remove(engine.world,b));
 
-  oldFloor.forEach(b => {
-    Composite.remove(engine.world,b);
-  });
+if(canvasWidth<=0||canvasHeight<=0)return;
 
-  if(canvasWidth <= 0 || canvasHeight <= 0){
-    return;
-  }
+const floor=Bodies.rectangle(
+canvasWidth/2,
+canvasHeight-FLOOR_HEIGHT/2,
+canvasWidth+100,
+FLOOR_HEIGHT,
+{
+label:"groundBedrock",
+isStatic:true,
+isGroundBedrock:true,
+restitution:0,
+friction:1.5,
+frictionStatic:5,
+slop:0
+}
+);
 
-  const floor = Bodies.rectangle(
-    canvasWidth / 2,
-    canvasHeight - FLOOR_HEIGHT / 2,
-    canvasWidth + 100,
-    FLOOR_HEIGHT,
-    {
-      label:"groundBedrock",
-      isStatic:true,
-      isGroundBedrock:true,
-      restitution:0,
-      friction:1.5,
-      frictionStatic:5,
-      density:1,
-      slop:0
-    }
-  );
-
-  Composite.add(engine.world,floor);
+Composite.add(engine.world,floor);
 }
 
 function installPhysicsEvents(){
 
-  Events.on(engine,"collisionStart",event => {
+Events.on(engine,"collisionStart",event=>{
 
-    event.pairs.forEach(pair => {
+event.pairs.forEach(pair=>{
 
-      let a = pair.bodyA;
-      let b = pair.bodyB;
+const a=pair.bodyA;
+const b=pair.bodyB;
 
-      handleCollision(a,b);
-      handleCollision(b,a);
+handleMultiplier(a,b);
+handleMultiplier(b,a);
 
-    });
+});
+});
 
-  });
+Events.on(engine,"collisionEnd",event=>{
 
-  Events.on(engine,"collisionEnd",event => {
+event.pairs.forEach(pair=>{
 
-    event.pairs.forEach(pair => {
+releaseMultiplier(pair.bodyA,pair.bodyB);
+releaseMultiplier(pair.bodyB,pair.bodyA);
 
-      releaseMultiplier(pair.bodyA,pair.bodyB);
-      releaseMultiplier(pair.bodyB,pair.bodyA);
+});
+});
 
-    });
+Events.on(engine,"beforeUpdate",()=>{
 
-  });
+if(mode!=="editor")return;
 
-  /*
-    編集中はブロックのHPを回復する。
-    つまり動くが壊れない。
-  */
+bodies.forEach(body=>{
 
-  Events.on(engine,"beforeUpdate",() => {
+if(!body||body.isGroundBedrock)return;
 
-    if(mode !== "editor"){
-      return;
-    }
-
-    bodies.forEach(body => {
-
-      if(!body || body.isGroundBedrock){
-        return;
-      }
-
-      if(body.blockType === "wood"){
-        body.hp = body.maxHp;
-      }
-
-      if(body.blockType === "glass"){
-        body.hp = body.maxHp;
-      }
-
-      if(body.blockType === "stone"){
-        body.hp = body.maxHp;
-      }
-
-      if(body.blockType === "slime"){
-        body.hp = body.maxHp;
-      }
-
-      if(body.blockType === "bedrock"){
-        body.hp = body.maxHp;
-      }
-
-    });
-
-  });
+if(body.maxHp!==Infinity){
+body.hp=body.maxHp;
 }
 
-function handleCollision(a,b){
+});
+});
+}
 
-  if(!a || !b){
-    return;
-  }
+function handleMultiplier(a,b){
 
-  /*
-    倍ブロックとの衝突。
-    sensorなので物理的には通過する。
-  */
+if(!a||!b)return;
 
-  if(a.blockType === "bomb" && b.blockType === "multiply"){
+if(a.blockType!=="bomb")return;
 
-    if(!multiplierInside.has(a)){
-      multiplierInside.set(a,new Set());
-    }
+if(b.blockType!=="multiply")return;
 
-    const set = multiplierInside.get(a);
+if(!multiplierInside.has(a)){
+multiplierInside.set(a,new Set());
+}
 
-    if(!set.has(b.multiplierId)){
+const set=multiplierInside.get(a);
 
-      set.add(b.multiplierId);
+if(set.has(b.multiplierId))return;
 
-      multiplyBomb(
-        a,
-        Number(b.factor) || 2
-      );
-    }
+set.add(b.multiplierId);
 
-    return;
-  }
-
-  /*
-    倍ブロック以外との衝突だけ爆発させる。
-    これが重要。
-    倍ブロックに触れただけでは爆発しない。
-  */
-
-  if(a.blockType === "bomb"){
-
-    if(b.blockType === "multiply"){
-      return;
-    }
-
-    if(b.isGroundBedrock){
-      return;
-    }
-
-    if(!a.exploded){
-      explodeBomb(a);
-    }
-  }
-
-  /*
-    爆弾同士
-  */
-
-  if(a.blockType === "bomb" && b.blockType === "bomb"){
-
-    if(!a.exploded){
-      explodeBomb(a);
-    }
-
-    if(!b.exploded){
-      explodeBomb(b);
-    }
-  }
+multiplyBomb(
+a,
+Number(b.factor)||2
+);
 }
 
 function releaseMultiplier(a,b){
 
-  if(!a || !b){
-    return;
-  }
+if(!a||!b)return;
 
-  if(a.blockType !== "bomb"){
-    return;
-  }
+if(a.blockType!=="bomb")return;
+if(b.blockType!=="multiply")return;
 
-  if(b.blockType !== "multiply"){
-    return;
-  }
+const set=multiplierInside.get(a);
 
-  const set = multiplierInside.get(a);
-
-  if(set){
-    set.delete(b.multiplierId);
-  }
+if(set)set.delete(b.multiplierId);
 }
 
 /* =========================
-   OBJECT CREATION
+OBJECT
 ========================= */
 
-function createObject(type,x,y){
+function createObject(type,x,y,options={}){
 
-  if(!engine){
-    return null;
-  }
+if(!engine)return null;
 
-  let body;
+let w=70;
+let h=45;
+let body;
 
-  let w = 70;
-  let h = 45;
+if(type==="bomb"){
+w=34;
+h=34;
+}
 
-  /*
-    床にめり込まないように配置位置を補正
-  */
+if(type==="multiply"){
+w=76;
+h=54;
+}
 
-  if(type === "slime"){
-    const r = 25;
+if(type==="bedrock"){
+w=80;
+h=48;
+}
 
-    y = Math.min(
-      y,
-      canvasHeight - FLOOR_HEIGHT - r - 3
-    );
+if(type==="slime"){
 
-    y = Math.max(r + 2,y);
+const r=25;
 
-    body = Bodies.circle(
-      x,
-      y,
-      r,
-      {
-        label:"slime",
-        blockType:"slime",
-        restitution:0,
-        friction:.9,
-        frictionStatic:2,
-        frictionAir:.025,
-        density:.002
-      }
-    );
+y=Math.min(
+y,
+canvasHeight-FLOOR_HEIGHT-r-3
+);
 
-    body.baseW = r * 2;
-    body.baseH = r * 2;
-    body.maxHp = 100;
-    body.hp = 100;
+y=Math.max(r+2,y);
 
-  }else{
+body=Bodies.circle(
+x,
+y,
+r,
+{
+label:"slime",
+blockType:"slime",
+restitution:0,
+friction:.9,
+frictionStatic:2,
+frictionAir:.025,
+density:.002
+}
+);
 
-    if(type === "bomb"){
-      w = 34;
-      h = 34;
-    }
+body.baseW=r*2;
+body.baseH=r*2;
 
-    if(type === "multiply"){
-      w = 76;
-      h = 54;
-    }
+}else{
 
-    if(type === "bedrock"){
-      w = 80;
-      h = 48;
-    }
+y=Math.min(
+y,
+canvasHeight-FLOOR_HEIGHT-h/2-3
+);
 
-    y = Math.min(
-      y,
-      canvasHeight - FLOOR_HEIGHT - h / 2 - 3
-    );
+y=Math.max(
+h/2+2,
+y
+);
 
-    y = Math.max(
-      h / 2 + 2,
-      y
-    );
+body=Bodies.rectangle(
+x,
+y,
+w,
+h,
+{
+label:type,
+blockType:type,
 
-    /*
-      倍ブロックだけ isStatic:true。
-      これによって絶対に落ちない。
-    */
+restitution:0,
+friction:1,
+frictionStatic:2,
+frictionAir:.025,
+density:.001,
 
-    const options = {
-      label:type,
-      blockType:type,
+isStatic:
+type==="multiply"||
+type==="bedrock",
 
-      restitution:0,
-      friction:1,
-      frictionStatic:2,
-      frictionAir:.025,
-      density:.001,
+isSensor:type==="multiply"
+}
+);
 
-      isStatic:
-        type === "multiply" ||
-        type === "bedrock",
+body.baseW=w;
+body.baseH=h;
+}
 
-      isSensor:
-        type === "multiply"
-    };
+body.maxHp=
+type==="wood"?100:
+type==="glass"?60:
+type==="stone"?220:
+type==="bedrock"?Infinity:
+100;
 
-    body = Bodies.rectangle(
-      x,
-      y,
-      w,
-      h,
-      options
-    );
+body.hp=body.maxHp;
 
-    body.baseW = w;
-    body.baseH = h;
+if(type==="multiply"){
 
-    body.maxHp =
-      type === "wood" ? 100 :
-      type === "glass" ? 60 :
-      type === "stone" ? 220 :
-      type === "bedrock" ? Infinity :
-      type === "bomb" ? 1 :
-      100;
+body.factor=
+Math.max(
+2,
+Math.min(
+20,
+Number(options.factor??document.getElementById("factorInput").value)||2
+)
+);
 
-    body.hp = body.maxHp;
+body.multiplierId=
+"multiplier_"+multiplierId++;
+}
 
-    if(type === "multiply"){
+if(type==="bomb"){
 
-      body.factor =
-        Math.max(
-          2,
-          Math.min(
-            20,
-            Number(factorInput.value) || 2
-          )
-        );
+body.timerDuration=
+Number(options.timerDuration)||
+Number(document.getElementById("timerInput").value)||
+3;
 
-      body.multiplierId =
-        "multiplier_" +
-        multiplierId++;
+body.timerDuration*=1000;
 
-      /*
-        staticなのでここで止まる。
-        センサーなので爆弾は通過できる。
-      */
-    }
-  }
+body.createdAt=performance.now();
+body.exploded=false;
+}
 
-  bodies.push(body);
-  Composite.add(engine.world,body);
+bodies.push(body);
 
-  return body;
+Composite.add(
+engine.world,
+body
+);
+
+return body;
 }
 
 /* =========================
-   MULTIPLY
+MULTIPLY
 ========================= */
 
 function multiplyBomb(original,factor){
 
-  if(!original || original.exploded){
-    return;
-  }
+if(!original||original.exploded)return;
 
-  const x = original.position.x;
-  const y = original.position.y;
+const x=original.position.x;
+const y=original.position.y;
 
-  /*
-    元の爆弾と同じ場所に生成。
-  */
+const oldSet=
+multiplierInside.has(original)
+?multiplierInside.get(original)
+:new Set();
 
-  for(let i=0;i<factor-1;i++){
+for(let i=0;i<factor-1;i++){
 
-    const bomb = createObject(
-      "bomb",
-      x,
-      y
-    );
+const bomb=createObject(
+"bomb",
+x,
+y
+);
 
-    if(!bomb){
-      continue;
-    }
+if(!bomb)continue;
 
-    /*
-      生成直後に同じ倍ブロックで
-      再増殖しないようにする。
-    */
+const set=new Set(oldSet);
 
-    const set = new Set();
+multiplierInside.set(
+bomb,
+set
+);
 
-    set.add(
-      ...(
-        multiplierInside.has(original)
-          ? multiplierInside.get(original)
-          : []
-      )
-    );
+Body.setVelocity(
+bomb,
+{
+x:(Math.random()-.5)*1.5,
+y:(Math.random()-.5)*1.5
+}
+);
 
-    multiplierInside.set(
-      bomb,
-      set
-    );
-
-    Body.setVelocity(
-      bomb,
-      {
-        x:(Math.random()-.5)*1.2,
-        y:Math.random()*1.2
-      }
-    );
-  }
+Body.setAngularVelocity(
+bomb,
+(Math.random()-.5)*.08
+);
+}
 }
 
 /* =========================
-   EXPLOSION
+BOMB TIMER
 ========================= */
+
+function updateBombTimers(now){
+
+if(!engine)return;
+
+const bombs=bodies.filter(
+b=>b.blockType==="bomb"
+);
+
+bombs.forEach(bomb=>{
+
+if(bomb.exploded)return;
+
+if(
+now-bomb.createdAt>=bomb.timerDuration
+){
+
+explodeBomb(bomb);
+}
+});
+}
 
 function explodeBomb(bomb){
 
-  if(!bomb || bomb.exploded){
-    return;
-  }
+if(!bomb||bomb.exploded)return;
 
-  bomb.exploded = true;
+bomb.exploded=true;
 
-  const x = bomb.position.x;
-  const y = bomb.position.y;
+const x=bomb.position.x;
+const y=bomb.position.y;
 
-  explosions.push({
-    x,
-    y,
-    start:performance.now(),
-    duration:520
-  });
+explosions.push({
+x,
+y,
+start:performance.now(),
+duration:520
+});
 
-  /*
-    爆発力。
-    ここでは物理演算自体を止めない。
-  */
+const all=Composite.allBodies(engine.world);
 
-  const all = Composite.allBodies(engine.world);
+all.forEach(body=>{
 
-  all.forEach(body => {
+if(body===bomb)return;
+if(body.isStatic)return;
+if(body.isGroundBedrock)return;
 
-    if(body === bomb){
-      return;
-    }
+const dx=body.position.x-x;
+const dy=body.position.y-y;
 
-    if(body.isStatic){
-      return;
-    }
+const dist=Math.hypot(dx,dy);
 
-    if(body.isGroundBedrock){
-      return;
-    }
+if(dist>230||dist<1)return;
 
-    const dx = body.position.x - x;
-    const dy = body.position.y - y;
+const power=(1-dist/230)*.045;
 
-    const dist = Math.sqrt(dx*dx + dy*dy);
+Body.applyForce(
+body,
+body.position,
+{
+x:dx/dist*power,
+y:dy/dist*power
+}
+);
 
-    if(dist > 230 || dist < 1){
-      return;
-    }
+if(
+mode==="play"&&
+body.blockType!=="bomb"
+){
 
-    const power =
-      (1 - dist / 230) * .045;
+const damage=(1-dist/230)*80;
 
-    Body.applyForce(
-      body,
-      body.position,
-      {
-        x:(dx/dist)*power,
-        y:(dy/dist)*power
-      }
-    );
+body.hp=Math.max(
+0,
+(body.hp??100)-damage
+);
 
-    if(body.blockType !== "bomb"){
+if(body.hp<=0){
+destroyBody(body);
+}
+}
+});
 
-      if(mode === "play"){
-
-        const damage =
-          (1 - dist / 230) * 80;
-
-        body.hp =
-          Math.max(
-            0,
-            (body.hp ?? 100) - damage
-          );
-
-        if(body.hp <= 0){
-          destroyBody(body);
-        }
-
-      }
-    }
-  });
-
-  destroyBody(bomb);
+destroyBody(bomb);
 }
 
 function destroyBody(body){
 
-  if(!body || body.isGroundBedrock){
-    return;
-  }
+if(!body||body.isGroundBedrock)return;
 
-  Composite.remove(
-    engine.world,
-    body
-  );
+Composite.remove(
+engine.world,
+body
+);
 
-  bodies = bodies.filter(
-    b => b !== body
-  );
+bodies=bodies.filter(
+b=>b!==body
+);
 
-  if(selectedBody === body){
-    selectedBody = null;
-  }
+if(selectedBody===body){
+selectedBody=null;
+}
 }
 
 /* =========================
-   CLEAR
+CLEAR
 ========================= */
 
 function clearObjects(){
 
-  const all = [...bodies];
+[...bodies].forEach(body=>{
 
-  all.forEach(body => {
+if(body.isGroundBedrock)return;
 
-    if(body.isGroundBedrock){
-      return;
-    }
+Composite.remove(
+engine.world,
+body
+);
+});
 
-    Composite.remove(
-      engine.world,
-      body
-    );
-  });
-
-  bodies = [];
-  selectedBody = null;
+bodies=[];
+selectedBody=null;
 }
 
 /* =========================
-   POINTER
+COORDINATE
 ========================= */
 
 function getPointer(e){
 
-  const rect = canvas.getBoundingClientRect();
+const rect=canvas.getBoundingClientRect();
 
-  const source =
-    e.touches && e.touches.length
-      ? e.touches[0]
-      : e;
-
-  return {
-    x:source.clientX - rect.left,
-    y:source.clientY - rect.top
-  };
-}
-
-function getBodyAt(point){
-
-  const all =
-    Composite.allBodies(engine.world);
-
-  for(let i=all.length-1;i>=0;i--){
-
-    const body = all[i];
-
-    if(body.isGroundBedrock){
-      continue;
-    }
-
-    if(
-      Matter.Bounds.contains(
-        body.bounds,
-        point
-      )
-    ){
-
-      if(body.blockType === "multiply"){
-        return body;
-      }
-
-      if(body.blockType === "bedrock"){
-        return body;
-      }
-
-      return body;
-    }
-  }
-
-  return null;
-}
-
-function getHandleAt(body,point){
-
-  if(!body){
-    return null;
-  }
-
-  if(
-    body.isStatic ||
-    body.blockType === "multiply" ||
-    body.blockType === "bedrock" ||
-    body.blockType === "slime" ||
-    body.blockType === "bomb"
-  ){
-    return null;
-  }
-
-  const hw = body.bounds.max.x - body.bounds.min.x;
-  const hh = body.bounds.max.y - body.bounds.min.y;
-
-  const handles = [
-    {
-      name:"tl",
-      x:body.position.x-hw/2,
-      y:body.position.y-hh/2
-    },
-    {
-      name:"tr",
-      x:body.position.x+hw/2,
-      y:body.position.y-hh/2
-    },
-    {
-      name:"bl",
-      x:body.position.x-hw/2,
-      y:body.position.y+hh/2
-    },
-    {
-      name:"br",
-      x:body.position.x+hw/2,
-      y:body.position.y+hh/2
-    }
-  ];
-
-  for(const h of handles){
-
-    if(
-      Math.abs(point.x-h.x)<14 &&
-      Math.abs(point.y-h.y)<14
-    ){
-      return h.name;
-    }
-  }
-
-  return null;
-}
-
-function getRotateHandle(body,point){
-
-  if(!body){
-    return false;
-  }
-
-  if(
-    body.isStatic ||
-    body.blockType === "multiply" ||
-    body.blockType === "bedrock"
-  ){
-    return false;
-  }
-
-  const distance =
-    Math.hypot(
-      point.x-body.position.x,
-      point.y-body.position.y
-    );
-
-  const target =
-    Math.max(
-      body.bounds.max.y-body.position.y,
-      30
-    ) + 34;
-
-  return Math.abs(distance-target)<13;
+return{
+x:(e.clientX-rect.left),
+y:(e.clientY-rect.top)
+};
 }
 
 /* =========================
-   POINTER DOWN
+BODY HIT
+========================= */
+
+function pointInBody(body,p){
+
+if(body.circleRadius){
+
+return Math.hypot(
+p.x-body.position.x,
+p.y-body.position.y
+)<=body.circleRadius+10;
+}
+
+const local=Vector.rotate(
+{
+x:p.x-body.position.x,
+y:p.y-body.position.y
+},
+-body.angle
+);
+
+return(
+Math.abs(local.x)<=body.baseW/2+8&&
+Math.abs(local.y)<=body.baseH/2+8
+);
+}
+
+function getBodyAt(p){
+
+const all=
+Composite.allBodies(engine.world);
+
+for(let i=all.length-1;i>=0;i--){
+
+const body=all[i];
+
+if(body.isGroundBedrock)continue;
+
+if(pointInBody(body,p)){
+return body;
+}
+}
+
+return null;
+}
+
+/* =========================
+ROTATION HANDLE
+========================= */
+
+function getRotationHandle(body){
+
+if(!body)return null;
+
+if(body.isGroundBedrock)return null;
+
+const distance=
+Math.max(
+body.baseH/2,
+body.baseW/2
+)+42;
+
+const local={
+x:0,
+y:-distance
+};
+
+const rotated=
+Vector.rotate(
+local,
+body.angle
+);
+
+return{
+x:body.position.x+rotated.x,
+y:body.position.y+rotated.y
+};
+}
+
+function hitRotationHandle(body,p){
+
+const h=getRotationHandle(body);
+
+if(!h)return false;
+
+return Math.hypot(
+p.x-h.x,
+p.y-h.y
+)<15;
+}
+
+/* =========================
+RESIZE HANDLES
+========================= */
+
+function getResizeHandles(body){
+
+if(!body)return[];
+
+if(
+body.isGroundBedrock||
+body.blockType==="slime"||
+body.blockType==="bomb"
+){
+return[];
+}
+
+const hw=body.baseW/2;
+const hh=body.baseH/2;
+
+const points=[
+{x:-hw,y:-hh,name:"tl"},
+{x:hw,y:-hh,name:"tr"},
+{x:-hw,y:hh,name:"bl"},
+{x:hw,y:hh,name:"br"}
+];
+
+return points.map(p=>{
+
+const r=Vector.rotate(
+{x:p.x,y:p.y},
+body.angle
+);
+
+return{
+name:p.name,
+x:body.position.x+r.x,
+y:body.position.y+r.y
+};
+});
+}
+
+function getResizeHandle(body,p){
+
+const handles=getResizeHandles(body);
+
+for(const h of handles){
+
+if(
+Math.hypot(
+p.x-h.x,
+p.y-h.y
+)<15
+){
+return h.name;
+}
+}
+
+return null;
+}
+
+/* =========================
+POINTER DOWN
 ========================= */
 
 function pointerDown(e){
 
-  e.preventDefault();
+e.preventDefault();
 
-  if(!engine){
-    return;
-  }
+if(!engine)return;
 
-  const p = getPointer(e);
+const p=getPointer(e);
 
-  /*
-    PLAY:
-    クリックするだけで爆弾を置く。
-  */
+if(mode==="play"){
 
-  if(mode === "play"){
+createObject(
+"bomb",
+p.x,
+p.y
+);
 
-    createObject(
-      "bomb",
-      p.x,
-      p.y
-    );
-
-    return;
-  }
-
-  /*
-    EDITOR:
-    ツールが選択されていたら配置。
-    何個置いてもツールは解除しない。
-  */
-
-  if(currentTool){
-
-    if(currentTool === "delete"){
-
-      const body = getBodyAt(p);
-
-      if(
-        body &&
-        !body.isGroundBedrock
-      ){
-        destroyBody(body);
-      }
-
-      return;
-    }
-
-    createObject(
-      currentTool,
-      p.x,
-      p.y
-    );
-
-    return;
-  }
-
-  /*
-    ツール未選択なら編集操作。
-  */
-
-  const body = getBodyAt(p);
-
-  if(!body){
-    selectedBody = null;
-    return;
-  }
-
-  selectedBody = body;
-
-  const handle = getHandleAt(body,p);
-
-  if(handle){
-
-    dragging = true;
-    dragType = "resize_" + handle;
-    return;
-  }
-
-  if(getRotateHandle(body,p)){
-
-    dragging = true;
-    dragType = "rotate";
-    return;
-  }
-
-  dragging = true;
-  dragType = "move";
-
-  dragOffset.x =
-    p.x-body.position.x;
-
-  dragOffset.y =
-    p.y-body.position.y;
-
-  Body.setSleeping(
-    body,
-    false
-  );
+return;
 }
 
+if(currentTool){
+
+if(currentTool==="delete"){
+
+const body=getBodyAt(p);
+
+if(body&&!body.isGroundBedrock){
+destroyBody(body);
+}
+
+return;
+}
+
+createObject(
+currentTool,
+p.x,
+p.y
+);
+
+return;
+}
+
+const body=getBodyAt(p);
+
+if(!body){
+
+selectedBody=null;
+return;
+}
+
+selectedBody=body;
+
+const resizeHandle=
+getResizeHandle(body,p);
+
+if(resizeHandle){
+
+dragging=true;
+dragType="resize";
+resizeCorner=resizeHandle;
+
+Body.setSleeping(
+body,
+false
+);
+
+return;
+}
+
+if(hitRotationHandle(body,p)){
+
+dragging=true;
+dragType="rotate";
+
+Body.setSleeping(
+body,
+false
+);
+
+return;
+}
+
+dragging=true;
+dragType="move";
+
+dragOffset={
+x:p.x-body.position.x,
+y:p.y-body.position.y
+};
+
+Body.setSleeping(
+body,
+false
+);
+}
+
+let resizeCorner=null;
+
 /* =========================
-   POINTER MOVE
+POINTER MOVE
 ========================= */
 
 function pointerMove(e){
 
-  if(!dragging || !selectedBody){
-    return;
-  }
+if(!dragging||!selectedBody)return;
 
-  e.preventDefault();
+e.preventDefault();
 
-  const p = getPointer(e);
-  const body = selectedBody;
+const body=selectedBody;
+const p=getPointer(e);
 
-  Body.setSleeping(
-    body,
-    false
-  );
+Body.setSleeping(
+body,
+false
+);
 
-  if(dragType === "move"){
+if(dragType==="move"){
 
-    Body.setPosition(
-      body,
-      {
-        x:p.x-dragOffset.x,
-        y:p.y-dragOffset.y
-      }
-    );
+Body.setPosition(
+body,
+{
+x:p.x-dragOffset.x,
+y:p.y-dragOffset.y
+}
+);
 
-    Body.setVelocity(
-      body,
-      {x:0,y:0}
-    );
+Body.setVelocity(
+body,
+{x:0,y:0}
+);
 
-    Body.setAngularVelocity(
-      body,
-      0
-    );
+Body.setAngularVelocity(
+body,
+0
+);
 
-    return;
-  }
+return;
+}
 
-  if(dragType === "rotate"){
+if(dragType==="rotate"){
 
-    const angle =
-      Math.atan2(
-        p.y-body.position.y,
-        p.x-body.position.x
-      ) + Math.PI/2;
+/*
+  ブロックの中心からマウス位置への角度。
+  縦線の先端が常にブロックの上方向になる。
+*/
 
-    Body.setAngle(
-      body,
-      angle
-    );
+const angle=
+Math.atan2(
+p.y-body.position.y,
+p.x-body.position.x
+)+Math.PI/2;
 
-    Body.setAngularVelocity(
-      body,
-      0
-    );
+Body.setAngle(
+body,
+angle
+);
 
-    return;
-  }
+Body.setAngularVelocity(
+body,
+0
+);
 
-  if(dragType.startsWith("resize_")){
+return;
+}
 
-    resizeFromCenter(
-      body,
-      p
-    );
-  }
+if(dragType==="resize"){
+
+resizeBody(
+body,
+p,
+resizeCorner
+);
+}
 }
 
 /* =========================
-   RESIZE
-   対角固定なし
-   中心固定
+RESIZE
+中心固定
+対角固定なし
 ========================= */
 
-function resizeFromCenter(body,p){
+function resizeBody(body,p,corner){
 
-  const dx =
-    Math.abs(
-      p.x-body.position.x
-    );
+const dx=
+p.x-body.position.x;
 
-  const dy =
-    Math.abs(
-      p.y-body.position.y
-    );
+const dy=
+p.y-body.position.y;
 
-  const newW =
-    Math.max(
-      25,
-      Math.min(
-        300,
-        dx*2
-      )
-    );
+/*
+  現在の角度を逆回転して
+  ブロック自身の座標系に変換する。
+*/
 
-  const newH =
-    Math.max(
-      25,
-      Math.min(
-        250,
-        dy*2
-      )
-    );
+const local=Vector.rotate(
+{
+x:dx,
+y:dy
+},
+-body.angle
+);
 
-  const oldW =
-    body.baseW || 70;
+let newW=Math.abs(local.x)*2;
+let newH=Math.abs(local.y)*2;
 
-  const oldH =
-    body.baseH || 45;
+newW=Math.max(
+25,
+Math.min(350,newW)
+);
 
-  const scaleX =
-    newW/oldW;
+newH=Math.max(
+25,
+Math.min(300,newH)
+);
 
-  const scaleY =
-    newH/oldH;
+const oldW=body.baseW||70;
+const oldH=body.baseH||45;
 
-  Body.scale(
-    body,
-    scaleX,
-    scaleY
-  );
+if(oldW<=0||oldH<=0)return;
 
-  body.baseW = newW;
-  body.baseH = newH;
+const sx=newW/oldW;
+const sy=newH/oldH;
 
-  Body.setVelocity(
-    body,
-    {x:0,y:0}
-  );
+Body.scale(
+body,
+sx,
+sy
+);
 
-  Body.setAngularVelocity(
-    body,
-    0
-  );
+body.baseW=newW;
+body.baseH=newH;
+
+Body.setPosition(
+body,
+body.position
+);
+
+Body.setVelocity(
+body,
+{x:0,y:0}
+);
+
+Body.setAngularVelocity(
+body,
+0
+);
+
+Body.setSleeping(
+body,
+false
+);
 }
 
-function pointerUp(e){
+/* =========================
+POINTER UP
+========================= */
 
-  dragging = false;
-  dragType = null;
+function pointerUp(){
 
-  if(selectedBody){
-    Body.setSleeping(
-      selectedBody,
-      false
-    );
-  }
+dragging=false;
+dragType=null;
+resizeCorner=null;
+
+if(selectedBody){
+
+Body.setSleeping(
+selectedBody,
+false
+);
+}
 }
 
 canvas.addEventListener(
-  "pointerdown",
-  pointerDown,
-  {passive:false}
+"pointerdown",
+pointerDown,
+{passive:false}
 );
 
 canvas.addEventListener(
-  "pointermove",
-  pointerMove,
-  {passive:false}
+"pointermove",
+pointerMove,
+{passive:false}
 );
 
 canvas.addEventListener(
-  "pointerup",
-  pointerUp,
-  {passive:false}
+"pointerup",
+pointerUp,
+{passive:false}
 );
 
 canvas.addEventListener(
-  "pointercancel",
-  pointerUp,
-  {passive:false}
+"pointercancel",
+pointerUp,
+{passive:false}
 );
 
 /* =========================
-   DRAW
+DRAW
 ========================= */
 
 function draw(){
 
-  ctx.clearRect(
-    0,
-    0,
-    canvasWidth,
-    canvasHeight
-  );
+ctx.clearRect(
+0,
+0,
+canvasWidth,
+canvasHeight
+);
 
-  /*
-    空
-  */
+const sky=
+ctx.createLinearGradient(
+0,0,
+0,canvasHeight
+);
 
-  const sky =
-    ctx.createLinearGradient(
-      0,0,
-      0,canvasHeight
-    );
+sky.addColorStop(
+0,
+"#dff5ff"
+);
 
-  sky.addColorStop(0,"#dff5ff");
-  sky.addColorStop(1,"#f4fbff");
+sky.addColorStop(
+1,
+"#f4fbff"
+);
 
-  ctx.fillStyle = sky;
-  ctx.fillRect(
-    0,
-    0,
-    canvasWidth,
-    canvasHeight
-  );
+ctx.fillStyle=sky;
 
-  drawFloor();
+ctx.fillRect(
+0,
+0,
+canvasWidth,
+canvasHeight
+);
 
-  const all =
-    Composite.allBodies(engine.world);
+drawFloor();
 
-  all.forEach(body => {
+const all=
+Composite.allBodies(engine.world);
 
-    if(body.isGroundBedrock){
-      return;
-    }
+all.forEach(body=>{
 
-    drawBody(body);
-  });
+if(body.isGroundBedrock)return;
 
-  drawSelection();
-  drawExplosions();
+drawBody(body);
+});
+
+drawSelection();
+drawExplosions();
 }
 
 function drawFloor(){
 
-  const y =
-    canvasHeight-FLOOR_HEIGHT;
+const y=
+canvasHeight-FLOOR_HEIGHT;
 
-  /*
-    岩盤の床
-  */
+ctx.fillStyle="#59606a";
 
-  ctx.fillStyle="#59606a";
+ctx.fillRect(
+0,
+y,
+canvasWidth,
+FLOOR_HEIGHT
+);
 
-  ctx.fillRect(
-    0,
-    y,
-    canvasWidth,
-    FLOOR_HEIGHT
-  );
+ctx.fillStyle="#737b85";
 
-  ctx.fillStyle="#737b85";
+for(let x=0;x<canvasWidth;x+=38){
 
-  for(let x=0;x<canvasWidth;x+=38){
+ctx.beginPath();
 
-    ctx.beginPath();
-    ctx.moveTo(x,y+10);
-    ctx.lineTo(x+17,y+4);
-    ctx.lineTo(x+31,y+17);
-    ctx.lineTo(x+16,y+29);
-    ctx.lineTo(x+2,y+24);
-    ctx.closePath();
-    ctx.fill();
-  }
+ctx.moveTo(x,y+10);
+ctx.lineTo(x+17,y+4);
+ctx.lineTo(x+31,y+17);
+ctx.lineTo(x+16,y+29);
+ctx.lineTo(x+2,y+24);
 
-  ctx.fillStyle="#444b54";
+ctx.closePath();
 
-  ctx.fillRect(
-    0,
-    y,
-    canvasWidth,
-    5
-  );
+ctx.fill();
+}
 
-  ctx.fillStyle="#fff";
+ctx.fillStyle="#444b54";
 
-  ctx.font="bold 12px sans-serif";
-  ctx.textAlign="right";
+ctx.fillRect(
+0,
+y,
+canvasWidth,
+5
+);
 
-  ctx.fillText(
-    "消せない岩盤",
-    canvasWidth-10,
-    y+25
-  );
+ctx.fillStyle="#fff";
+ctx.font="bold 12px sans-serif";
+ctx.textAlign="right";
+
+ctx.fillText(
+"消せない岩盤",
+canvasWidth-10,
+y+25
+);
 }
 
 function drawBody(body){
 
-  const x = body.position.x;
-  const y = body.position.y;
+ctx.save();
 
-  ctx.save();
+ctx.translate(
+body.position.x,
+body.position.y
+);
 
-  ctx.translate(x,y);
-  ctx.rotate(body.angle);
+ctx.rotate(body.angle);
 
-  if(body.blockType === "wood"){
-    drawWood(body);
-  }
-  else if(body.blockType === "glass"){
-    drawGlass(body);
-  }
-  else if(body.blockType === "stone"){
-    drawStone(body);
-  }
-  else if(body.blockType === "slime"){
-    drawSlime(body);
-  }
-  else if(body.blockType === "bomb"){
-    drawBomb(body);
-  }
-  else if(body.blockType === "multiply"){
-    drawMultiply(body);
-  }
-  else if(body.blockType === "bedrock"){
-    drawBedrock(body);
-  }
-
-  ctx.restore();
+if(body.blockType==="wood"){
+drawWood(body);
+}
+else if(body.blockType==="glass"){
+drawGlass(body);
+}
+else if(body.blockType==="stone"){
+drawStone(body);
+}
+else if(body.blockType==="slime"){
+drawSlime(body);
+}
+else if(body.blockType==="bomb"){
+drawBomb(body);
+}
+else if(body.blockType==="multiply"){
+drawMultiply(body);
+}
+else if(body.blockType==="bedrock"){
+drawBedrock(body);
 }
 
-function drawRoundedRect(x,y,w,h,r){
+ctx.restore();
+}
 
-  ctx.beginPath();
+function roundedRect(x,y,w,h,r){
 
-  ctx.moveTo(x+r,y);
-  ctx.lineTo(x+w-r,y);
+ctx.beginPath();
 
-  ctx.quadraticCurveTo(
-    x+w,y,
-    x+w,y+r
-  );
+ctx.moveTo(x+r,y);
+ctx.lineTo(x+w-r,y);
 
-  ctx.lineTo(x+w,y+h-r);
+ctx.quadraticCurveTo(
+x+w,y,
+x+w,y+r
+);
 
-  ctx.quadraticCurveTo(
-    x+w,y+h,
-    x+w-r,y+h
-  );
+ctx.lineTo(
+x+w,
+y+h-r
+);
 
-  ctx.lineTo(x+r,y+h);
+ctx.quadraticCurveTo(
+x+w,y+h,
+x+w-r,y+h
+);
 
-  ctx.quadraticCurveTo(
-    x,y+h,
-    x,y+h-r
-  );
+ctx.lineTo(
+x+r,y+h
+);
 
-  ctx.lineTo(x,y+r);
+ctx.quadraticCurveTo(
+x,y+h,
+x,y+h-r
+);
 
-  ctx.quadraticCurveTo(
-    x,y,
-    x+r,y
-  );
+ctx.lineTo(
+x,y+r
+);
 
-  ctx.closePath();
+ctx.quadraticCurveTo(
+x,y,
+x+r,y
+);
+
+ctx.closePath();
 }
 
 function drawWood(body){
 
-  const w=body.baseW || 70;
-  const h=body.baseH || 45;
+const w=body.baseW;
+const h=body.baseH;
 
-  drawRoundedRect(
-    -w/2,
-    -h/2,
-    w,
-    h,
-    9
-  );
+roundedRect(
+-w/2,
+-h/2,
+w,
+h,
+9
+);
 
-  ctx.fillStyle="#c9853c";
-  ctx.fill();
+ctx.fillStyle="#c9853c";
+ctx.fill();
 
-  ctx.lineWidth=3;
-  ctx.strokeStyle="#8d5723";
-  ctx.stroke();
+ctx.strokeStyle="#8d5723";
+ctx.lineWidth=3;
+ctx.stroke();
 
-  ctx.strokeStyle="rgba(100,50,10,.35)";
-  ctx.lineWidth=2;
+ctx.strokeStyle="rgba(100,50,10,.35)";
+ctx.lineWidth=2;
 
-  ctx.beginPath();
-  ctx.moveTo(-w*.3,-h*.15);
-  ctx.quadraticCurveTo(
-    0,
-    0,
-    w*.3,
-    h*.12
-  );
-  ctx.stroke();
+ctx.beginPath();
+
+ctx.moveTo(
+-w*.3,
+-h*.15
+);
+
+ctx.quadraticCurveTo(
+0,
+0,
+w*.3,
+h*.12
+);
+
+ctx.stroke();
 }
 
 function drawGlass(body){
 
-  const w=body.baseW || 70;
-  const h=body.baseH || 45;
+const w=body.baseW;
+const h=body.baseH;
 
-  drawRoundedRect(
-    -w/2,
-    -h/2,
-    w,
-    h,
-    8
-  );
+roundedRect(
+-w/2,
+-h/2,
+w,
+h,
+8
+);
 
-  ctx.fillStyle="rgba(170,225,255,.62)";
-  ctx.fill();
+ctx.fillStyle="rgba(170,225,255,.62)";
+ctx.fill();
 
-  ctx.strokeStyle="#78b9dc";
-  ctx.lineWidth=3;
-  ctx.stroke();
+ctx.strokeStyle="#78b9dc";
+ctx.lineWidth=3;
+ctx.stroke();
 
-  ctx.strokeStyle="rgba(255,255,255,.8)";
-  ctx.lineWidth=3;
+ctx.strokeStyle="rgba(255,255,255,.8)";
+ctx.lineWidth=3;
 
-  ctx.beginPath();
-  ctx.moveTo(-w*.3,-h*.25);
-  ctx.lineTo(w*.25,h*.25);
-  ctx.stroke();
+ctx.beginPath();
+
+ctx.moveTo(
+-w*.3,
+-h*.25
+);
+
+ctx.lineTo(
+w*.25,
+h*.25
+);
+
+ctx.stroke();
 }
 
 function drawStone(body){
 
-  const w=body.baseW || 70;
-  const h=body.baseH || 45;
+const w=body.baseW;
+const h=body.baseH;
 
-  drawRoundedRect(
-    -w/2,
-    -h/2,
-    w,
-    h,
-    7
-  );
+roundedRect(
+-w/2,
+-h/2,
+w,
+h,
+7
+);
 
-  ctx.fillStyle="#888";
-  ctx.fill();
+ctx.fillStyle="#888";
+ctx.fill();
 
-  ctx.strokeStyle="#5d5d5d";
-  ctx.lineWidth=3;
-  ctx.stroke();
+ctx.strokeStyle="#5d5d5d";
+ctx.lineWidth=3;
+ctx.stroke();
 
-  ctx.fillStyle="#aaa";
+ctx.fillStyle="#aaa";
 
-  for(let i=0;i<4;i++){
+for(let i=0;i<4;i++){
 
-    const xx =
-      -w/2 +
-      (i+1)*w/5;
+const xx=
+-w/2+(i+1)*w/5;
 
-    const yy =
-      -h/2 +
-      (i%2)*h*.35;
+const yy=
+-h/2+(i%2)*h*.35;
 
-    ctx.beginPath();
-    ctx.arc(
-      xx,
-      yy,
-      4,
-      0,
-      Math.PI*2
-    );
-    ctx.fill();
-  }
+ctx.beginPath();
+
+ctx.arc(
+xx,
+yy,
+4,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+}
 }
 
 function drawSlime(body){
 
-  const r =
-    (body.baseW || 50)/2;
+const r=
+body.circleRadius||25;
 
-  ctx.beginPath();
+ctx.beginPath();
 
-  ctx.arc(
-    0,
-    0,
-    r,
-    0,
-    Math.PI*2
-  );
+ctx.arc(
+0,
+0,
+r,
+0,
+Math.PI*2
+);
 
-  ctx.fillStyle="#69cf65";
-  ctx.fill();
+ctx.fillStyle="#69cf65";
+ctx.fill();
 
-  ctx.strokeStyle="#3e9d45";
-  ctx.lineWidth=3;
-  ctx.stroke();
+ctx.strokeStyle="#3e9d45";
+ctx.lineWidth=3;
+ctx.stroke();
 
-  ctx.fillStyle="#222";
+ctx.fillStyle="#222";
 
-  ctx.beginPath();
-  ctx.arc(-r*.3,-r*.12,4,0,Math.PI*2);
-  ctx.fill();
+ctx.beginPath();
+ctx.arc(
+-r*.3,
+-r*.12,
+4,
+0,
+Math.PI*2
+);
+ctx.fill();
 
-  ctx.beginPath();
-  ctx.arc(r*.3,-r*.12,4,0,Math.PI*2);
-  ctx.fill();
+ctx.beginPath();
+ctx.arc(
+r*.3,
+-r*.12,
+4,
+0,
+Math.PI*2
+);
+ctx.fill();
 
-  ctx.strokeStyle="#276c2d";
-  ctx.lineWidth=2;
+ctx.strokeStyle="#276c2d";
+ctx.lineWidth=2;
 
-  ctx.beginPath();
-  ctx.arc(
-    0,
-    r*.02,
-    r*.35,
-    0,
-    Math.PI
-  );
+ctx.beginPath();
 
-  ctx.stroke();
+ctx.arc(
+0,
+r*.02,
+r*.35,
+0,
+Math.PI
+);
+
+ctx.stroke();
 }
 
 function drawBomb(body){
 
-  const r =
-    (body.baseW || 34)/2;
+const r=
+body.circleRadius||17;
 
-  ctx.beginPath();
-  ctx.arc(
-    0,
-    0,
-    r,
-    0,
-    Math.PI*2
-  );
+ctx.beginPath();
 
-  ctx.fillStyle="#333";
-  ctx.fill();
+ctx.arc(
+0,
+0,
+r,
+0,
+Math.PI*2
+);
 
-  ctx.strokeStyle="#111";
-  ctx.lineWidth=3;
-  ctx.stroke();
+ctx.fillStyle="#333";
+ctx.fill();
 
-  ctx.strokeStyle="#e99b32";
-  ctx.lineWidth=4;
+ctx.strokeStyle="#111";
+ctx.lineWidth=3;
+ctx.stroke();
 
-  ctx.beginPath();
-  ctx.moveTo(3,-r);
-  ctx.quadraticCurveTo(
-    12,
-    -r-12,
-    18,
-    -r-5
-  );
-  ctx.stroke();
+ctx.strokeStyle="#e99b32";
+ctx.lineWidth=4;
 
-  ctx.fillStyle="#ffbd38";
+ctx.beginPath();
 
-  ctx.beginPath();
-  ctx.arc(
-    18,
-    -r-5,
-    4,
-    0,
-    Math.PI*2
-  );
+ctx.moveTo(
+3,
+-r
+);
 
-  ctx.fill();
+ctx.quadraticCurveTo(
+12,
+-r-12,
+18,
+-r-5
+);
+
+ctx.stroke();
+
+ctx.fillStyle="#ffbd38";
+
+ctx.beginPath();
+
+ctx.arc(
+18,
+-r-5,
+4,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+
+/*
+  残り時間を爆弾の上に表示
+*/
+
+if(body.createdAt){
+
+const remaining=
+Math.max(
+0,
+body.timerDuration-
+(performance.now()-body.createdAt)
+);
+
+ctx.fillStyle="#222";
+ctx.font="900 10px sans-serif";
+ctx.textAlign="center";
+
+ctx.fillText(
+(remaining/1000).toFixed(1),
+0,
+r+14
+);
+}
 }
 
 function drawMultiply(body){
 
-  const w=body.baseW || 76;
-  const h=body.baseH || 54;
+const w=body.baseW;
+const h=body.baseH;
 
-  /*
-    倍ブロックは固定。
-  */
+roundedRect(
+-w/2,
+-h/2,
+w,
+h,
+12
+);
 
-  drawRoundedRect(
-    -w/2,
-    -h/2,
-    w,
-    h,
-    12
-  );
+ctx.fillStyle="#79d68b";
+ctx.fill();
 
-  ctx.fillStyle="#79d68b";
-  ctx.fill();
+ctx.strokeStyle="#3ca85b";
+ctx.lineWidth=4;
+ctx.stroke();
 
-  ctx.strokeStyle="#3ca85b";
-  ctx.lineWidth=4;
-  ctx.stroke();
+ctx.fillStyle="#fff";
+ctx.font="900 23px sans-serif";
+ctx.textAlign="center";
+ctx.textBaseline="middle";
 
-  ctx.fillStyle="#fff";
-  ctx.font="900 23px sans-serif";
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
-
-  ctx.fillText(
-    "×"+body.factor,
-    0,
-    1
-  );
+ctx.fillText(
+"×"+body.factor,
+0,
+1
+);
 }
 
 function drawBedrock(body){
 
-  const w=body.baseW || 80;
-  const h=body.baseH || 48;
+const w=body.baseW;
+const h=body.baseH;
 
-  drawRoundedRect(
-    -w/2,
-    -h/2,
-    w,
-    h,
-    7
-  );
+roundedRect(
+-w/2,
+-h/2,
+w,
+h,
+7
+);
 
-  ctx.fillStyle="#555d66";
-  ctx.fill();
+ctx.fillStyle="#555d66";
+ctx.fill();
 
-  ctx.strokeStyle="#343a40";
-  ctx.lineWidth=4;
-  ctx.stroke();
+ctx.strokeStyle="#343a40";
+ctx.lineWidth=4;
+ctx.stroke();
 
-  ctx.fillStyle="#9299a0";
-  ctx.font="900 13px sans-serif";
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
+ctx.fillStyle="#9299a0";
+ctx.font="900 13px sans-serif";
+ctx.textAlign="center";
+ctx.textBaseline="middle";
 
-  ctx.fillText(
-    "岩盤",
-    0,
-    0
-  );
+ctx.fillText(
+"岩盤",
+0,
+0
+);
 }
 
 /* =========================
-   SELECTION
+SELECTION
 ========================= */
 
 function drawSelection(){
 
-  const body = selectedBody;
+const body=selectedBody;
 
-  if(!body){
-    return;
-  }
+if(!body)return;
+if(body.isGroundBedrock)return;
 
-  if(body.isGroundBedrock){
-    return;
-  }
+ctx.save();
 
-  const w =
-    body.bounds.max.x-body.bounds.min.x;
+const handles=getResizeHandles(body);
 
-  const h =
-    body.bounds.max.y-body.bounds.min.y;
+if(handles.length){
 
-  ctx.save();
+ctx.strokeStyle="#f07b1a";
+ctx.lineWidth=2;
+ctx.setLineDash([6,5]);
 
-  ctx.strokeStyle="#f07b1a";
-  ctx.lineWidth=2;
-  ctx.setLineDash([6,5]);
+const w=body.baseW;
+const h=body.baseH;
 
-  ctx.strokeRect(
-    body.bounds.min.x-5,
-    body.bounds.min.y-5,
-    w+10,
-    h+10
-  );
+ctx.save();
 
-  ctx.setLineDash([]);
+ctx.translate(
+body.position.x,
+body.position.y
+);
 
-  if(
-    !body.isStatic &&
-    body.blockType !== "multiply" &&
-    body.blockType !== "bedrock" &&
-    body.blockType !== "slime" &&
-    body.blockType !== "bomb"
-  ){
+ctx.rotate(body.angle);
 
-    const points=[
-      [body.bounds.min.x,body.bounds.min.y],
-      [body.bounds.max.x,body.bounds.min.y],
-      [body.bounds.min.x,body.bounds.max.y],
-      [body.bounds.max.x,body.bounds.max.y]
-    ];
+ctx.strokeRect(
+-w/2-5,
+-h/2-5,
+w+10,
+h+10
+);
 
-    ctx.fillStyle="#fff";
-    ctx.strokeStyle="#e96e15";
-    ctx.lineWidth=2;
+ctx.restore();
 
-    points.forEach(p=>{
-      ctx.beginPath();
-      ctx.arc(
-        p[0],
-        p[1],
-        7,
-        0,
-        Math.PI*2
-      );
-      ctx.fill();
-      ctx.stroke();
-    });
-  }
+ctx.setLineDash([]);
 
-  if(
-    !body.isStatic &&
-    body.blockType !== "multiply" &&
-    body.blockType !== "bedrock"
-  ){
+handles.forEach(h=>{
 
-    const lineTop =
-      body.bounds.min.y-42;
+ctx.fillStyle="#fff";
+ctx.strokeStyle="#e96e15";
+ctx.lineWidth=2;
 
-    ctx.strokeStyle="#e96e15";
-    ctx.lineWidth=2;
+ctx.beginPath();
 
-    ctx.beginPath();
+ctx.arc(
+h.x,
+h.y,
+7,
+0,
+Math.PI*2
+);
 
-    ctx.moveTo(
-      body.position.x,
-      body.bounds.min.y
-    );
+ctx.fill();
+ctx.stroke();
+});
+}
 
-    ctx.lineTo(
-      body.position.x,
-      lineTop
-    );
+/*
+  回転線。
+  実際のangleに合わせて描画するので
+  回転してもハンドルがずれない。
+*/
 
-    ctx.stroke();
+if(!body.isGroundBedrock){
 
-    ctx.fillStyle="#fff";
-    ctx.strokeStyle="#e96e15";
+const rh=getRotationHandle(body);
 
-    ctx.beginPath();
-    ctx.arc(
-      body.position.x,
-      lineTop,
-      8,
-      0,
-      Math.PI*2
-    );
+const top={
+x:body.position.x,
+y:body.position.y
+};
 
-    ctx.fill();
-    ctx.stroke();
-  }
+ctx.strokeStyle="#e96e15";
+ctx.lineWidth=2;
 
-  ctx.restore();
+ctx.beginPath();
+
+ctx.moveTo(
+top.x,
+top.y
+);
+
+ctx.lineTo(
+rh.x,
+rh.y
+);
+
+ctx.stroke();
+
+ctx.fillStyle="#fff";
+ctx.strokeStyle="#e96e15";
+ctx.lineWidth=2;
+
+ctx.beginPath();
+
+ctx.arc(
+rh.x,
+rh.y,
+8,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+ctx.stroke();
+}
+
+ctx.restore();
 }
 
 /* =========================
-   EXPLOSION DRAW
+EXPLOSIONS
 ========================= */
 
 function drawExplosions(){
 
-  const now=performance.now();
+const now=performance.now();
 
-  explosions =
-    explosions.filter(ex => {
+explosions=
+explosions.filter(ex=>{
 
-      const elapsed =
-        now-ex.start;
+const elapsed=
+now-ex.start;
 
-      if(elapsed>=ex.duration){
-        return false;
-      }
+if(elapsed>=ex.duration){
+return false;
+}
 
-      const t =
-        elapsed/ex.duration;
+const t=
+elapsed/ex.duration;
 
-      const radius =
-        20+135*t;
+const radius=
+20+135*t;
 
-      const alpha =
-        1-t;
+const alpha=1-t;
 
-      const gradient =
-        ctx.createRadialGradient(
-          ex.x,
-          ex.y,
-          0,
-          ex.x,
-          ex.y,
-          radius
-        );
+const gradient=
+ctx.createRadialGradient(
+ex.x,
+ex.y,
+0,
+ex.x,
+ex.y,
+radius
+);
 
-      gradient.addColorStop(
-        0,
-        "rgba(255,255,180,"+
-        (0.95*alpha)+")"
-      );
+gradient.addColorStop(
+0,
+"rgba(255,255,180,"+
+(.95*alpha)+")"
+);
 
-      gradient.addColorStop(
-        .35,
-        "rgba(255,175,45,"+
-        (0.7*alpha)+")"
-      );
+gradient.addColorStop(
+.35,
+"rgba(255,175,45,"+
+(.7*alpha)+")"
+);
 
-      gradient.addColorStop(
-        1,
-        "rgba(255,80,20,0)"
-      );
+gradient.addColorStop(
+1,
+"rgba(255,80,20,0)"
+);
 
-      ctx.fillStyle=gradient;
+ctx.fillStyle=gradient;
 
-      ctx.beginPath();
+ctx.beginPath();
 
-      ctx.arc(
-        ex.x,
-        ex.y,
-        radius,
-        0,
-        Math.PI*2
-      );
+ctx.arc(
+ex.x,
+ex.y,
+radius,
+0,
+Math.PI*2
+);
 
-      ctx.fill();
+ctx.fill();
 
-      ctx.strokeStyle=
-        "rgba(255,100,20,"+
-        alpha+")";
+ctx.strokeStyle=
+"rgba(255,100,20,"+
+alpha+")";
 
-      ctx.lineWidth=5;
+ctx.lineWidth=5;
 
-      ctx.beginPath();
+ctx.beginPath();
 
-      ctx.arc(
-        ex.x,
-        ex.y,
-        radius*.72,
-        0,
-        Math.PI*2
-      );
+ctx.arc(
+ex.x,
+ex.y,
+radius*.72,
+0,
+Math.PI*2
+);
 
-      ctx.stroke();
+ctx.stroke();
 
-      return true;
-    });
+return true;
+});
 }
 
 /* =========================
-   GAME LOOP
+GAME LOOP
 ========================= */
 
 function gameLoop(now){
 
-  if(engine){
+if(engine){
 
-    const dt =
-      Math.min(
-        50,
-        now-lastTime
-      );
+const dt=
+Math.min(
+50,
+now-lastTime
+);
 
-    lastTime=now;
+lastTime=now;
 
-    /*
-      ここではエンジンを止めない。
-      1個のブロックが床についた後も
-      他のブロックは普通に動き続ける。
-    */
+Engine.update(
+engine,
+dt
+);
 
-    Engine.update(
-      engine,
-      dt
-    );
+updateBombTimers(now);
 
-    draw();
-  }
-
-  animationFrame =
-    requestAnimationFrame(
-      gameLoop
-    );
+draw();
 }
 
-function startGameLoop(){
-
-  if(animationFrame === null){
-
-    lastTime=performance.now();
-
-    animationFrame =
-      requestAnimationFrame(
-        gameLoop
-      );
-  }
+animationFrame=
+requestAnimationFrame(
+gameLoop
+);
 }
 
-startGameLoop();
+if(animationFrame===null){
+animationFrame=
+requestAnimationFrame(
+gameLoop
+);
+}
 
 /* =========================
-   TOOL BUTTONS
+TOOLS
 ========================= */
 
 document.querySelectorAll(".tool").forEach(btn=>{
 
-  btn.addEventListener("click",()=>{
+btn.addEventListener(
+"click",
+()=>{
 
-    const tool =
-      btn.dataset.tool;
+const tool=btn.dataset.tool;
 
-    document
-      .querySelectorAll(".tool")
-      .forEach(b=>{
-        b.classList.remove("active");
-      });
+document
+.querySelectorAll(".tool")
+.forEach(b=>b.classList.remove("active"));
 
-    /*
-      同じボタンをもう一度押したら解除。
-    */
+if(currentTool===tool){
 
-    if(currentTool === tool){
+currentTool=null;
+return;
+}
 
-      currentTool=null;
-      return;
-    }
+currentTool=tool;
 
-    currentTool=tool;
-
-    btn.classList.add("active");
-
-    if(tool === "multiply"){
-      factorArea.classList.remove("hidden");
-    }
-  });
-
+btn.classList.add("active");
+}
+);
 });
 
 /* =========================
-   MODE
+MODE
 ========================= */
 
 function setMode(newMode){
 
-  mode=newMode;
+mode=newMode;
 
-  selectedBody=null;
-  dragging=false;
-  currentTool=null;
+selectedBody=null;
+dragging=false;
+currentTool=null;
 
-  document
-    .querySelectorAll(".tool")
-    .forEach(b=>{
-      b.classList.remove("active");
-    });
+document
+.querySelectorAll(".tool")
+.forEach(b=>b.classList.remove("active"));
 
-  if(mode === "editor"){
+if(mode==="editor"){
 
-    modeTitle.textContent=
-      "ステージ作成";
+document.getElementById("modeTitle").textContent=
+"ステージ作成";
 
-    editorTools.classList.remove("hidden");
-    factorArea.classList.remove("hidden");
+document
+.getElementById("editorTools")
+.classList.remove("hidden");
 
-  }else{
+document
+.getElementById("factorArea")
+.classList.remove("hidden");
 
-    modeTitle.textContent=
-      "ステージプレイ";
+}else{
 
-    editorTools.classList.add("hidden");
-    factorArea.classList.add("hidden");
-  }
+document.getElementById("modeTitle").textContent=
+"ステージプレイ";
+
+document
+.getElementById("editorTools")
+.classList.add("hidden");
+
+document
+.getElementById("factorArea")
+.classList.add("hidden");
+}
 }
 
-editModeBtn.addEventListener(
-  "click",
-  ()=>{
-    setMode("editor");
-  }
+document.getElementById("editModeBtn")
+.addEventListener(
+"click",
+()=>setMode("editor")
 );
 
-playModeBtn.addEventListener(
-  "click",
-  ()=>{
-    setMode("play");
-  }
+document.getElementById("playModeBtn")
+.addEventListener(
+"click",
+()=>setMode("play")
 );
 
 /* =========================
-   OPEN GAME
+OPEN
 ========================= */
 
 function openGame(newMode){
 
-  showScreen(gameScreen);
+showScreen(gameScreen);
 
-  setTimeout(()=>{
+setTimeout(()=>{
 
-    resizeCanvas();
+resizeCanvas();
 
-    if(!engine){
-      createEngine();
-    }
-
-    resizeCanvas();
-
-    setMode(newMode);
-
-  },30);
+if(!engine){
+createEngine();
 }
 
-makeStageBtn.addEventListener(
-  "click",
-  ()=>{
-    openGame("editor");
-  }
+resizeCanvas();
+
+setMode(newMode);
+
+},30);
+}
+
+document.getElementById("makeStageBtn")
+.addEventListener(
+"click",
+()=>openGame("editor")
 );
 
-playStageBtn.addEventListener(
-  "click",
-  ()=>{
-    openGame("play");
-  }
-);
-
-/* =========================
-   EXPLODE
-========================= */
-
-explodeBtn.addEventListener(
-  "click",
-  ()=>{
-
-    if(!engine){
-      return;
-    }
-
-    const bombs =
-      Composite
-      .allBodies(engine.world)
-      .filter(
-        b=>b.blockType==="bomb"
-      );
-
-    bombs.forEach(
-      explodeBomb
-    );
-  }
+document.getElementById("playStageBtn")
+.addEventListener(
+"click",
+()=>openGame("play")
 );
 
 /* =========================
-   CLEAR
+EXPLODE BUTTON
 ========================= */
 
-clearBtn.addEventListener(
-  "click",
-  ()=>{
+document.getElementById("explodeBtn")
+.addEventListener(
+"click",
+()=>{
 
-    if(mode !== "editor"){
-      return;
-    }
+if(!engine)return;
 
-    clearObjects();
-  }
+const bombs=
+bodies.filter(
+b=>b.blockType==="bomb"
+);
+
+bombs.forEach(
+explodeBomb
+);
+}
 );
 
 /* =========================
-   HOME
+CLEAR
 ========================= */
 
-homeBtn.addEventListener(
-  "click",
-  ()=>{
-    showScreen(titleScreen);
-  }
+document.getElementById("clearBtn")
+.addEventListener(
+"click",
+()=>{
+
+if(mode==="editor"){
+clearObjects();
+}
+}
 );
 
 /* =========================
-   SAVE
+HOME
 ========================= */
 
-saveBtn.addEventListener(
-  "click",
-  ()=>{
-
-    if(mode !== "editor"){
-      return;
-    }
-
-    stageNameInput.value="";
-    saveModal.classList.remove("hidden");
-
-    setTimeout(
-      ()=>stageNameInput.focus(),
-      50
-    );
-  }
+document.getElementById("homeBtn")
+.addEventListener(
+"click",
+()=>showScreen(titleScreen)
 );
 
-saveCancelBtn.addEventListener(
-  "click",
-  ()=>{
-    saveModal.classList.add("hidden");
-  }
+/* =========================
+SAVE
+========================= */
+
+document.getElementById("saveBtn")
+.addEventListener(
+"click",
+()=>{
+
+if(mode!=="editor")return;
+
+document.getElementById("stageNameInput").value="";
+
+saveModal.classList.remove("hidden");
+
+setTimeout(
+()=>document.getElementById("stageNameInput").focus(),
+50
+);
+}
 );
 
-saveConfirmBtn.addEventListener(
-  "click",
-  saveStage
+document.getElementById("saveCancelBtn")
+.addEventListener(
+"click",
+()=>saveModal.classList.add("hidden")
+);
+
+document.getElementById("saveConfirmBtn")
+.addEventListener(
+"click",
+saveStage
 );
 
 function saveStage(){
 
-  const name =
-    stageNameInput.value.trim() ||
-    "無題のステージ";
+const name=
+document
+.getElementById("stageNameInput")
+.value
+.trim()||
+"無題のステージ";
 
-  const data =
-    bodies
-      .filter(
-        b=>!b.isGroundBedrock
-      )
-      .map(b=>({
+const data=
+bodies
+.filter(b=>!b.isGroundBedrock)
+.map(b=>({
 
-        type:b.blockType,
+type:b.blockType,
 
-        x:b.position.x,
-        y:b.position.y,
+x:b.position.x,
+y:b.position.y,
 
-        angle:b.angle,
+angle:b.angle,
 
-        width:
-          b.baseW ||
-          (b.bounds.max.x-b.bounds.min.x),
+width:b.baseW,
+height:b.baseH,
 
-        height:
-          b.baseH ||
-          (b.bounds.max.y-b.bounds.min.y),
+factor:
+b.blockType==="multiply"
+?b.factor
+:null,
 
-        factor:
-          b.blockType==="multiply"
-            ? b.factor
-            : null
-      }));
+timer:
+b.blockType==="bomb"
+?b.timerDuration/1000
+:null
+}));
 
-  const stages =
-    JSON.parse(
-      localStorage.getItem(SAVE_KEY) ||
-      "[]"
-    );
+const stages=
+JSON.parse(
+localStorage.getItem(SAVE_KEY)||"[]"
+);
 
-  stages.push({
-    id:newId(),
-    name,
-    created:Date.now(),
-    objects:data
-  });
+stages.push({
+id:newId(),
+name,
+created:Date.now(),
+objects:data
+});
 
-  localStorage.setItem(
-    SAVE_KEY,
-    JSON.stringify(stages)
-  );
+localStorage.setItem(
+SAVE_KEY,
+JSON.stringify(stages)
+);
 
-  saveModal.classList.add("hidden");
+saveModal.classList.add("hidden");
 }
 
 /* =========================
-   STAGE LIST
+STAGE LIST
 ========================= */
 
-stageListBtn.addEventListener(
-  "click",
-  ()=>{
-    showStageList();
-  }
+document.getElementById("stageListBtn")
+.addEventListener(
+"click",
+showStageList
 );
 
 function showStageList(){
 
-  const stages =
-    JSON.parse(
-      localStorage.getItem(SAVE_KEY) ||
-      "[]"
-    );
+const stages=
+JSON.parse(
+localStorage.getItem(SAVE_KEY)||"[]"
+);
 
-  stageList.innerHTML="";
+stageList.innerHTML="";
 
-  if(stages.length===0){
+if(stages.length===0){
 
-    const empty =
-      document.createElement("div");
+const empty=document.createElement("div");
 
-    empty.className="empty";
-    empty.textContent=
-      "保存されたステージはありません。";
+empty.className="empty";
+empty.textContent=
+"保存されたステージはありません。";
 
-    stageList.appendChild(empty);
+stageList.appendChild(empty);
 
-  }else{
+}else{
 
-    [...stages]
-      .reverse()
-      .forEach(stage=>{
+[...stages].reverse().forEach(stage=>{
 
-        const item =
-          document.createElement("div");
+const item=
+document.createElement("div");
 
-        item.className="stage-item";
+item.className="stage-item";
 
-        const name =
-          document.createElement("div");
+const name=
+document.createElement("div");
 
-        name.className="stage-name";
-        name.textContent=stage.name;
+name.className="stage-name";
+name.textContent=stage.name;
 
-        const play =
-          document.createElement("button");
+const play=
+document.createElement("button");
 
-        play.textContent="遊ぶ";
+play.textContent="遊ぶ";
 
-        play.addEventListener(
-          "click",
-          ()=>{
-            loadStage(
-              stage,
-              "play"
-            );
-          }
-        );
+play.addEventListener(
+"click",
+()=>loadStage(stage,"play")
+);
 
-        const edit =
-          document.createElement("button");
+const edit=
+document.createElement("button");
 
-        edit.textContent="編集";
+edit.textContent="編集";
 
-        edit.addEventListener(
-          "click",
-          ()=>{
-            loadStage(
-              stage,
-              "editor"
-            );
-          }
-        );
+edit.addEventListener(
+"click",
+()=>loadStage(stage,"editor")
+);
 
-        const del =
-          document.createElement("button");
+const del=
+document.createElement("button");
 
-        del.textContent="削除";
+del.textContent="削除";
 
-        del.addEventListener(
-          "click",
-          ()=>{
-            deleteStage(stage.id);
-          }
-        );
+del.addEventListener(
+"click",
+()=>deleteStage(stage.id)
+);
 
-        item.appendChild(name);
-        item.appendChild(play);
-        item.appendChild(edit);
-        item.appendChild(del);
+item.appendChild(name);
+item.appendChild(play);
+item.appendChild(edit);
+item.appendChild(del);
 
-        stageList.appendChild(item);
-      });
-  }
+stageList.appendChild(item);
 
-  showScreen(stageListScreen);
+});
+}
+
+showScreen(stageListScreen);
 }
 
 function loadStage(stage,newMode){
 
-  showScreen(gameScreen);
+showScreen(gameScreen);
 
-  setTimeout(()=>{
+setTimeout(()=>{
 
-    resizeCanvas();
+resizeCanvas();
 
-    if(!engine){
-      createEngine();
-    }
+if(!engine){
+createEngine();
+}
 
-    clearObjects();
+clearObjects();
+resizeCanvas();
 
-    resizeCanvas();
+stage.objects.forEach(obj=>{
 
-    stage.objects.forEach(obj=>{
+const body=
+createObject(
+obj.type,
+obj.x,
+obj.y,
+{
+factor:obj.factor,
+timerDuration:obj.timer
+}
+);
 
-      const body =
-        createObject(
-          obj.type,
-          obj.x,
-          obj.y
-        );
+if(!body)return;
 
-      if(!body){
-        return;
-      }
+Body.setAngle(
+body,
+obj.angle||0
+);
 
-      Body.setAngle(
-        body,
-        obj.angle || 0
-      );
+if(
+obj.width&&
+obj.height&&
+body.blockType!=="bomb"&&
+body.blockType!=="slime"
+){
 
-      if(
-        obj.width &&
-        obj.height &&
-        body.blockType !== "bomb" &&
-        body.blockType !== "slime"
-      ){
+const oldW=body.baseW;
+const oldH=body.baseH;
 
-        const oldW =
-          body.baseW ||
-          (body.bounds.max.x-body.bounds.min.x);
+Body.scale(
+body,
+obj.width/oldW,
+obj.height/oldH
+);
 
-        const oldH =
-          body.baseH ||
-          (body.bounds.max.y-body.bounds.min.y);
+body.baseW=obj.width;
+body.baseH=obj.height;
+}
 
-        Body.scale(
-          body,
-          obj.width/oldW,
-          obj.height/oldH
-        );
+if(body.blockType==="multiply"){
 
-        body.baseW=obj.width;
-        body.baseH=obj.height;
-      }
+body.factor=
+Math.max(
+2,
+Math.min(
+20,
+Number(obj.factor)||2
+)
+);
+}
 
-      if(body.blockType==="multiply"){
+if(body.blockType==="bomb"){
 
-        body.factor =
-          Math.max(
-            2,
-            Math.min(
-              20,
-              Number(obj.factor)||2
-            )
-          );
-      }
+body.timerDuration=
+Number(obj.timer||3)*1000;
 
-      Body.setSleeping(
-        body,
-        false
-      );
-    });
+body.createdAt=
+performance.now();
+}
 
-    setMode(newMode);
+Body.setSleeping(
+body,
+false
+);
 
-  },30);
+});
+
+setMode(newMode);
+
+},30);
 }
 
 function deleteStage(id){
 
-  const stages =
-    JSON.parse(
-      localStorage.getItem(SAVE_KEY) ||
-      "[]"
-    );
+const stages=
+JSON.parse(
+localStorage.getItem(SAVE_KEY)||"[]"
+);
 
-  const newStages =
-    stages.filter(
-      s=>s.id!==id
-    );
+localStorage.setItem(
+SAVE_KEY,
+JSON.stringify(
+stages.filter(
+s=>s.id!==id
+)
+)
+);
 
-  localStorage.setItem(
-    SAVE_KEY,
-    JSON.stringify(newStages)
-  );
-
-  showStageList();
+showStageList();
 }
 
-listBackBtn.addEventListener(
-  "click",
-  ()=>{
-    showScreen(titleScreen);
-  }
+document.getElementById("listBackBtn")
+.addEventListener(
+"click",
+()=>showScreen(titleScreen)
 );
 
 /* =========================
-   RESIZE
+INPUT
 ========================= */
+
+document.getElementById("factorInput")
+.addEventListener(
+"change",
+e=>{
+
+let v=
+Math.floor(
+Number(e.target.value)||2
+);
+
+v=Math.max(
+2,
+Math.min(20,v)
+);
+
+e.target.value=v;
+}
+);
+
+document.getElementById("timerInput")
+.addEventListener(
+"change",
+e=>{
+
+let v=
+Number(e.target.value)||3;
+
+v=Math.max(
+.5,
+Math.min(60,v)
+);
+
+e.target.value=v;
+}
+);
 
 window.addEventListener(
-  "resize",
-  ()=>{
-    resizeCanvas();
-  }
+"resize",
+resizeCanvas
 );
-
-/* =========================
-   FACTOR
-========================= */
-
-factorInput.addEventListener(
-  "change",
-  ()=>{
-
-    let value =
-      Number(factorInput.value);
-
-    if(!Number.isFinite(value)){
-      value=2;
-    }
-
-    value =
-      Math.max(
-        2,
-        Math.min(
-          20,
-          Math.floor(value)
-        )
-      );
-
-    factorInput.value=value;
-  }
-);
-
-/* =========================
-   START
-========================= */
 
 showScreen(titleScreen);
 </script>
-
 </body>
 </html>
