@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>日野市の街並みに歴史</title>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
 
 <style>
@@ -16,20 +15,17 @@
 html,body{
     margin:0;
     padding:0;
-    width:100%;
     min-height:100%;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
     background:#f7f7f7;
     color:#333;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
 }
 
 body{
     overflow-x:hidden;
 }
 
-button,
-input,
-select{
+button,input{
     font:inherit;
 }
 
@@ -39,276 +35,292 @@ button{
     touch-action:manipulation;
 }
 
+.hidden{
+    display:none!important;
+}
+
 .screen{
     width:100%;
     min-height:100vh;
-}
-
-.hidden{
-    display:none!important;
 }
 
 .start-screen{
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:30px 16px;
+    padding:20px;
 }
 
-.start-box{
-    width:min(620px,100%);
+.start-card{
+    width:min(600px,100%);
     background:#fff;
     border-radius:28px;
-    box-shadow:0 8px 28px rgba(0,0,0,.13);
-    padding:35px 22px;
+    padding:32px 22px;
+    box-shadow:0 8px 28px rgba(0,0,0,.14);
     text-align:center;
 }
 
 .start-title{
-    margin:0 0 30px;
-    font-size:clamp(28px,7vw,48px);
+    margin:0 0 8px;
+    font-size:clamp(28px,8vw,48px);
     font-weight:900;
     line-height:1.2;
 }
 
-.start-subtitle{
-    margin:-18px 0 28px;
+.start-description{
     color:#777;
-    font-size:14px;
+    font-size:13px;
+    margin-bottom:25px;
 }
 
 .main-button{
+    min-height:54px;
     width:100%;
-    min-height:58px;
-    margin:9px 0;
-    padding:12px 20px;
-    border-radius:18px;
+    padding:10px 18px;
+    margin:7px 0;
+    border-radius:17px;
     background:#f80;
     color:#fff;
-    font-weight:800;
-    font-size:18px;
-    box-shadow:0 5px 0 #c60;
+    font-weight:900;
+    box-shadow:0 4px 0 #c60;
 }
 
 .main-button:active{
     transform:translateY(3px);
-    box-shadow:0 2px 0 #c60;
+    box-shadow:0 1px 0 #c60;
 }
 
-.secondary-button{
-    min-height:48px;
-    padding:10px 18px;
-    border-radius:15px;
+.white-button{
+    min-height:45px;
+    padding:8px 15px;
+    border-radius:14px;
     background:#fff;
-    color:#333;
     border:2px solid #ddd;
-    font-weight:700;
+    color:#333;
+    font-weight:800;
 }
 
-.secondary-button:active{
-    background:#f3f3f3;
+.game{
+    padding:8px;
 }
 
-.game-screen{
-    padding:10px;
-}
-
-.top-panel{
+.editor-ui,
+.play-ui{
     position:relative;
     z-index:20;
-    width:100%;
     background:#fff;
     border-radius:20px;
-    box-shadow:0 5px 20px rgba(0,0,0,.12);
-    padding:12px;
-    margin-bottom:10px;
+    box-shadow:0 5px 20px rgba(0,0,0,.13);
+    padding:10px;
+    margin-bottom:8px;
 }
 
-.panel-title{
+.ui-title{
     font-weight:900;
-    margin-bottom:9px;
     font-size:16px;
+    margin-bottom:8px;
 }
 
-.tool-row{
+.button-row{
     display:flex;
     flex-wrap:wrap;
-    gap:7px;
-    align-items:center;
+    gap:6px;
 }
 
-.tool-button{
-    min-width:70px;
-    min-height:43px;
-    padding:8px 12px;
+.orange-button{
+    min-height:42px;
+    padding:7px 12px;
     border-radius:14px;
     background:#f80;
     color:#fff;
-    font-weight:800;
+    font-size:14px;
+    font-weight:900;
     box-shadow:0 3px 0 #c60;
 }
 
-.tool-button:active{
+.orange-button:active{
     transform:translateY(2px);
     box-shadow:0 1px 0 #c60;
 }
 
-.tool-button.selected{
+.orange-button.active{
     background:#000;
-    color:#fff;
     box-shadow:0 3px 0 #333;
 }
 
-.tool-button.select-tool{
-    background:#fff;
-    color:#333;
-    border:2px solid #ddd;
-    box-shadow:none;
-}
-
-.tool-button.select-tool.selected{
-    background:#f80;
-    color:#fff;
-    border-color:#f80;
-}
-
-.edit-actions{
-    display:flex;
-    gap:7px;
-    flex-wrap:wrap;
-    margin-top:10px;
-    padding-top:10px;
-    border-top:1px solid #eee;
-}
-
-.edit-button{
-    min-height:42px;
-    padding:8px 15px;
+.white-small{
+    min-height:40px;
+    padding:7px 12px;
     border-radius:13px;
     background:#fff;
     border:2px solid #ddd;
     font-weight:800;
 }
 
-.edit-button.selected{
-    background:#f80;
-    border-color:#f80;
-    color:#fff;
-}
-
-.control-row{
+.edit-actions{
     display:flex;
+    gap:6px;
     flex-wrap:wrap;
-    gap:7px;
-    margin-top:10px;
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px solid #eee;
 }
 
-.control-button{
-    min-height:43px;
-    padding:8px 15px;
-    border-radius:14px;
+.edit-actions button{
+    min-height:39px;
+    padding:6px 12px;
+    border-radius:12px;
     background:#fff;
     border:2px solid #ddd;
     font-weight:800;
 }
 
-.stage-wrapper{
+.edit-actions button.active{
+    background:#f80;
+    color:#fff;
+    border-color:#f80;
+}
+
+.status{
+    margin-top:8px;
+    padding:7px 10px;
+    border-radius:11px;
+    background:#f5f5f5;
+    font-size:12px;
+    font-weight:700;
+}
+
+.dropper-line{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    margin-top:7px;
+    padding:6px 0 2px;
+}
+
+.dropper-line span{
+    white-space:nowrap;
+    font-size:12px;
+    font-weight:800;
+}
+
+.dropper-line input{
+    width:55px;
+    min-width:55px;
+    height:32px;
+    padding:3px 6px;
+    border:2px solid #ddd;
+    border-radius:9px;
+    text-align:center;
+}
+
+.dropper-line button{
+    min-height:32px;
+    padding:4px 9px;
+    border-radius:9px;
+    background:#f80;
+    color:#fff;
+    font-size:12px;
+    font-weight:900;
+    white-space:nowrap;
+}
+
+.dropper-status{
+    min-width:45px;
+    text-align:center;
+    padding:5px 7px;
+    border-radius:8px;
+    background:#eee;
+    font-size:11px;
+    font-weight:900;
+}
+
+.dropper-status.on{
+    background:#f80;
+    color:#fff;
+}
+
+.stage-area{
     position:relative;
     z-index:1;
     width:100%;
-    background:#fff;
-    border-radius:22px;
-    box-shadow:0 7px 24px rgba(0,0,0,.14);
-    overflow:hidden;
-}
-
-.canvas-scroll{
-    width:100%;
-    height:min(68vh,720px);
+    height:min(72vh,760px);
     min-height:400px;
     overflow:hidden;
-    position:relative;
-    background:#fafafa;
+    background:#fff;
+    border-radius:23px;
+    box-shadow:0 7px 25px rgba(0,0,0,.15);
 }
 
-#gameCanvas{
-    display:block;
+#canvas{
     position:absolute;
     left:0;
     top:0;
+    display:block;
     touch-action:none;
 }
 
 .floor-label{
     position:absolute;
+    z-index:4;
     left:0;
     bottom:0;
     width:100%;
     height:42px;
     display:flex;
-    align-items:center;
     justify-content:center;
-    pointer-events:none;
+    align-items:center;
+    background:rgba(0,0,0,.78);
     color:#fff;
     font-weight:900;
-    background:rgba(0,0,0,.76);
-    z-index:3;
+    pointer-events:none;
 }
 
-.bottom-panel{
+.bottom-ui{
     position:relative;
     z-index:20;
-    margin-top:10px;
-    padding:12px;
     background:#fff;
-    border-radius:20px;
-    box-shadow:0 5px 20px rgba(0,0,0,.12);
-}
-
-.save-row{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-}
-
-.save-row button{
-    flex:1;
-    min-width:120px;
+    border-radius:18px;
+    box-shadow:0 5px 18px rgba(0,0,0,.12);
+    padding:9px;
+    margin-top:8px;
 }
 
 .zoom-row{
     display:flex;
     align-items:center;
-    gap:8px;
-    margin-top:10px;
+    gap:7px;
+    margin-bottom:8px;
 }
 
 .zoom-row button{
-    width:48px;
-    height:43px;
-    border-radius:14px;
+    width:42px;
+    height:40px;
+    border-radius:12px;
     background:#fff;
     border:2px solid #ddd;
-    font-size:22px;
+    font-size:20px;
     font-weight:900;
 }
 
-.zoom-value{
-    min-width:75px;
+.zoom-number{
+    min-width:65px;
     text-align:center;
     font-weight:900;
 }
 
-.overlay{
+.modal-bg{
     position:fixed;
-    inset:0;
     z-index:100;
-    background:rgba(255,255,255,.72);
+    inset:0;
+    background:rgba(255,255,255,.74);
     backdrop-filter:blur(7px);
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:18px;
+    padding:15px;
 }
 
 .modal{
@@ -316,41 +328,31 @@ button{
     max-height:90vh;
     overflow:auto;
     background:#fff;
-    border-radius:25px;
-    box-shadow:0 10px 40px rgba(0,0,0,.2);
-    padding:22px;
+    border-radius:24px;
+    box-shadow:0 10px 40px rgba(0,0,0,.22);
+    padding:20px;
 }
 
 .modal h2{
-    margin-top:0;
+    margin:0 0 15px;
 }
 
-.field{
-    margin:12px 0;
-}
-
-.field label{
-    display:block;
-    margin-bottom:5px;
-    font-weight:800;
-}
-
-.field input{
+.modal-input{
     width:100%;
-    min-height:44px;
+    height:45px;
     border:2px solid #ddd;
     border-radius:12px;
-    padding:8px 12px;
+    padding:7px 10px;
 }
 
-.modal-buttons{
+.modal-row{
     display:flex;
-    gap:8px;
     flex-wrap:wrap;
-    margin-top:18px;
+    gap:7px;
+    margin-top:12px;
 }
 
-.modal-buttons button{
+.modal-row button{
     flex:1;
     min-width:120px;
 }
@@ -358,88 +360,74 @@ button{
 .stage-list{
     display:flex;
     flex-direction:column;
-    gap:10px;
+    gap:8px;
 }
 
 .stage-item{
     border:2px solid #eee;
-    border-radius:16px;
-    padding:13px;
+    border-radius:15px;
+    padding:11px;
 }
 
-.stage-item-name{
+.stage-name{
     font-weight:900;
-    font-size:17px;
 }
 
-.stage-item-date{
+.stage-date{
     color:#888;
-    font-size:12px;
-    margin-top:4px;
+    font-size:11px;
+    margin-top:3px;
 }
 
-.stage-item-buttons{
+.stage-buttons{
     display:flex;
-    gap:7px;
     flex-wrap:wrap;
-    margin-top:9px;
+    gap:5px;
+    margin-top:8px;
 }
 
-.stage-item-buttons button{
-    padding:8px 12px;
-    border-radius:11px;
+.stage-buttons button{
+    min-height:36px;
+    padding:5px 10px;
+    border-radius:10px;
     background:#f80;
     color:#fff;
-    font-weight:800;
+    font-size:12px;
+    font-weight:900;
 }
 
-.stage-item-buttons button.delete{
+.stage-buttons .delete{
     background:#fff;
     color:#c00;
-    border:2px solid #e5caca;
+    border:2px solid #ecc;
 }
 
-.config-box{
-    background:#fafafa;
-    border-radius:15px;
-    padding:13px;
-    margin-top:12px;
-}
-
-.small-note{
+.play-info{
     font-size:12px;
-    color:#777;
-    line-height:1.6;
-}
-
-.status{
-    margin-top:9px;
-    padding:9px 12px;
-    border-radius:12px;
-    background:#f5f5f5;
-    font-size:13px;
-    font-weight:700;
+    color:#666;
+    margin-top:7px;
 }
 
 @media(max-width:600px){
-    .game-screen{
-        padding:6px;
+    .game{
+        padding:5px;
     }
 
-    .top-panel{
+    .editor-ui,
+    .play-ui{
         border-radius:16px;
-        padding:9px;
+        padding:8px;
     }
 
-    .tool-button{
-        min-width:60px;
-        font-size:13px;
-        padding:7px 9px;
+    .orange-button{
+        font-size:12px;
+        padding:6px 9px;
+        min-height:38px;
     }
 
-    .canvas-scroll{
+    .stage-area{
         min-height:380px;
-        height:62vh;
+        height:64vh;
     }
 }
 </style>
@@ -448,257 +436,342 @@ button{
 <body>
 
 <div id="startScreen" class="screen start-screen">
-    <div class="start-box">
-        <h1 class="start-title">スライム城崩しメーカー</h1>
-        <div class="start-subtitle">日野市の街並みに歴史</div>
+    <div class="start-card">
 
-        <button class="main-button" id="createStageButton">
+        <h1 class="start-title">
+            スライム城崩しメーカー
+        </h1>
+
+        <div class="start-description">
+            ステージを作って、爆弾で遊べます。
+        </div>
+
+        <button id="newStageButton" class="main-button">
             ステージを作る
         </button>
 
-        <button class="main-button" id="playStageButton">
+        <button id="playSavedButton" class="main-button">
             ステージで遊ぶ
         </button>
 
-        <button class="secondary-button" id="savedStagesButton" style="width:100%;margin-top:12px;">
+        <button id="savedButton" class="white-button" style="width:100%;margin-top:8px;">
             保存データ一覧
         </button>
 
-        <button class="secondary-button" id="migrationButton" style="width:100%;margin-top:8px;">
+        <button id="migrationButton" class="white-button" style="width:100%;margin-top:7px;">
             データ移行
         </button>
+
     </div>
 </div>
 
-<div id="gameScreen" class="screen game-screen hidden">
 
-    <div class="top-panel">
+<div id="editorScreen" class="screen game hidden">
 
-        <div class="panel-title">
-            設置するブロックを選ぶ
+    <div class="editor-ui">
+
+        <div class="ui-title">
+            ステージを作る
         </div>
 
-        <div class="tool-row">
+        <div class="button-row">
 
-            <button class="tool-button select-tool" data-tool="select">
+            <button class="orange-button" data-editor-tool="select">
                 選択
             </button>
 
-            <button class="tool-button" data-tool="wood">
+            <button class="orange-button" data-editor-tool="wood">
                 木
             </button>
 
-            <button class="tool-button" data-tool="stone">
+            <button class="orange-button" data-editor-tool="stone">
                 石
             </button>
 
-            <button class="tool-button" data-tool="glass">
+            <button class="orange-button" data-editor-tool="glass">
                 ガラス
             </button>
 
-            <button class="tool-button" data-tool="slime">
+            <button class="orange-button" data-editor-tool="slime">
                 スライム
             </button>
 
-            <button class="tool-button" data-tool="bomb">
+            <button class="orange-button" data-editor-tool="bomb">
                 爆弾
             </button>
 
-            <button class="tool-button" data-tool="multiply">
+            <button class="orange-button" data-editor-tool="multiply">
                 倍
             </button>
 
-            <button class="tool-button" data-tool="bedrock">
+            <button class="orange-button" data-editor-tool="bedrock">
                 岩盤
             </button>
 
-            <button class="tool-button" data-tool="hollow">
-                新ブロック
+            <button class="orange-button" data-editor-tool="house">
+                家
             </button>
 
-            <button class="tool-button" data-tool="dropper">
-                自動投下機
+            <button class="orange-button" data-editor-tool="dropper">
+                投下機
             </button>
 
         </div>
 
-        <div id="editActions" class="edit-actions hidden">
+        <div id="editorActions" class="edit-actions hidden">
 
-            <button class="edit-button" data-edit="move">
+            <button data-editor-action="move">
                 移動
             </button>
 
-            <button class="edit-button" data-edit="resize">
+            <button data-editor-action="resize">
                 形変更
             </button>
 
-            <button class="edit-button" data-edit="rotate">
+            <button data-editor-action="rotate">
                 回転
             </button>
 
-        </div>
-
-        <div id="dropperSettings" class="config-box hidden">
-
-            <div class="panel-title">
-                自動爆弾投下機の設定
-            </div>
-
-            <div class="field">
-                <label>投下間隔（秒）</label>
-                <input id="dropInterval" type="number" min="0.1" step="0.1" value="5">
-            </div>
-
-            <div class="field">
-                <label>1回の投下個数</label>
-                <input id="dropCount" type="number" min="1" max="100" step="1" value="1">
-            </div>
-
-            <div class="field">
-                <label>爆弾の爆発時間（秒）</label>
-                <input id="dropBombTimer" type="number" min="0.1" step="0.1" value="10">
-            </div>
-
-            <button id="applyDropperSettings" class="tool-button">
-                設定を反映
+            <button id="deleteSelectedButton">
+                削除
             </button>
 
-            <div class="small-note">
-                投下機は形変更できません。クリックするとON/OFFを切り替えます。
-            </div>
+        </div>
+
+        <div id="editorDropperSettings" class="dropper-line hidden">
+
+            <span>投下間隔</span>
+            <input id="editorInterval" type="number" min=".1" step=".1" value="5">
+
+            <span>秒</span>
+
+            <span>個数</span>
+            <input id="editorCount" type="number" min="1" max="100" value="1">
+
+            <span>爆発</span>
+            <input id="editorBombTimer" type="number" min=".1" step=".1" value="10">
+
+            <span>秒</span>
+
+            <button id="editorDropperApply">
+                反映
+            </button>
+
+            <button id="editorDropperToggle">
+                ON/OFF
+            </button>
+
+            <span id="editorDropperStatus" class="dropper-status">
+                OFF
+            </span>
 
         </div>
 
-        <div id="selectionStatus" class="status">
-            選択モードではブロックをクリックして選択できます。
+        <div id="editorStatus" class="status">
+            選択してブロックを操作できます。
         </div>
 
     </div>
 
-    <div class="stage-wrapper">
-
-        <div id="canvasScroll" class="canvas-scroll">
-
-            <canvas id="gameCanvas"></canvas>
-
-            <div class="floor-label">
-                消せない岩盤
-            </div>
-
-        </div>
-
+    <div class="stage-area">
+        <canvas id="canvas"></canvas>
+        <div class="floor-label">消せない岩盤</div>
     </div>
 
-    <div class="bottom-panel">
+    <div class="bottom-ui">
 
-        <div class="control-row">
+        <div class="zoom-row">
+            <button id="editorZoomOut">−</button>
+            <div id="editorZoomValue" class="zoom-number">100%</div>
+            <button id="editorZoomIn">＋</button>
+        </div>
 
-            <button id="explodeAllButton" class="tool-button">
-                全爆破
+        <div class="button-row">
+
+            <button id="editorSave" class="orange-button">
+                ステージを保存
             </button>
 
-            <button id="clearButton" class="control-button">
-                ブロック全消去
+            <button id="editorSaved" class="white-small">
+                保存データ
             </button>
 
-            <button id="backButton" class="control-button">
+            <button id="editorBack" class="white-small">
                 戻る
             </button>
 
         </div>
 
-        <div class="zoom-row">
-            <button id="zoomOut">−</button>
-            <div id="zoomValue" class="zoom-value">100%</div>
-            <button id="zoomIn">＋</button>
+    </div>
+
+</div>
+
+
+<div id="playScreen" class="screen game hidden">
+
+    <div class="play-ui">
+
+        <div class="ui-title">
+            ステージで遊ぶ
         </div>
 
-        <div class="save-row">
+        <div class="button-row">
 
-            <button id="saveButton" class="main-button">
-                ステージを保存
+            <button id="playBombTool" class="orange-button active">
+                爆弾を投下
             </button>
 
-            <button id="savedFromGameButton" class="secondary-button">
-                保存データ
+            <button id="playReset" class="orange-button">
+                リセット（やり直す）
             </button>
 
+            <button id="playExplodeAll" class="orange-button">
+                全爆破
+            </button>
+
+            <button id="playSettings" class="white-small">
+                自動投下機設定
+            </button>
+
+            <button id="playBack" class="white-small">
+                戻る
+            </button>
+
+        </div>
+
+        <div id="playDropperSettings" class="dropper-line hidden">
+
+            <span>間隔</span>
+            <input id="playInterval" type="number" min=".1" step=".1" value="5">
+
+            <span>秒</span>
+
+            <span>個数</span>
+            <input id="playCount" type="number" min="1" max="100" value="1">
+
+            <span>爆発</span>
+            <input id="playBombTimer" type="number" min=".1" step=".1" value="10">
+
+            <span>秒</span>
+
+            <button id="playDropperApply">
+                反映
+            </button>
+
+        </div>
+
+        <div class="play-info">
+            爆弾をステージ内でタップすると投下します。自動爆弾投下機はステージ上の投下機を直接タップしてON/OFFできます。
+        </div>
+
+        <div id="playStatus" class="status">
+            爆弾投下モード
+        </div>
+
+    </div>
+
+    <div class="stage-area">
+        <canvas id="playCanvas"></canvas>
+        <div class="floor-label">消せない岩盤</div>
+    </div>
+
+    <div class="bottom-ui">
+
+        <div class="zoom-row">
+            <button id="playZoomOut">−</button>
+            <div id="playZoomValue" class="zoom-number">100%</div>
+            <button id="playZoomIn">＋</button>
         </div>
 
     </div>
 
 </div>
 
-<div id="saveModal" class="overlay hidden">
+
+<div id="saveModal" class="modal-bg hidden">
+
     <div class="modal">
 
         <h2>ステージを保存</h2>
 
-        <div class="field">
-            <label>ステージ名</label>
-            <input id="stageNameInput" type="text" maxlength="100" placeholder="例：日野駅ステージ">
-        </div>
+        <input
+            id="stageName"
+            class="modal-input"
+            maxlength="100"
+            placeholder="ステージ名"
+        >
 
-        <div class="modal-buttons">
+        <div class="modal-row">
+
             <button id="saveConfirm" class="main-button">
                 保存
             </button>
-            <button id="saveCancel" class="secondary-button">
+
+            <button id="saveCancel" class="white-button">
                 キャンセル
             </button>
+
         </div>
 
     </div>
+
 </div>
 
-<div id="savedModal" class="overlay hidden">
+
+<div id="savedModal" class="modal-bg hidden">
+
     <div class="modal">
 
         <h2>保存データ一覧</h2>
 
         <div id="stageList" class="stage-list"></div>
 
-        <div class="modal-buttons">
-            <button id="savedClose" class="secondary-button">
+        <div class="modal-row">
+            <button id="savedClose" class="white-button">
                 閉じる
             </button>
         </div>
 
     </div>
+
 </div>
 
-<div id="migrationModal" class="overlay hidden">
+
+<div id="migrationModal" class="modal-bg hidden">
+
     <div class="modal">
 
         <h2>データ移行</h2>
 
-        <p>
-            保存されているステージをJSONファイルとして書き出したり、
-            別の端末から読み込んだりできます。
-        </p>
+        <div class="modal-row">
 
-        <div class="modal-buttons">
-
-            <button id="exportData" class="main-button">
+            <button id="exportButton" class="main-button">
                 データを書き出す
             </button>
 
-            <button id="importData" class="secondary-button">
+            <button id="importButton" class="white-button">
                 データを読み込む
             </button>
 
-            <input id="importFile" type="file" accept=".json,application/json" class="hidden">
+            <input
+                id="importFile"
+                type="file"
+                accept=".json,application/json"
+                class="hidden"
+            >
 
         </div>
 
-        <div class="modal-buttons">
-            <button id="migrationClose" class="secondary-button">
+        <div class="modal-row">
+            <button id="migrationClose" class="white-button">
                 閉じる
             </button>
         </div>
 
     </div>
+
 </div>
+
 
 <script>
 const {
@@ -710,75 +783,66 @@ const {
     Vector
 } = Matter;
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-
-const startScreen = document.getElementById("startScreen");
-const gameScreen = document.getElementById("gameScreen");
-const canvasScroll = document.getElementById("canvasScroll");
-
-const editActions = document.getElementById("editActions");
-const selectionStatus = document.getElementById("selectionStatus");
-const dropperSettings = document.getElementById("dropperSettings");
-
-const STORAGE_KEY = "hino_history_street_final_v2";
+const STORAGE_KEY = "slime_castle_original_stages_v3";
 
 const FLOOR_HEIGHT = 42;
 
 let engine = null;
-let animationFrame = null;
-let lastTime = performance.now();
+
+let editorCanvas = document.getElementById("canvas");
+let editorCtx = editorCanvas.getContext("2d");
+
+let playCanvas = document.getElementById("playCanvas");
+let playCtx = playCanvas.getContext("2d");
+
+let activeCanvas = editorCanvas;
+let activeCtx = editorCtx;
 
 let canvasWidth = 0;
 let canvasHeight = 0;
 
-let currentTool = "select";
-let editAction = null;
+let currentMode = "editor";
+
+let editorTool = "select";
+let editorAction = null;
 
 let selectedBody = null;
 
-let pointerDownData = null;
+let pointerData = null;
 
-let zoom = 1;
+let zoomEditor = 1;
+let zoomPlay = 1;
+
+let animationFrame = null;
+let lastTime = performance.now();
 
 let explosions = [];
 
-let objectCounter = 0;
+let idCounter = 0;
 
-let playMode = false;
+let currentPlayStage = null;
+let playOriginalObjects = [];
 
-const activeTouchPairs = new WeakMap();
+let editorObjectsBeforePlay = [];
+
+const multiplierTouch = new WeakMap();
 
 function newId(){
-    objectCounter++;
-    return "obj_" +
+
+    idCounter++;
+
+    return (
+        "object_" +
         Date.now().toString(36) +
         "_" +
-        objectCounter.toString(36) +
+        idCounter.toString(36) +
         "_" +
-        Math.random().toString(36).slice(2,8);
+        Math.random().toString(36).slice(2,8)
+    );
 }
 
 function clamp(v,min,max){
     return Math.max(min,Math.min(max,v));
-}
-
-function showStart(){
-    startScreen.classList.remove("hidden");
-    gameScreen.classList.add("hidden");
-}
-
-function showGame(){
-    startScreen.classList.add("hidden");
-    gameScreen.classList.remove("hidden");
-
-    resizeCanvas();
-
-    if(!engine){
-        createEngine();
-    }
-
-    rebuildFloor();
 }
 
 function createEngine(){
@@ -796,54 +860,142 @@ function createEngine(){
     installPhysicsEvents();
 
     if(!animationFrame){
+
         lastTime = performance.now();
-        animationFrame = requestAnimationFrame(gameLoop);
+
+        animationFrame =
+            requestAnimationFrame(gameLoop);
     }
 }
 
 function gameLoop(now){
 
-    const dt = Math.min(50, now - lastTime);
+    const dt =
+        Math.min(
+            50,
+            now-lastTime
+        );
 
     lastTime = now;
 
     if(engine){
 
-        Engine.update(engine,dt);
+        Engine.update(
+            engine,
+            dt
+        );
 
         updateBombTimers(now);
 
-        updateAutoBombMachines(now);
+        updateDroppers(now);
 
         draw();
 
     }
 
-    animationFrame = requestAnimationFrame(gameLoop);
+    animationFrame =
+        requestAnimationFrame(gameLoop);
+}
+
+function getStageArea(){
+
+    return document.querySelector(
+        currentMode === "editor"
+            ? "#editorScreen .stage-area"
+            : "#playScreen .stage-area"
+    );
 }
 
 function resizeCanvas(){
 
-    const rect = canvasScroll.getBoundingClientRect();
+    const area =
+        getStageArea();
 
-    canvasWidth = Math.max(300,rect.width);
-
-    canvasHeight = Math.max(400,rect.height);
-
-    const dpr = window.devicePixelRatio || 1;
-
-    canvas.width = Math.floor(canvasWidth * dpr);
-
-    canvas.height = Math.floor(canvasHeight * dpr);
-
-    canvas.style.width = canvasWidth + "px";
-    canvas.style.height = canvasHeight + "px";
-
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-
-    if(engine){
-        rebuildFloor();
+    if(!area){
+        return;
     }
+
+    const rect =
+        area.getBoundingClientRect();
+
+    canvasWidth =
+        Math.max(
+            300,
+            rect.width
+        );
+
+    canvasHeight =
+        Math.max(
+            400,
+            rect.height
+        );
+
+    const canvas =
+        currentMode === "editor"
+            ? editorCanvas
+            : playCanvas;
+
+    const dpr =
+        window.devicePixelRatio || 1;
+
+    canvas.width =
+        Math.floor(
+            canvasWidth*dpr
+        );
+
+    canvas.height =
+        Math.floor(
+            canvasHeight*dpr
+        );
+
+    canvas.style.width =
+        canvasWidth+"px";
+
+    canvas.style.height =
+        canvasHeight+"px";
+
+    if(currentMode === "editor"){
+
+        editorCtx =
+            editorCanvas.getContext("2d");
+
+        editorCtx.setTransform(
+            dpr,
+            0,
+            0,
+            dpr,
+            0,
+            0
+        );
+
+        activeCanvas =
+            editorCanvas;
+
+        activeCtx =
+            editorCtx;
+
+    }else{
+
+        playCtx =
+            playCanvas.getContext("2d");
+
+        playCtx.setTransform(
+            dpr,
+            0,
+            0,
+            dpr,
+            0,
+            0
+        );
+
+        activeCanvas =
+            playCanvas;
+
+        activeCtx =
+            playCtx;
+    }
+
+    rebuildFloor();
 }
 
 function rebuildFloor(){
@@ -852,951 +1004,350 @@ function rebuildFloor(){
         return;
     }
 
-    const bodies = Composite.allBodies(engine.world);
+    Composite
+        .allBodies(engine.world)
+        .filter(
+            b=>b.isGroundBedrock
+        )
+        .forEach(
+            b=>Composite.remove(
+                engine.world,
+                b
+            )
+        );
 
-    for(const body of bodies){
+    const floor =
+        Bodies.rectangle(
+            canvasWidth/2,
+            canvasHeight-FLOOR_HEIGHT/2,
+            canvasWidth+300,
+            FLOOR_HEIGHT,
+            {
+                isStatic:true,
+                isGroundBedrock:true,
+                label:"groundBedrock",
+                friction:1.5,
+                frictionStatic:5,
+                restitution:0
+            }
+        );
 
-        if(body.isGroundBedrock){
-            Composite.remove(engine.world,body);
-        }
-
-    }
-
-    const floor = Bodies.rectangle(
-        canvasWidth / 2,
-        canvasHeight - FLOOR_HEIGHT / 2,
-        canvasWidth + 200,
-        FLOOR_HEIGHT,
-        {
-            label:"groundBedrock",
-            isStatic:true,
-            isGroundBedrock:true,
-            restitution:0,
-            friction:1.5,
-            frictionStatic:5,
-            slop:0
-        }
+    Composite.add(
+        engine.world,
+        floor
     );
-
-    Composite.add(engine.world,floor);
 }
 
-function baseObjectData(type){
+function objectDefaults(type){
 
-    const defaults = {
+    const data = {
+
         wood:{
             width:75,
             height:45,
-            color:"#9b641f",
-            strength:18
+            strength:30
         },
 
         stone:{
             width:75,
             height:45,
-            color:"#777",
-            strength:35
+            strength:55
         },
 
         glass:{
             width:75,
             height:45,
-            color:"rgba(120,210,255,.55)",
-            strength:12
+            strength:22
         },
 
         slime:{
-            width:34,
-            height:34,
-            color:"#55b84a",
-            strength:15
+            width:35,
+            height:35,
+            strength:25
         },
 
         bomb:{
             width:34,
             height:34,
-            color:"#222",
             strength:999999
         },
 
         multiply:{
-            width:78,
+            width:80,
             height:55,
-            color:"#d56bff",
             strength:999999
         },
 
         bedrock:{
-            width:80,
-            height:48,
-            color:"#444",
+            width:82,
+            height:50,
             strength:999999
         },
 
-        hollow:{
-            width:100,
-            height:70,
-            color:"#d28a3a",
-            strength:28
+        house:{
+            width:110,
+            height:75,
+            strength:40
         },
 
         dropper:{
-            width:90,
-            height:52,
-            color:"#f80",
+            width:95,
+            height:54,
             strength:999999
         }
+
     };
 
-    return Object.assign({},defaults[type]);
+    return data[type];
 }
 
-function createObject(type,x,y,options={}){
+function createBody(type,x,y,opt={}){
 
-    const d = baseObjectData(type);
+    const d =
+        objectDefaults(type);
 
-    const width = options.width || d.width;
-    const height = options.height || d.height;
+    const width =
+        opt.width || d.width;
 
-    const angle = options.angle || 0;
+    const height =
+        opt.height || d.height;
+
+    const angle =
+        opt.angle || 0;
 
     let body;
 
     if(type === "slime"){
 
-        body = Bodies.circle(
-            x,
-            y,
-            width / 2,
-            {
-                label:"slime",
-                restitution:.2,
-                friction:.8,
-                density:.002,
-                objectType:type
-            }
-        );
+        body =
+            Bodies.circle(
+                x,
+                y,
+                width/2,
+                {
+                    restitution:.15,
+                    friction:.8,
+                    density:.002
+                }
+            );
 
     }else if(type === "bomb"){
 
-        body = Bodies.circle(
-            x,
-            y,
-            width / 2,
-            {
-                label:"bomb",
-                restitution:.25,
-                friction:.7,
-                density:.002,
-                objectType:type
-            }
-        );
+        body =
+            Bodies.circle(
+                x,
+                y,
+                width/2,
+                {
+                    restitution:.2,
+                    friction:.7,
+                    density:.002
+                }
+            );
 
-    }else if(type === "hollow"){
+    }else if(type === "house"){
 
-        body = createHollowBody(
-            x,
-            y,
-            width,
-            height,
-            angle
-        );
-
-        body.objectType = type;
-        body.objectWidth = width;
-        body.objectHeight = height;
-        body.objectAngle = angle;
-        body.strength = options.strength ?? d.strength;
-
-        Composite.add(engine.world,body);
-
-        return body;
+        body =
+            createHouseBody(
+                x,
+                y,
+                width,
+                height,
+                angle
+            );
 
     }else{
 
-        body = Bodies.rectangle(
-            x,
-            y,
-            width,
-            height,
-            {
-                label:type,
-                isStatic:type === "multiply" || type === "bedrock" || type === "dropper",
-                isSensor:type === "multiply",
-                restitution:type === "glass" ? .05 : .1,
-                friction:type === "glass" ? .5 : .8,
-                density:.002,
-                objectType:type
-            }
-        );
+        body =
+            Bodies.rectangle(
+                x,
+                y,
+                width,
+                height,
+                {
+                    isStatic:
+                        type === "multiply" ||
+                        type === "bedrock" ||
+                        type === "dropper",
+
+                    isSensor:
+                        type === "multiply",
+
+                    restitution:
+                        type === "glass"
+                            ? .05
+                            : .1,
+
+                    friction:
+                        type === "glass"
+                            ? .45
+                            : .8,
+
+                    density:.002
+                }
+            );
     }
 
-    body.objectId = options.objectId || newId();
-    body.objectType = type;
+    body.objectId =
+        opt.objectId || newId();
 
-    body.objectWidth = width;
-    body.objectHeight = height;
+    body.objectType =
+        type;
 
-    body.baseWidth = width;
-    body.baseHeight = height;
+    body.objectWidth =
+        width;
 
-    body.objectAngle = angle;
+    body.objectHeight =
+        height;
 
-    body.strength = options.strength ?? d.strength;
+    body.baseWidth =
+        width;
 
-    body.damage = options.damage || 0;
+    body.baseHeight =
+        height;
 
-    body.createdAt = performance.now();
+    body.strength =
+        opt.strength ?? d.strength;
 
-    body.exploded = false;
+    body.damage =
+        opt.damage || 0;
 
-    body.fromMultiplierId = options.fromMultiplierId || null;
+    body.factor =
+        opt.factor || 2;
 
-    body.timerDuration = options.timerDuration || 8;
+    body.timerDuration =
+        opt.timerDuration || 8;
 
-    body.factor = options.factor || 2;
+    body.createdAt =
+        performance.now();
 
-    body.dropInterval = options.dropInterval || 5;
-    body.dropCount = options.dropCount || 1;
-    body.dropBombTimer = options.dropBombTimer || 10;
+    body.exploded =
+        false;
+
+    body.fromMultiplierId =
+        opt.fromMultiplierId || null;
+
+    body.dropInterval =
+        opt.dropInterval || 5;
+
+    body.dropCount =
+        opt.dropCount || 1;
+
+    body.dropBombTimer =
+        opt.dropBombTimer || 10;
 
     body.dropperEnabled =
-        options.dropperEnabled !== undefined
-            ? options.dropperEnabled
-            : true;
+        opt.dropperEnabled !== undefined
+            ? opt.dropperEnabled
+            : false;
 
-    body.dropperLastDrop = performance.now();
+    body.dropperLastDrop =
+        performance.now();
 
-    body.isGroundBedrock = false;
+    Body.setAngle(
+        body,
+        angle
+    );
 
-    Body.setAngle(body,angle);
+    body.objectAngle =
+        angle;
 
-    Composite.add(engine.world,body);
+    Composite.add(
+        engine.world,
+        body
+    );
 
     return body;
 }
 
-function createHollowBody(x,y,width,height,angle){
-
-    const thickness = Math.max(
-        8,
-        Math.min(width,height) * .16
-    );
-
-    const top = Bodies.rectangle(
-        x,
-        y - height/2 + thickness/2,
-        width,
-        thickness,
-        {
-            label:"hollowPart",
-            isStatic:false,
-            density:.002,
-            restitution:.1,
-            friction:.8
-        }
-    );
-
-    const bottom = Bodies.rectangle(
-        x,
-        y + height/2 - thickness/2,
-        width,
-        thickness,
-        {
-            label:"hollowPart",
-            isStatic:false,
-            density:.002,
-            restitution:.1,
-            friction:.8
-        }
-    );
-
-    const left = Bodies.rectangle(
-        x - width/2 + thickness/2,
-        y,
-        thickness,
-        height - thickness * 2,
-        {
-            label:"hollowPart",
-            isStatic:false,
-            density:.002,
-            restitution:.1,
-            friction:.8
-        }
-    );
-
-    const right = Bodies.rectangle(
-        x + width/2 - thickness/2,
-        y,
-        thickness,
-        height - thickness * 2,
-        {
-            label:"hollowPart",
-            isStatic:false,
-            density:.002,
-            restitution:.1,
-            friction:.8
-        }
-    );
-
-    const compound = Body.create({
-        parts:[top,bottom,left,right],
-        restitution:.1,
-        friction:.8
-    });
-
-    Body.setPosition(compound,{x,y});
-    Body.setAngle(compound,angle);
-
-    return compound;
-}
-
-function setTool(tool){
-
-    currentTool = tool;
-
-    document.querySelectorAll("[data-tool]").forEach(btn=>{
-        btn.classList.toggle(
-            "selected",
-            btn.dataset.tool === tool
-        );
-    });
-
-    editActions.classList.toggle(
-        "hidden",
-        tool !== "select"
-    );
-
-    if(tool !== "select"){
-
-        editAction = null;
-        selectedBody = null;
-
-        document.querySelectorAll("[data-edit]").forEach(btn=>{
-            btn.classList.remove("selected");
-        });
-
-        dropperSettings.classList.add("hidden");
-
-        selectionStatus.textContent =
-            "選択したブロックを操作する場合は「選択」を押してください。";
-
-    }else{
-
-        selectionStatus.textContent =
-            "ブロックをクリックして選択できます。";
-    }
-}
-
-document.querySelectorAll("[data-tool]").forEach(btn=>{
-
-    btn.addEventListener("click",()=>{
-
-        setTool(btn.dataset.tool);
-
-    });
-
-});
-
-document.querySelectorAll("[data-edit]").forEach(btn=>{
-
-    btn.addEventListener("click",()=>{
-
-        if(!selectedBody){
-            selectionStatus.textContent =
-                "先にブロックを選択してください。";
-            return;
-        }
-
-        editAction = btn.dataset.edit;
-
-        document.querySelectorAll("[data-edit]").forEach(b=>{
-            b.classList.toggle(
-                "selected",
-                b === btn
-            );
-        });
-
-        if(
-            selectedBody.objectType === "dropper"
-            &&
-            editAction === "resize"
-        ){
-
-            selectionStatus.textContent =
-                "自動爆弾投下機は形変更できません。";
-
-            editAction = null;
-
-            btn.classList.remove("selected");
-
-            return;
-        }
-
-        selectionStatus.textContent =
-            editAction === "move"
-                ? "選択中のブロックをドラッグして移動できます。"
-                : editAction === "resize"
-                ? "四隅のハンドルをドラッグして形を変更できます。"
-                : "上の回転ハンドルをドラッグして回転できます。";
-
-    });
-
-});
-
-canvas.addEventListener("pointerdown",pointerDown);
-
-canvas.addEventListener("pointermove",pointerMove);
-
-canvas.addEventListener("pointerup",pointerUp);
-
-canvas.addEventListener("pointercancel",pointerUp);
-
-function screenToWorld(e){
-
-    const rect = canvas.getBoundingClientRect();
-
-    return {
-        x:(e.clientX - rect.left) / zoom,
-        y:(e.clientY - rect.top) / zoom
-    };
-}
-
-function getBodyAt(x,y){
-
-    const bodies = Composite.allBodies(engine.world);
-
-    for(let i=bodies.length-1;i>=0;i--){
-
-        const body = bodies[i];
-
-        if(body.isGroundBedrock){
-            continue;
-        }
-
-        if(
-            body.objectType === "hollow"
-            &&
-            pointInHollow(body,x,y)
-        ){
-            return body;
-        }
-
-        if(
-            Matter.Bounds.contains(body.bounds,{x,y})
-        ){
-
-            const local = Vector.rotate(
-                {
-                    x:x-body.position.x,
-                    y:y-body.position.y
-                },
-                -body.angle
-            );
-
-            const w = body.objectWidth || body.baseWidth || 50;
-            const h = body.objectHeight || body.baseHeight || 50;
-
-            if(
-                Math.abs(local.x) <= w/2 &&
-                Math.abs(local.y) <= h/2
-            ){
-                return body;
-            }
-        }
-    }
-
-    return null;
-}
-
-function pointInHollow(body,x,y){
-
-    const local = Vector.rotate(
-        {
-            x:x-body.position.x,
-            y:y-body.position.y
-        },
-        -body.angle
-    );
-
-    const w = body.objectWidth;
-    const h = body.objectHeight;
-
-    const thickness =
-        Math.max(8,Math.min(w,h)*.16);
-
-    if(
-        Math.abs(local.x) > w/2 ||
-        Math.abs(local.y) > h/2
-    ){
-        return false;
-    }
-
-    return (
-        Math.abs(local.x) >= w/2-thickness ||
-        Math.abs(local.y) >= h/2-thickness
-    );
-}
-
-function getResizeHandles(body){
-
-    if(!body){
-        return [];
-    }
-
-    if(
-        body.objectType === "bomb" ||
-        body.objectType === "slime" ||
-        body.objectType === "dropper"
-    ){
-        return [];
-    }
-
-    const w = body.objectWidth || body.baseWidth;
-    const h = body.objectHeight || body.baseHeight;
-
-    const corners = [
-        {x:-w/2,y:-h/2},
-        {x:w/2,y:-h/2},
-        {x:w/2,y:h/2},
-        {x:-w/2,y:h/2}
-    ];
-
-    return corners.map(p=>{
-        const r = Vector.rotate(p,body.angle);
-
-        return {
-            x:body.position.x+r.x,
-            y:body.position.y+r.y
-        };
-    });
-}
-
-function getRotationHandle(body){
-
-    const distance =
-        Math.max(
-            body.objectWidth || 50,
-            body.objectHeight || 50
-        ) / 2 + 45;
-
-    const p = Vector.rotate(
-        {
-            x:0,
-            y:-distance
-        },
-        body.angle
-    );
-
-    return {
-        x:body.position.x+p.x,
-        y:body.position.y+p.y
-    };
-}
-
-function distance(a,b){
-
-    return Math.hypot(
-        a.x-b.x,
-        a.y-b.y
-    );
-}
-
-function pointerDown(e){
-
-    if(!engine){
-        return;
-    }
-
-    e.preventDefault();
-
-    const p = screenToWorld(e);
-
-    pointerDownData = {
-        pointerId:e.pointerId,
-        start:p,
-        body:null,
-        handle:null,
-        originalWidth:0,
-        originalHeight:0,
-        originalAngle:0,
-        originalX:0,
-        originalY:0
-    };
-
-    try{
-        canvas.setPointerCapture(e.pointerId);
-    }catch(_){}
-
-    if(currentTool !== "select"){
-
-        const type = currentTool;
-
-        if(type === "bomb"){
-
-            createBombAt(p.x,p.y,8);
-
-        }else{
-
-            createObject(
-                type,
-                p.x,
-                p.y
-            );
-
-        }
-
-        return;
-    }
-
-    if(!selectedBody){
-
-        const body = getBodyAt(p.x,p.y);
-
-        if(body){
-
-            selectBody(body);
-
-            if(body.objectType === "dropper"){
-
-                toggleDropper(body);
-
-            }
-        }
-
-        return;
-    }
-
-    if(editAction === "move"){
-
-        pointerDownData.body = selectedBody;
-
-        Body.setVelocity(selectedBody,{x:0,y:0});
-        Body.setAngularVelocity(selectedBody,0);
-        Body.setSleeping(selectedBody,false);
-
-        return;
-    }
-
-    if(editAction === "resize"){
-
-        const handles = getResizeHandles(selectedBody);
-
-        let nearest = null;
-        let nearestDistance = Infinity;
-
-        handles.forEach((h,i)=>{
-
-            const d = distance(p,h);
-
-            if(d < 25 && d < nearestDistance){
-
-                nearest = i;
-                nearestDistance = d;
-            }
-
-        });
-
-        if(nearest !== null){
-
-            pointerDownData.body = selectedBody;
-            pointerDownData.handle = nearest;
-
-            pointerDownData.originalWidth =
-                selectedBody.objectWidth;
-
-            pointerDownData.originalHeight =
-                selectedBody.objectHeight;
-
-            pointerDownData.originalX =
-                selectedBody.position.x;
-
-            pointerDownData.originalY =
-                selectedBody.position.y;
-
-            Body.setVelocity(selectedBody,{x:0,y:0});
-            Body.setAngularVelocity(selectedBody,0);
-            Body.setSleeping(selectedBody,false);
-        }
-
-        return;
-    }
-
-    if(editAction === "rotate"){
-
-        const handle = getRotationHandle(selectedBody);
-
-        if(distance(p,handle) < 30){
-
-            pointerDownData.body = selectedBody;
-
-            pointerDownData.originalAngle =
-                selectedBody.angle;
-
-            Body.setVelocity(selectedBody,{x:0,y:0});
-            Body.setAngularVelocity(selectedBody,0);
-            Body.setSleeping(selectedBody,false);
-        }
-
-        return;
-    }
-}
-
-function pointerMove(e){
-
-    if(!pointerDownData){
-        return;
-    }
-
-    if(pointerDownData.pointerId !== e.pointerId){
-        return;
-    }
-
-    e.preventDefault();
-
-    const p = screenToWorld(e);
-
-    const body = pointerDownData.body;
-
-    if(!body){
-        return;
-    }
-
-    if(editAction === "move"){
-
-        Body.setPosition(
-            body,
-            {
-                x:p.x,
-                y:p.y
-            }
-        );
-
-        Body.setVelocity(body,{x:0,y:0});
-        Body.setAngularVelocity(body,0);
-
-        return;
-    }
-
-    if(editAction === "resize"){
-
-        resizeBodyFromCenter(
-            body,
-            p,
-            pointerDownData.handle,
-            pointerDownData.originalWidth,
-            pointerDownData.originalHeight
-        );
-
-        Body.setVelocity(body,{x:0,y:0});
-        Body.setAngularVelocity(body,0);
-
-        return;
-    }
-
-    if(editAction === "rotate"){
-
-        const angle =
-            Math.atan2(
-                p.y-body.position.y,
-                p.x-body.position.x
-            ) + Math.PI/2;
-
-        Body.setAngle(body,angle);
-
-        body.objectAngle = angle;
-
-        Body.setVelocity(body,{x:0,y:0});
-        Body.setAngularVelocity(body,0);
-
-        return;
-    }
-}
-
-function pointerUp(e){
-
-    if(pointerDownData){
-
-        const body = pointerDownData.body;
-
-        if(body){
-
-            Body.setVelocity(body,{x:0,y:0});
-            Body.setAngularVelocity(body,0);
-            Body.setSleeping(body,false);
-        }
-    }
-
-    pointerDownData = null;
-
-    try{
-        canvas.releasePointerCapture(e.pointerId);
-    }catch(_){}
-}
-
-function resizeBodyFromCenter(
-    body,
-    pointer,
-    handleIndex,
-    originalWidth,
-    originalHeight
+function createHouseBody(
+    x,
+    y,
+    width,
+    height,
+    angle
 ){
 
-    const local = Vector.rotate(
-        {
-            x:pointer.x-body.position.x,
-            y:pointer.y-body.position.y
-        },
-        -body.angle
-    );
-
-    let newWidth = originalWidth;
-    let newHeight = originalHeight;
-
-    if(handleIndex === 0){
-
-        newWidth = Math.abs(local.x)*2;
-        newHeight = Math.abs(local.y)*2;
-
-    }else if(handleIndex === 1){
-
-        newWidth = Math.abs(local.x)*2;
-        newHeight = Math.abs(local.y)*2;
-
-    }else if(handleIndex === 2){
-
-        newWidth = Math.abs(local.x)*2;
-        newHeight = Math.abs(local.y)*2;
-
-    }else if(handleIndex === 3){
-
-        newWidth = Math.abs(local.x)*2;
-        newHeight = Math.abs(local.y)*2;
-
-    }
-
-    newWidth = clamp(newWidth,20,600);
-    newHeight = clamp(newHeight,20,600);
-
-    if(body.objectType === "hollow"){
-
-        rebuildHollowBody(
-            body,
-            newWidth,
-            newHeight
+    const thickness =
+        Math.max(
+            9,
+            Math.min(width,height)*.14
         );
 
-    }else{
-
-        const scaleX =
-            newWidth / body.objectWidth;
-
-        const scaleY =
-            newHeight / body.objectHeight;
-
-        Body.scale(
-            body,
-            scaleX,
-            scaleY
+    const top =
+        Bodies.rectangle(
+            x,
+            y-height/2+thickness/2,
+            width,
+            thickness,
+            {
+                density:.002,
+                friction:.8
+            }
         );
 
-        body.objectWidth = newWidth;
-        body.objectHeight = newHeight;
-    }
+    const bottom =
+        Bodies.rectangle(
+            x,
+            y+height/2-thickness/2,
+            width,
+            thickness,
+            {
+                density:.002,
+                friction:.8
+            }
+        );
+
+    const left =
+        Bodies.rectangle(
+            x-width/2+thickness/2,
+            y,
+            thickness,
+            height-thickness*2,
+            {
+                density:.002,
+                friction:.8
+            }
+        );
+
+    const right =
+        Bodies.rectangle(
+            x+width/2-thickness/2,
+            y,
+            thickness,
+            height-thickness*2,
+            {
+                density:.002,
+                friction:.8
+            }
+        );
+
+    const compound =
+        Body.create({
+            parts:[
+                top,
+                bottom,
+                left,
+                right
+            ],
+            density:.002,
+            friction:.8
+        });
 
     Body.setPosition(
-        body,
+        compound,
         {
-            x:pointerDownData.originalX,
-            y:pointerDownData.originalY
-        }
-    );
-}
-
-function rebuildHollowBody(body,width,height){
-
-    const oldPosition = {
-        x:body.position.x,
-        y:body.position.y
-    };
-
-    const oldAngle = body.angle;
-
-    Composite.remove(engine.world,body);
-
-    const newBody = createHollowBody(
-        oldPosition.x,
-        oldPosition.y,
-        width,
-        height,
-        oldAngle
-    );
-
-    newBody.objectId = body.objectId;
-    newBody.objectType = "hollow";
-    newBody.objectWidth = width;
-    newBody.objectHeight = height;
-    newBody.baseWidth = width;
-    newBody.baseHeight = height;
-    newBody.objectAngle = oldAngle;
-    newBody.strength = body.strength;
-    newBody.damage = body.damage;
-
-    selectedBody = newBody;
-
-    pointerDownData.body = newBody;
-}
-
-function selectBody(body){
-
-    if(body.isGroundBedrock){
-        return;
-    }
-
-    selectedBody = body;
-
-    editAction = null;
-
-    document.querySelectorAll("[data-edit]").forEach(btn=>{
-        btn.classList.remove("selected");
-    });
-
-    selectionStatus.textContent =
-        "ブロックを選択しました。「移動」「形変更」「回転」から操作を選べます。";
-
-    if(body.objectType === "dropper"){
-
-        dropperSettings.classList.remove("hidden");
-
-        document.getElementById("dropInterval").value =
-            body.dropInterval;
-
-        document.getElementById("dropCount").value =
-            body.dropCount;
-
-        document.getElementById("dropBombTimer").value =
-            body.dropBombTimer;
-
-    }else{
-
-        dropperSettings.classList.add("hidden");
-    }
-}
-
-function createBombAt(x,y,timer){
-
-    const bomb = createObject(
-        "bomb",
-        x,
-        y,
-        {
-            timerDuration:timer
+            x:x,
+            y:y
         }
     );
 
-    bomb.createdAt = performance.now();
+    Body.setAngle(
+        compound,
+        angle
+    );
 
-    return bomb;
+    return compound;
 }
 
 function installPhysicsEvents(){
@@ -1806,14 +1357,18 @@ function installPhysicsEvents(){
         "collisionStart",
         event=>{
 
-            for(const pair of event.pairs){
+            event.pairs.forEach(pair=>{
 
-                const a = pair.bodyA;
-                const b = pair.bodyB;
+                processMultiplier(
+                    pair.bodyA,
+                    pair.bodyB
+                );
 
-                handleMultiplierCollision(a,b);
-                handleMultiplierCollision(b,a);
-            }
+                processMultiplier(
+                    pair.bodyB,
+                    pair.bodyA
+                );
+            });
         }
     );
 
@@ -1822,88 +1377,91 @@ function installPhysicsEvents(){
         "collisionEnd",
         event=>{
 
-            for(const pair of event.pairs){
+            event.pairs.forEach(pair=>{
 
-                const a = pair.bodyA;
-                const b = pair.bodyB;
+                releaseMultiplier(
+                    pair.bodyA,
+                    pair.bodyB
+                );
 
-                clearMultiplierTouch(a,b);
-                clearMultiplierTouch(b,a);
-            }
+                releaseMultiplier(
+                    pair.bodyB,
+                    pair.bodyA
+                );
+            });
         }
     );
 }
 
-function isBomb(body){
+function processMultiplier(
+    bomb,
+    multiplier
+){
 
-    return body &&
-        body.objectType === "bomb";
-}
-
-function isMultiplier(body){
-
-    return body &&
-        body.objectType === "multiply";
-}
-
-function handleMultiplierCollision(bomb,multiplier){
-
-    if(!isBomb(bomb) || !isMultiplier(multiplier)){
+    if(
+        !bomb ||
+        !multiplier ||
+        bomb.objectType !== "bomb" ||
+        multiplier.objectType !== "multiply"
+    ){
         return;
     }
 
     /*
-        重要な増殖ルール
+       重要：
 
-        bomb.fromMultiplierId は
-        「この爆弾を直前に増殖させた倍ブロック」のID。
+       Aで増殖した爆弾
+       ↓
+       fromMultiplierId = A
 
-        Aで増殖
-        ↓
-        fromMultiplierId = A
+       Aでは増殖不可
+       Bでは増殖可能
 
-        その爆弾はAでは増殖不可。
-        Bでは増殖可能。
+       Bで増殖した爆弾
+       ↓
+       fromMultiplierId = B
 
-        Bでさらに増殖
-        ↓
-        fromMultiplierId = B
+       Bでは増殖不可
+       Aでは増殖可能
 
-        この新しい爆弾はBでは増殖不可。
-        Aでは増殖可能。
-
-        以前にAを通ったことなどは記録しない。
+       過去にどこを通ったかは記憶しない。
     */
 
     if(
-        bomb.fromMultiplierId === multiplier.objectId
+        bomb.fromMultiplierId ===
+        multiplier.objectId
     ){
         return;
     }
 
-    let touched = activeTouchPairs.get(bomb);
+    let set =
+        multiplierTouch.get(bomb);
 
-    if(!touched){
+    if(!set){
 
-        touched = new Set();
+        set = new Set();
 
-        activeTouchPairs.set(
+        multiplierTouch.set(
             bomb,
-            touched
+            set
         );
     }
 
     if(
-        touched.has(multiplier.objectId)
+        set.has(
+            multiplier.objectId
+        )
     ){
         return;
     }
 
-    touched.add(multiplier.objectId);
+    set.add(
+        multiplier.objectId
+    );
 
     const factor =
         clamp(
-            Number(multiplier.factor) || 2,
+            Number(multiplier.factor)||2,
             2,
             20
         );
@@ -1915,102 +1473,134 @@ function handleMultiplierCollision(bomb,multiplier){
     );
 }
 
-function clearMultiplierTouch(a,b){
+function releaseMultiplier(
+    bomb,
+    multiplier
+){
 
-    if(!isBomb(a) || !isMultiplier(b)){
+    if(
+        !bomb ||
+        !multiplier ||
+        bomb.objectType !== "bomb" ||
+        multiplier.objectType !== "multiply"
+    ){
         return;
     }
 
-    const touched =
-        activeTouchPairs.get(a);
+    const set =
+        multiplierTouch.get(bomb);
 
-    if(!touched){
+    if(!set){
         return;
     }
 
-    touched.delete(
-        b.objectId
+    set.delete(
+        multiplier.objectId
     );
 }
 
 function multiplyBomb(
     original,
     factor,
-    sourceMultiplierId
+    multiplierId
 ){
 
-    if(!original || original.exploded){
+    if(
+        !original ||
+        original.exploded
+    ){
         return;
     }
 
-    const x = original.position.x;
-    const y = original.position.y;
+    const x =
+        original.position.x;
+
+    const y =
+        original.position.y;
 
     const timer =
         original.timerDuration;
 
     /*
-        元の爆弾も含めてfactor個にする。
+       factor=2なら1個追加
+       factor=3なら2個追加
 
-        生成された爆弾には
-        「直前に増殖させた倍ブロック」
-        だけを記録する。
+       元の爆弾と合わせて
+       合計factor個。
 
-        これが暴走防止の核心。
+       全てに
+       「直前の倍ブロック」
+       を記録する。
     */
 
-    for(let i=0;i<factor-1;i++){
+    for(
+        let i=0;
+        i<factor-1;
+        i++
+    ){
 
-        const child = createBombAt(
-            x,
-            y,
-            timer
-        );
-
-        child.fromMultiplierId =
-            sourceMultiplierId;
+        const child =
+            createBody(
+                "bomb",
+                x,
+                y,
+                {
+                    timerDuration:timer,
+                    fromMultiplierId:multiplierId
+                }
+            );
 
         child.createdAt =
             performance.now();
     }
 
-    /*
-        元の爆弾自身も
-        今回の倍ブロックでは再増殖できない。
-    */
-
     original.fromMultiplierId =
-        sourceMultiplierId;
+        multiplierId;
 
     original.createdAt =
         performance.now();
 }
 
+function createBomb(
+    x,
+    y,
+    timer=8
+){
+
+    return createBody(
+        "bomb",
+        x,
+        y,
+        {
+            timerDuration:timer
+        }
+    );
+}
+
 function updateBombTimers(now){
 
-    const bodies =
-        Composite.allBodies(engine.world);
+    Composite
+        .allBodies(engine.world)
+        .forEach(body=>{
 
-    for(const body of bodies){
+            if(
+                body.objectType !== "bomb" ||
+                body.exploded
+            ){
+                return;
+            }
 
-        if(!isBomb(body)){
-            continue;
-        }
+            const elapsed =
+                (now-body.createdAt)/1000;
 
-        if(body.exploded){
-            continue;
-        }
+            if(
+                elapsed >=
+                body.timerDuration
+            ){
 
-        const elapsed =
-            (now-body.createdAt)/1000;
-
-        if(
-            elapsed >= body.timerDuration
-        ){
-
-            explodeBomb(body);
-        }
-    }
+                explodeBomb(body);
+            }
+        });
 }
 
 function explodeBomb(bomb){
@@ -2022,68 +1612,73 @@ function explodeBomb(bomb){
         return;
     }
 
-    bomb.exploded = true;
+    bomb.exploded =
+        true;
 
-    const radius = 145;
+    const radius = 150;
 
-    const forcePower = 0.055;
+    const power = .055;
 
-    const bodies =
-        Composite.allBodies(engine.world);
+    Composite
+        .allBodies(engine.world)
+        .forEach(body=>{
 
-    for(const body of bodies){
-
-        if(
-            body === bomb ||
-            body.isStatic ||
-            body.isGroundBedrock
-        ){
-            continue;
-        }
-
-        const dx =
-            body.position.x-bomb.position.x;
-
-        const dy =
-            body.position.y-bomb.position.y;
-
-        const dist =
-            Math.max(
-                1,
-                Math.hypot(dx,dy)
-            );
-
-        if(dist > radius){
-            continue;
-        }
-
-        const power =
-            (1-dist/radius)*forcePower;
-
-        Body.applyForce(
-            body,
-            body.position,
-            {
-                x:(dx/dist)*power,
-                y:(dy/dist)*power
+            if(
+                body === bomb ||
+                body.isStatic ||
+                body.isGroundBedrock
+            ){
+                return;
             }
-        );
 
-        if(playMode){
+            const dx =
+                body.position.x-
+                bomb.position.x;
 
-            damageBody(
+            const dy =
+                body.position.y-
+                bomb.position.y;
+
+            const distance =
+                Math.max(
+                    1,
+                    Math.hypot(dx,dy)
+                );
+
+            if(distance > radius){
+                return;
+            }
+
+            const strength =
+                (1-distance/radius)*
+                power;
+
+            Body.applyForce(
                 body,
-                power*100
+                body.position,
+                {
+                    x:dx/distance*strength,
+                    y:dy/distance*strength
+                }
             );
-        }
-    }
+
+            if(
+                currentMode === "play"
+            ){
+
+                damageBody(
+                    body,
+                    strength*100
+                );
+            }
+        });
 
     explosions.push({
         x:bomb.position.x,
         y:bomb.position.y,
         start:performance.now(),
         duration:500,
-        radius
+        radius:radius
     });
 
     Composite.remove(
@@ -2092,7 +1687,10 @@ function explodeBomb(bomb){
     );
 }
 
-function damageBody(body,damage){
+function damageBody(
+    body,
+    damage
+){
 
     if(
         body.isStatic ||
@@ -2105,7 +1703,7 @@ function damageBody(body,damage){
     }
 
     body.damage =
-        (body.damage || 0)+damage;
+        (body.damage||0)+damage;
 
     if(
         body.damage >= body.strength
@@ -2115,63 +1713,796 @@ function damageBody(body,damage){
             engine.world,
             body
         );
+
+        if(selectedBody === body){
+            selectedBody = null;
+        }
     }
 }
 
-function updateAutoBombMachines(now){
+function updateDroppers(now){
 
-    const bodies =
-        Composite.allBodies(engine.world);
+    Composite
+        .allBodies(engine.world)
+        .forEach(body=>{
 
-    for(const body of bodies){
+            if(
+                body.objectType !== "dropper" ||
+                !body.dropperEnabled
+            ){
+                return;
+            }
 
-        if(body.objectType !== "dropper"){
-            continue;
-        }
+            const interval =
+                Math.max(
+                    .1,
+                    Number(
+                        body.dropInterval
+                    )||5
+                )*1000;
 
-        if(!body.dropperEnabled){
-            continue;
-        }
+            if(
+                now-body.dropperLastDrop >=
+                interval
+            ){
 
-        const interval =
-            Math.max(
-                .1,
-                Number(body.dropInterval)||5
-            )*1000;
+                body.dropperLastDrop =
+                    now;
 
-        if(
-            now-body.dropperLastDrop >= interval
-        ){
-
-            body.dropperLastDrop = now;
-
-            const count =
-                clamp(
-                    Math.floor(
-                        Number(body.dropCount)||1
-                    ),
-                    1,
-                    100
-                );
-
-            for(let i=0;i<count;i++){
-
-                const offset =
-                    (i-(count-1)/2)*22;
-
-                const bomb =
-                    createBombAt(
-                        body.position.x+offset,
-                        body.position.y+
-                            body.objectHeight/2+
-                            25,
-                        Number(body.dropBombTimer)||10
+                const count =
+                    clamp(
+                        Math.floor(
+                            Number(
+                                body.dropCount
+                            )||1
+                        ),
+                        1,
+                        100
                     );
 
-                bomb.createdAt = now;
+                for(
+                    let i=0;
+                    i<count;
+                    i++
+                ){
+
+                    const offset =
+                        (i-(count-1)/2)*22;
+
+                    createBomb(
+                        body.position.x+offset,
+                        body.position.y+
+                        body.objectHeight/2+
+                        25,
+                        Number(
+                            body.dropBombTimer
+                        )||10
+                    );
+                }
             }
+        });
+}
+
+function getZoom(){
+
+    return currentMode === "editor"
+        ? zoomEditor
+        : zoomPlay;
+}
+
+function setZoom(v){
+
+    v =
+        clamp(
+            v,
+            .5,
+            2
+        );
+
+    if(currentMode === "editor"){
+
+        zoomEditor = v;
+
+        document.getElementById(
+            "editorZoomValue"
+        ).textContent =
+            Math.round(v*100)+"%";
+
+    }else{
+
+        zoomPlay = v;
+
+        document.getElementById(
+            "playZoomValue"
+        ).textContent =
+            Math.round(v*100)+"%";
+    }
+}
+
+function pointerToWorld(e){
+
+    const rect =
+        activeCanvas.getBoundingClientRect();
+
+    const z =
+        getZoom();
+
+    return {
+        x:
+            (e.clientX-rect.left)/z,
+        y:
+            (e.clientY-rect.top)/z
+    };
+}
+
+function getBodyAt(x,y){
+
+    const bodies =
+        Composite.allBodies(
+            engine.world
+        );
+
+    for(
+        let i=bodies.length-1;
+        i>=0;
+        i--
+    ){
+
+        const body =
+            bodies[i];
+
+        if(body.isGroundBedrock){
+            continue;
+        }
+
+        if(
+            body.objectType === "house"
+        ){
+
+            if(
+                pointInHouse(
+                    body,
+                    x,
+                    y
+                )
+            ){
+                return body;
+            }
+
+            continue;
+        }
+
+        const local =
+            Vector.rotate(
+                {
+                    x:x-body.position.x,
+                    y:y-body.position.y
+                },
+                -body.angle
+            );
+
+        const w =
+            body.objectWidth ||
+            body.baseWidth ||
+            40;
+
+        const h =
+            body.objectHeight ||
+            body.baseHeight ||
+            40;
+
+        if(
+            Math.abs(local.x)<=w/2 &&
+            Math.abs(local.y)<=h/2
+        ){
+            return body;
         }
     }
+
+    return null;
+}
+
+function pointInHouse(
+    body,
+    x,
+    y
+){
+
+    const local =
+        Vector.rotate(
+            {
+                x:x-body.position.x,
+                y:y-body.position.y
+            },
+            -body.angle
+        );
+
+    const w =
+        body.objectWidth;
+
+    const h =
+        body.objectHeight;
+
+    const t =
+        Math.max(
+            9,
+            Math.min(w,h)*.14
+        );
+
+    if(
+        Math.abs(local.x)>w/2 ||
+        Math.abs(local.y)>h/2
+    ){
+        return false;
+    }
+
+    return (
+        Math.abs(local.x)>=w/2-t ||
+        Math.abs(local.y)>=h/2-t
+    );
+}
+
+function getResizeHandles(body){
+
+    if(
+        !body ||
+        body.objectType === "bomb" ||
+        body.objectType === "slime" ||
+        body.objectType === "dropper"
+    ){
+        return [];
+    }
+
+    const w =
+        body.objectWidth;
+
+    const h =
+        body.objectHeight;
+
+    const points = [
+        {x:-w/2,y:-h/2},
+        {x:w/2,y:-h/2},
+        {x:w/2,y:h/2},
+        {x:-w/2,y:h/2}
+    ];
+
+    return points.map(p=>{
+
+        const r =
+            Vector.rotate(
+                p,
+                body.angle
+            );
+
+        return {
+            x:
+                body.position.x+r.x,
+            y:
+                body.position.y+r.y
+        };
+    });
+}
+
+function getRotateHandle(body){
+
+    const distance =
+        Math.max(
+            body.objectWidth,
+            body.objectHeight
+        )/2+45;
+
+    const p =
+        Vector.rotate(
+            {
+                x:0,
+                y:-distance
+            },
+            body.angle
+        );
+
+    return {
+        x:
+            body.position.x+p.x,
+        y:
+            body.position.y+p.y
+    };
+}
+
+function selectBody(body){
+
+    if(
+        !body ||
+        body.isGroundBedrock
+    ){
+        return;
+    }
+
+    selectedBody =
+        body;
+
+    editorAction =
+        null;
+
+    document
+        .querySelectorAll(
+            "[data-editor-action]"
+        )
+        .forEach(btn=>{
+            btn.classList.remove(
+                "active"
+            );
+        });
+
+    document
+        .getElementById(
+            "editorActions"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+    if(
+        body.objectType === "dropper"
+    ){
+
+        openEditorDropperSettings();
+
+    }else{
+
+        document
+            .getElementById(
+                "editorDropperSettings"
+            )
+            .classList.add(
+                "hidden"
+            );
+    }
+
+    document
+        .getElementById(
+            "editorStatus"
+        ).textContent =
+        "ブロックを選択しました。操作を選んでください。";
+}
+
+function pointerDown(e){
+
+    if(!engine){
+        return;
+    }
+
+    e.preventDefault();
+
+    const p =
+        pointerToWorld(e);
+
+    pointerData = {
+        id:e.pointerId,
+        start:p,
+        body:null,
+        handle:null,
+        originalWidth:0,
+        originalHeight:0,
+        originalX:0,
+        originalY:0
+    };
+
+    try{
+        activeCanvas.setPointerCapture(
+            e.pointerId
+        );
+    }catch(_){}
+
+    if(currentMode === "play"){
+
+        const hit =
+            getBodyAt(
+                p.x,
+                p.y
+            );
+
+        if(
+            hit &&
+            hit.objectType === "dropper"
+        ){
+
+            toggleDropper(
+                hit
+            );
+
+            return;
+        }
+
+        createBomb(
+            p.x,
+            p.y,
+            8
+        );
+
+        return;
+    }
+
+    if(editorTool !== "select"){
+
+        if(
+            editorTool === "bomb"
+        ){
+
+            createBomb(
+                p.x,
+                p.y,
+                8
+            );
+
+        }else{
+
+            createBody(
+                editorTool,
+                p.x,
+                p.y
+            );
+        }
+
+        return;
+    }
+
+    if(!selectedBody){
+
+        const hit =
+            getBodyAt(
+                p.x,
+                p.y
+            );
+
+        if(hit){
+            selectBody(hit);
+        }
+
+        return;
+    }
+
+    if(editorAction === "move"){
+
+        pointerData.body =
+            selectedBody;
+
+        stopBody(
+            selectedBody
+        );
+
+        return;
+    }
+
+    if(editorAction === "resize"){
+
+        const handles =
+            getResizeHandles(
+                selectedBody
+            );
+
+        let nearest = null;
+        let best = Infinity;
+
+        handles.forEach((h,i)=>{
+
+            const d =
+                Math.hypot(
+                    p.x-h.x,
+                    p.y-h.y
+                );
+
+            if(
+                d<28 &&
+                d<best
+            ){
+
+                best=d;
+                nearest=i;
+            }
+        });
+
+        if(nearest !== null){
+
+            pointerData.body =
+                selectedBody;
+
+            pointerData.handle =
+                nearest;
+
+            pointerData.originalWidth =
+                selectedBody.objectWidth;
+
+            pointerData.originalHeight =
+                selectedBody.objectHeight;
+
+            pointerData.originalX =
+                selectedBody.position.x;
+
+            pointerData.originalY =
+                selectedBody.position.y;
+
+            stopBody(
+                selectedBody
+            );
+        }
+
+        return;
+    }
+
+    if(editorAction === "rotate"){
+
+        const handle =
+            getRotateHandle(
+                selectedBody
+            );
+
+        const d =
+            Math.hypot(
+                p.x-handle.x,
+                p.y-handle.y
+            );
+
+        if(d<32){
+
+            pointerData.body =
+                selectedBody;
+
+            stopBody(
+                selectedBody
+            );
+        }
+
+        return;
+    }
+}
+
+function pointerMove(e){
+
+    if(!pointerData){
+        return;
+    }
+
+    if(
+        pointerData.id !==
+        e.pointerId
+    ){
+        return;
+    }
+
+    e.preventDefault();
+
+    const p =
+        pointerToWorld(e);
+
+    const body =
+        pointerData.body;
+
+    if(!body){
+        return;
+    }
+
+    if(
+        editorAction === "move"
+    ){
+
+        Body.setPosition(
+            body,
+            {
+                x:p.x,
+                y:p.y
+            }
+        );
+
+        stopBody(body);
+
+        return;
+    }
+
+    if(
+        editorAction === "resize"
+    ){
+
+        resizeBody(
+            body,
+            p
+        );
+
+        stopBody(body);
+
+        return;
+    }
+
+    if(
+        editorAction === "rotate"
+    ){
+
+        const angle =
+            Math.atan2(
+                p.y-body.position.y,
+                p.x-body.position.x
+            )+
+            Math.PI/2;
+
+        Body.setAngle(
+            body,
+            angle
+        );
+
+        body.objectAngle =
+            angle;
+
+        stopBody(body);
+
+        return;
+    }
+}
+
+function pointerUp(e){
+
+    if(
+        pointerData &&
+        pointerData.body
+    ){
+
+        stopBody(
+            pointerData.body
+        );
+    }
+
+    pointerData = null;
+
+    try{
+        activeCanvas.releasePointerCapture(
+            e.pointerId
+        );
+    }catch(_){}
+}
+
+function stopBody(body){
+
+    Body.setVelocity(
+        body,
+        {
+            x:0,
+            y:0
+        }
+    );
+
+    Body.setAngularVelocity(
+        body,
+        0
+    );
+
+    Body.setSleeping(
+        body,
+        false
+    );
+}
+
+function resizeBody(
+    body,
+    pointer
+){
+
+    const local =
+        Vector.rotate(
+            {
+                x:
+                    pointer.x-
+                    body.position.x,
+
+                y:
+                    pointer.y-
+                    body.position.y
+            },
+            -body.angle
+        );
+
+    let w =
+        Math.abs(local.x)*2;
+
+    let h =
+        Math.abs(local.y)*2;
+
+    w =
+        clamp(
+            w,
+            25,
+            600
+        );
+
+    h =
+        clamp(
+            h,
+            25,
+            600
+        );
+
+    if(
+        body.objectType === "house"
+    ){
+
+        rebuildHouse(
+            body,
+            w,
+            h
+        );
+
+        return;
+    }
+
+    const sx =
+        w/body.objectWidth;
+
+    const sy =
+        h/body.objectHeight;
+
+    Body.scale(
+        body,
+        sx,
+        sy
+    );
+
+    body.objectWidth =
+        w;
+
+    body.objectHeight =
+        h;
+
+    Body.setPosition(
+        body,
+        {
+            x:pointerData.originalX,
+            y:pointerData.originalY
+        }
+    );
+}
+
+function rebuildHouse(
+    oldBody,
+    width,
+    height
+){
+
+    const x =
+        oldBody.position.x;
+
+    const y =
+        oldBody.position.y;
+
+    const angle =
+        oldBody.angle;
+
+    const id =
+        oldBody.objectId;
+
+    const strength =
+        oldBody.strength;
+
+    Composite.remove(
+        engine.world,
+        oldBody
+    );
+
+    const newBody =
+        createBody(
+            "house",
+            x,
+            y,
+            {
+                objectId:id,
+                width:width,
+                height:height,
+                angle:angle,
+                strength:strength
+            }
+        );
+
+    selectedBody =
+        newBody;
+
+    pointerData.body =
+        newBody;
 }
 
 function toggleDropper(body){
@@ -2189,15 +2520,82 @@ function toggleDropper(body){
     body.dropperLastDrop =
         performance.now();
 
-    selectionStatus.textContent =
-        body.dropperEnabled
-            ? "自動爆弾投下機：ON"
-            : "自動爆弾投下機：OFF";
+    if(
+        currentMode === "editor"
+    ){
+
+        updateEditorDropperStatus();
+
+        document.getElementById(
+            "editorStatus"
+        ).textContent =
+            body.dropperEnabled
+                ? "自動爆弾投下機：ON"
+                : "自動爆弾投下機：OFF";
+    }
 }
 
-document.getElementById(
-    "applyDropperSettings"
-).addEventListener("click",()=>{
+function openEditorDropperSettings(){
+
+    if(
+        !selectedBody ||
+        selectedBody.objectType !== "dropper"
+    ){
+        return;
+    }
+
+    document
+        .getElementById(
+            "editorDropperSettings"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+    document.getElementById(
+        "editorInterval"
+    ).value =
+        selectedBody.dropInterval;
+
+    document.getElementById(
+        "editorCount"
+    ).value =
+        selectedBody.dropCount;
+
+    document.getElementById(
+        "editorBombTimer"
+    ).value =
+        selectedBody.dropBombTimer;
+
+    updateEditorDropperStatus();
+}
+
+function updateEditorDropperStatus(){
+
+    if(
+        !selectedBody ||
+        selectedBody.objectType !== "dropper"
+    ){
+        return;
+    }
+
+    const status =
+        document.getElementById(
+            "editorDropperStatus"
+        );
+
+    status.textContent =
+        selectedBody.dropperEnabled
+            ? "ON"
+            : "OFF";
+
+    status.classList.toggle(
+        "on",
+        selectedBody.dropperEnabled
+    );
+}
+
+function applyEditorDropperSettings(){
 
     if(
         !selectedBody ||
@@ -2209,7 +2607,9 @@ document.getElementById(
     selectedBody.dropInterval =
         clamp(
             Number(
-                document.getElementById("dropInterval").value
+                document.getElementById(
+                    "editorInterval"
+                ).value
             )||5,
             .1,
             3600
@@ -2219,7 +2619,9 @@ document.getElementById(
         clamp(
             Math.floor(
                 Number(
-                    document.getElementById("dropCount").value
+                    document.getElementById(
+                        "editorCount"
+                    ).value
                 )||1
             ),
             1,
@@ -2229,155 +2631,345 @@ document.getElementById(
     selectedBody.dropBombTimer =
         clamp(
             Number(
-                document.getElementById("dropBombTimer").value
+                document.getElementById(
+                    "editorBombTimer"
+                ).value
             )||10,
             .1,
             3600
         );
 
-    selectionStatus.textContent =
+    document.getElementById(
+        "editorStatus"
+    ).textContent =
         "自動爆弾投下機の設定を反映しました。";
-});
+}
 
 document.getElementById(
-    "explodeAllButton"
-).addEventListener("click",()=>{
-
-    const bodies =
-        Composite.allBodies(engine.world)
-            .filter(isBomb);
-
-    bodies.forEach(explodeBomb);
-});
+    "editorDropperApply"
+).addEventListener(
+    "click",
+    applyEditorDropperSettings
+);
 
 document.getElementById(
-    "clearButton"
-).addEventListener("click",()=>{
+    "editorDropperToggle"
+).addEventListener(
+    "click",
+    ()=>{
 
-    if(!engine){
-        return;
-    }
-
-    const bodies =
-        Composite.allBodies(engine.world);
-
-    bodies.forEach(body=>{
-
-        if(
-            !body.isGroundBedrock
-        ){
-            Composite.remove(
-                engine.world,
-                body
+        if(selectedBody){
+            toggleDropper(
+                selectedBody
             );
         }
-    });
+    }
+);
 
-    selectedBody = null;
+document.querySelectorAll(
+    "[data-editor-tool]"
+).forEach(button=>{
+
+    button.addEventListener(
+        "click",
+        ()=>{
+
+            editorTool =
+                button.dataset.editorTool;
+
+            document
+                .querySelectorAll(
+                    "[data-editor-tool]"
+                )
+                .forEach(b=>{
+                    b.classList.toggle(
+                        "active",
+                        b === button
+                    );
+                });
+
+            if(
+                editorTool !== "select"
+            ){
+
+                editorAction =
+                    null;
+
+                selectedBody =
+                    null;
+
+                document
+                    .getElementById(
+                        "editorActions"
+                    )
+                    .classList.add(
+                        "hidden"
+                    );
+
+                document
+                    .getElementById(
+                        "editorDropperSettings"
+                    )
+                    .classList.add(
+                        "hidden"
+                    );
+
+                document.getElementById(
+                    "editorStatus"
+                ).textContent =
+                    "ブロックをタップして設置できます。";
+
+            }else{
+
+                document.getElementById(
+                    "editorStatus"
+                ).textContent =
+                    "ブロックを選択してから操作を選んでください。";
+            }
+        }
+    );
 });
+
+document.querySelectorAll(
+    "[data-editor-action]"
+).forEach(button=>{
+
+    button.addEventListener(
+        "click",
+        ()=>{
+
+            if(!selectedBody){
+
+                document.getElementById(
+                    "editorStatus"
+                ).textContent =
+                    "先にブロックを選択してください。";
+
+                return;
+            }
+
+            const action =
+                button.dataset.editorAction;
+
+            if(
+                action === "resize" &&
+                (
+                    selectedBody.objectType === "bomb" ||
+                    selectedBody.objectType === "slime" ||
+                    selectedBody.objectType === "dropper"
+                )
+            ){
+
+                document.getElementById(
+                    "editorStatus"
+                ).textContent =
+                    "このブロックは形変更できません。";
+
+                return;
+            }
+
+            editorAction =
+                action;
+
+            document
+                .querySelectorAll(
+                    "[data-editor-action]"
+                )
+                .forEach(b=>{
+                    b.classList.toggle(
+                        "active",
+                        b === button
+                    );
+                });
+
+            document.getElementById(
+                "editorStatus"
+            ).textContent =
+                action === "move"
+                    ? "ブロックをドラッグして移動できます。"
+                    : action === "resize"
+                    ? "四隅のハンドルをドラッグしてください。"
+                    : "上の回転ハンドルをドラッグしてください。";
+        }
+    );
+});
+
+document.getElementById(
+    "deleteSelectedButton"
+).addEventListener(
+    "click",
+    ()=>{
+
+        if(
+            selectedBody &&
+            !selectedBody.isGroundBedrock
+        ){
+
+            Composite.remove(
+                engine.world,
+                selectedBody
+            );
+
+            selectedBody =
+                null;
+
+            document
+                .getElementById(
+                    "editorActions"
+                )
+                .classList.add(
+                    "hidden"
+                );
+
+            document
+                .getElementById(
+                    "editorDropperSettings"
+                )
+                .classList.add(
+                    "hidden"
+                );
+
+            document.getElementById(
+                "editorStatus"
+            ).textContent =
+                "ブロックを削除しました。";
+        }
+    }
+);
 
 function draw(){
 
-    if(!canvasWidth || !canvasHeight){
-        return;
-    }
-
-    ctx.clearRect(
+    activeCtx.clearRect(
         0,
         0,
         canvasWidth,
         canvasHeight
     );
 
-    ctx.save();
+    activeCtx.save();
 
-    ctx.scale(zoom,zoom);
+    const z =
+        getZoom();
+
+    activeCtx.scale(
+        z,
+        z
+    );
 
     drawBackground();
 
-    if(engine){
-
-        const bodies =
-            Composite.allBodies(engine.world);
-
-        bodies.forEach(drawBody);
-    }
+    Composite
+        .allBodies(engine.world)
+        .forEach(
+            drawBody
+        );
 
     drawExplosions();
 
-    if(selectedBody){
+    if(
+        currentMode === "editor" &&
+        selectedBody
+    ){
+
         drawSelection();
     }
 
-    ctx.restore();
+    activeCtx.restore();
 }
 
 function drawBackground(){
 
-    ctx.fillStyle = "#fafafa";
+    const ctx =
+        activeCtx;
+
+    ctx.fillStyle =
+        "#fafafa";
 
     ctx.fillRect(
         0,
         0,
-        canvasWidth/zoom,
-        canvasHeight/zoom
+        canvasWidth/getZoom(),
+        canvasHeight/getZoom()
     );
 
-    ctx.strokeStyle = "rgba(0,0,0,.035)";
+    ctx.strokeStyle =
+        "rgba(0,0,0,.035)";
+
     ctx.lineWidth = 1;
 
     const grid = 40;
 
     for(
         let x=0;
-        x<canvasWidth/zoom;
+        x<canvasWidth/getZoom();
         x+=grid
     ){
 
         ctx.beginPath();
-        ctx.moveTo(x,0);
-        ctx.lineTo(x,canvasHeight/zoom);
+
+        ctx.moveTo(
+            x,
+            0
+        );
+
+        ctx.lineTo(
+            x,
+            canvasHeight/getZoom()
+        );
+
         ctx.stroke();
     }
 
     for(
         let y=0;
-        y<canvasHeight/zoom;
+        y<canvasHeight/getZoom();
         y+=grid
     ){
 
         ctx.beginPath();
-        ctx.moveTo(0,y);
-        ctx.lineTo(canvasWidth/zoom,y);
+
+        ctx.moveTo(
+            0,
+            y
+        );
+
+        ctx.lineTo(
+            canvasWidth/getZoom(),
+            y
+        );
+
         ctx.stroke();
     }
 }
 
 function drawBody(body){
 
+    const ctx =
+        activeCtx;
+
     if(body.isGroundBedrock){
 
-        ctx.save();
-
-        ctx.fillStyle = "#3d3d3d";
+        ctx.fillStyle =
+            "#3b3b3b";
 
         ctx.fillRect(
             body.bounds.min.x,
             body.bounds.min.y,
-            body.bounds.max.x-body.bounds.min.x,
-            body.bounds.max.y-body.bounds.min.y
+            body.bounds.max.x-
+            body.bounds.min.x,
+            body.bounds.max.y-
+            body.bounds.min.y
         );
-
-        ctx.restore();
 
         return;
     }
 
-    const type = body.objectType;
+    const type =
+        body.objectType;
 
-    if(type === "hollow"){
+    if(type === "house"){
 
-        drawHollow(body);
+        drawHouse(body);
         return;
     }
 
@@ -2388,21 +2980,20 @@ function drawBody(body){
         body.position.y
     );
 
-    ctx.rotate(body.angle);
+    ctx.rotate(
+        body.angle
+    );
 
     const w =
-        body.objectWidth ||
-        body.baseWidth ||
-        40;
+        body.objectWidth;
 
     const h =
-        body.objectHeight ||
-        body.baseHeight ||
-        40;
+        body.objectHeight;
 
     if(type === "bomb"){
 
-        ctx.fillStyle = "#222";
+        ctx.fillStyle =
+            "#222";
 
         ctx.beginPath();
 
@@ -2416,13 +3007,14 @@ function drawBody(body){
 
         ctx.fill();
 
-        ctx.fillStyle = "#f80";
+        ctx.fillStyle =
+            "#f80";
 
         ctx.beginPath();
 
         ctx.arc(
             0,
-            -w*.32,
+            -w*.3,
             5,
             0,
             Math.PI*2
@@ -2430,25 +3022,38 @@ function drawBody(body){
 
         ctx.fill();
 
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle =
+            "#fff";
 
-        ctx.font = "bold 11px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+        ctx.font =
+            "900 10px sans-serif";
 
-        ctx.fillText(
+        ctx.textAlign =
+            "center";
+
+        ctx.textBaseline =
+            "middle";
+
+        const left =
             Math.max(
                 0,
-                body.timerDuration -
-                (performance.now()-body.createdAt)/1000
-            ).toFixed(1),
+                body.timerDuration-
+                (
+                    performance.now()-
+                    body.createdAt
+                )/1000
+            );
+
+        ctx.fillText(
+            left.toFixed(1),
             0,
             0
         );
 
     }else if(type === "multiply"){
 
-        ctx.fillStyle = "#d56bff";
+        ctx.fillStyle =
+            "#d56bff";
 
         ctx.fillRect(
             -w/2,
@@ -2457,7 +3062,9 @@ function drawBody(body){
             h
         );
 
-        ctx.strokeStyle = "#7e259c";
+        ctx.strokeStyle =
+            "#7b2299";
+
         ctx.lineWidth = 3;
 
         ctx.strokeRect(
@@ -2467,11 +3074,17 @@ function drawBody(body){
             h
         );
 
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle =
+            "#fff";
 
-        ctx.font = "900 21px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+        ctx.font =
+            "900 21px sans-serif";
+
+        ctx.textAlign =
+            "center";
+
+        ctx.textBaseline =
+            "middle";
 
         ctx.fillText(
             "×"+body.factor,
@@ -2481,7 +3094,8 @@ function drawBody(body){
 
     }else if(type === "bedrock"){
 
-        ctx.fillStyle = "#444";
+        ctx.fillStyle =
+            "#444";
 
         ctx.fillRect(
             -w/2,
@@ -2490,7 +3104,9 @@ function drawBody(body){
             h
         );
 
-        ctx.strokeStyle = "#222";
+        ctx.strokeStyle =
+            "#222";
+
         ctx.lineWidth = 3;
 
         ctx.strokeRect(
@@ -2502,7 +3118,10 @@ function drawBody(body){
 
     }else if(type === "dropper"){
 
-        ctx.fillStyle = "#f80";
+        ctx.fillStyle =
+            body.dropperEnabled
+                ? "#f80"
+                : "#888";
 
         ctx.fillRect(
             -w/2,
@@ -2511,7 +3130,9 @@ function drawBody(body){
             h
         );
 
-        ctx.strokeStyle = "#9a4c00";
+        ctx.strokeStyle =
+            "#333";
+
         ctx.lineWidth = 3;
 
         ctx.strokeRect(
@@ -2521,21 +3142,30 @@ function drawBody(body){
             h
         );
 
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle =
+            "#fff";
 
-        ctx.font = "900 14px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+        ctx.font =
+            "900 13px sans-serif";
+
+        ctx.textAlign =
+            "center";
+
+        ctx.textBaseline =
+            "middle";
 
         ctx.fillText(
-            body.dropperEnabled ? "投下 ON" : "投下 OFF",
+            body.dropperEnabled
+                ? "投下 ON"
+                : "投下 OFF",
             0,
             0
         );
 
     }else if(type === "slime"){
 
-        ctx.fillStyle = "#55b84a";
+        ctx.fillStyle =
+            "#55b84a";
 
         ctx.beginPath();
 
@@ -2549,25 +3179,44 @@ function drawBody(body){
 
         ctx.fill();
 
-        ctx.fillStyle = "#111";
+        ctx.fillStyle =
+            "#111";
 
         ctx.beginPath();
 
-        ctx.arc(-6,-3,2.5,0,Math.PI*2);
-        ctx.arc(6,-3,2.5,0,Math.PI*2);
+        ctx.arc(
+            -6,
+            -3,
+            2.5,
+            0,
+            Math.PI*2
+        );
+
+        ctx.arc(
+            6,
+            -3,
+            2.5,
+            0,
+            Math.PI*2
+        );
 
         ctx.fill();
 
     }else{
 
         if(type === "wood"){
-            ctx.fillStyle = "#9b641f";
-        }else if(type === "stone"){
-            ctx.fillStyle = "#777";
-        }else if(type === "glass"){
-            ctx.fillStyle = "rgba(120,210,255,.55)";
-        }else{
-            ctx.fillStyle = "#aaa";
+            ctx.fillStyle =
+                "#9b641f";
+        }
+
+        if(type === "stone"){
+            ctx.fillStyle =
+                "#777";
+        }
+
+        if(type === "glass"){
+            ctx.fillStyle =
+                "rgba(120,210,255,.55)";
         }
 
         ctx.fillRect(
@@ -2595,15 +3244,21 @@ function drawBody(body){
     ctx.restore();
 }
 
-function drawHollow(body){
+function drawHouse(body){
 
-    const w = body.objectWidth;
-    const h = body.objectHeight;
+    const ctx =
+        activeCtx;
 
-    const thickness =
+    const w =
+        body.objectWidth;
+
+    const h =
+        body.objectHeight;
+
+    const t =
         Math.max(
-            8,
-            Math.min(w,h)*.16
+            9,
+            Math.min(w,h)*.14
         );
 
     ctx.save();
@@ -2613,39 +3268,44 @@ function drawHollow(body){
         body.position.y
     );
 
-    ctx.rotate(body.angle);
+    ctx.rotate(
+        body.angle
+    );
 
-    ctx.fillStyle = "#d28a3a";
+    ctx.fillStyle =
+        "#d28a3a";
 
     ctx.fillRect(
         -w/2,
         -h/2,
         w,
-        thickness
+        t
     );
 
     ctx.fillRect(
         -w/2,
-        h/2-thickness,
+        h/2-t,
         w,
-        thickness
+        t
     );
 
     ctx.fillRect(
         -w/2,
-        -h/2+thickness,
-        thickness,
-        h-thickness*2
+        -h/2+t,
+        t,
+        h-t*2
     );
 
     ctx.fillRect(
-        w/2-thickness,
-        -h/2+thickness,
-        thickness,
-        h-thickness*2
+        w/2-t,
+        -h/2+t,
+        t,
+        h-t*2
     );
 
-    ctx.strokeStyle = "#7b4c1b";
+    ctx.strokeStyle =
+        "#754617";
+
     ctx.lineWidth = 2;
 
     ctx.strokeRect(
@@ -2660,14 +3320,21 @@ function drawHollow(body){
 
 function drawSelection(){
 
-    if(
-        !selectedBody ||
-        selectedBody.isGroundBedrock
-    ){
+    const body =
+        selectedBody;
+
+    if(!body){
         return;
     }
 
-    const body = selectedBody;
+    const ctx =
+        activeCtx;
+
+    const w =
+        body.objectWidth;
+
+    const h =
+        body.objectHeight;
 
     ctx.save();
 
@@ -2676,89 +3343,77 @@ function drawSelection(){
         body.position.y
     );
 
-    ctx.rotate(body.angle);
+    ctx.rotate(
+        body.angle
+    );
 
-    const w =
-        body.objectWidth ||
-        body.baseWidth ||
-        50;
+    ctx.strokeStyle =
+        "#f80";
 
-    const h =
-        body.objectHeight ||
-        body.baseHeight ||
-        50;
-
-    ctx.strokeStyle = "#f80";
     ctx.lineWidth = 3;
-    ctx.setLineDash([7,4]);
 
-    if(body.objectType === "hollow"){
+    ctx.setLineDash(
+        [7,4]
+    );
 
-        ctx.strokeRect(
-            -w/2,
-            -h/2,
-            w,
-            h
-        );
-
-    }else{
-
-        ctx.strokeRect(
-            -w/2,
-            -h/2,
-            w,
-            h
-        );
-    }
+    ctx.strokeRect(
+        -w/2,
+        -h/2,
+        w,
+        h
+    );
 
     ctx.setLineDash([]);
 
     ctx.restore();
 
-    if(editAction === "resize"){
+    if(
+        editorAction === "resize"
+    ){
 
-        const handles =
-            getResizeHandles(body);
+        getResizeHandles(body)
+            .forEach(h=>{
 
-        handles.forEach(h=>{
+                ctx.fillStyle =
+                    "#fff";
 
-            ctx.fillStyle = "#fff";
-            ctx.strokeStyle = "#f80";
-            ctx.lineWidth = 3;
+                ctx.strokeStyle =
+                    "#f80";
 
-            ctx.beginPath();
+                ctx.lineWidth = 3;
 
-            ctx.arc(
-                h.x,
-                h.y,
-                7,
-                0,
-                Math.PI*2
-            );
+                ctx.beginPath();
 
-            ctx.fill();
-            ctx.stroke();
-        });
+                ctx.arc(
+                    h.x,
+                    h.y,
+                    7,
+                    0,
+                    Math.PI*2
+                );
+
+                ctx.fill();
+                ctx.stroke();
+            });
     }
 
-    if(editAction === "rotate"){
+    if(
+        editorAction === "rotate"
+    ){
 
         const handle =
-            getRotationHandle(body);
+            getRotateHandle(body);
 
-        const center = {
-            x:body.position.x,
-            y:body.position.y
-        };
+        ctx.strokeStyle =
+            "#f80";
 
-        ctx.strokeStyle = "#f80";
         ctx.lineWidth = 3;
 
         ctx.beginPath();
 
         ctx.moveTo(
-            center.x,
-            center.y
+            body.position.x,
+            body.position.y
         );
 
         ctx.lineTo(
@@ -2768,9 +3423,11 @@ function drawSelection(){
 
         ctx.stroke();
 
-        ctx.fillStyle = "#fff";
-        ctx.strokeStyle = "#f80";
-        ctx.lineWidth = 3;
+        ctx.fillStyle =
+            "#fff";
+
+        ctx.strokeStyle =
+            "#f80";
 
         ctx.beginPath();
 
@@ -2783,13 +3440,15 @@ function drawSelection(){
         );
 
         ctx.fill();
+
         ctx.stroke();
     }
 }
 
 function drawExplosions(){
 
-    const now = performance.now();
+    const now =
+        performance.now();
 
     explosions =
         explosions.filter(explosion=>{
@@ -2814,7 +3473,7 @@ function drawExplosions(){
                 1-t;
 
             const gradient =
-                ctx.createRadialGradient(
+                activeCtx.createRadialGradient(
                     explosion.x,
                     explosion.y,
                     0,
@@ -2829,8 +3488,8 @@ function drawExplosions(){
             );
 
             gradient.addColorStop(
-                .25,
-                `rgba(255,160,0,${alpha})`
+                .3,
+                `rgba(255,170,0,${alpha})`
             );
 
             gradient.addColorStop(
@@ -2840,14 +3499,15 @@ function drawExplosions(){
 
             gradient.addColorStop(
                 1,
-                `rgba(255,0,0,0)`
+                "rgba(255,0,0,0)"
             );
 
-            ctx.fillStyle = gradient;
+            activeCtx.fillStyle =
+                gradient;
 
-            ctx.beginPath();
+            activeCtx.beginPath();
 
-            ctx.arc(
+            activeCtx.arc(
                 explosion.x,
                 explosion.y,
                 radius,
@@ -2855,7 +3515,7 @@ function drawExplosions(){
                 Math.PI*2
             );
 
-            ctx.fill();
+            activeCtx.fill();
 
             return true;
         });
@@ -2863,26 +3523,34 @@ function drawExplosions(){
 
 function serializeBody(body){
 
-    if(body.isGroundBedrock){
+    if(
+        body.isGroundBedrock
+    ){
         return null;
     }
 
     return {
-        id:body.objectId,
-        type:body.objectType,
 
-        x:body.position.x,
-        y:body.position.y,
+        id:
+            body.objectId,
 
-        angle:body.angle,
+        type:
+            body.objectType,
+
+        x:
+            body.position.x,
+
+        y:
+            body.position.y,
+
+        angle:
+            body.angle,
 
         width:
-            body.objectWidth ||
-            body.baseWidth,
+            body.objectWidth,
 
         height:
-            body.objectHeight ||
-            body.baseHeight,
+            body.objectHeight,
 
         factor:
             body.factor || 2,
@@ -2891,10 +3559,7 @@ function serializeBody(body){
             body.timerDuration || 8,
 
         strength:
-            body.strength || 10,
-
-        damage:
-            body.damage || 0,
+            body.strength,
 
         dropInterval:
             body.dropInterval || 5,
@@ -2906,95 +3571,95 @@ function serializeBody(body){
             body.dropBombTimer || 10,
 
         dropperEnabled:
-            body.dropperEnabled !== false
+            body.dropperEnabled || false
     };
 }
 
 function serializeStage(){
 
-    const bodies =
-        Composite.allBodies(engine.world);
-
-    return bodies
+    return Composite
+        .allBodies(engine.world)
         .map(serializeBody)
         .filter(Boolean);
 }
 
-function loadStage(objects){
+function clearObjects(){
 
-    if(!engine){
-        createEngine();
-    }
+    Composite
+        .allBodies(engine.world)
+        .forEach(body=>{
 
-    const bodies =
-        Composite.allBodies(engine.world);
+            if(
+                !body.isGroundBedrock
+            ){
 
-    bodies.forEach(body=>{
+                Composite.remove(
+                    engine.world,
+                    body
+                );
+            }
+        });
 
-        if(!body.isGroundBedrock){
+    selectedBody =
+        null;
+}
 
-            Composite.remove(
-                engine.world,
-                body
-            );
-        }
-    });
+function loadObjects(objects){
 
-    selectedBody = null;
+    clearObjects();
 
-    if(Array.isArray(objects)){
+    if(
+        Array.isArray(objects)
+    ){
 
         objects.forEach(o=>{
 
-            const body =
-                createObject(
-                    o.type,
-                    o.x,
-                    o.y,
-                    {
-                        objectId:o.id || newId(),
+            createBody(
+                o.type,
+                o.x,
+                o.y,
+                {
+                    objectId:
+                        o.id || newId(),
 
-                        width:o.width,
-                        height:o.height,
+                    width:
+                        o.width,
 
-                        angle:o.angle || 0,
+                    height:
+                        o.height,
 
-                        factor:o.factor || 2,
+                    angle:
+                        o.angle || 0,
 
-                        timerDuration:o.timer || 8,
+                    factor:
+                        o.factor || 2,
 
-                        strength:o.strength,
+                    timerDuration:
+                        o.timer || 8,
 
-                        damage:o.damage || 0,
+                    strength:
+                        o.strength,
 
-                        dropInterval:
-                            o.dropInterval || 5,
+                    dropInterval:
+                        o.dropInterval || 5,
 
-                        dropCount:
-                            o.dropCount || 1,
+                    dropCount:
+                        o.dropCount || 1,
 
-                        dropBombTimer:
-                            o.dropBombTimer || 10,
+                    dropBombTimer:
+                        o.dropBombTimer || 10,
 
-                        dropperEnabled:
-                            o.dropperEnabled !== false
-                    }
-                );
-
-            if(
-                body.objectType === "dropper"
-            ){
-
-                body.dropperLastDrop =
-                    performance.now();
-            }
+                    dropperEnabled:
+                        o.dropperEnabled || false
+                }
+            );
         });
     }
 
     rebuildFloor();
 }
 
-function getSavedStages(){
+function savedStages(){
 
     try{
 
@@ -3020,109 +3685,143 @@ function getSavedStages(){
     }
 }
 
-function saveStages(stages){
+function saveStages(data){
 
     localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(stages)
+        JSON.stringify(data)
     );
+}
+
+function escapeHtml(text){
+
+    return String(text)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
 }
 
 function openSaveModal(){
 
     document
-        .getElementById("saveModal")
-        .classList.remove("hidden");
+        .getElementById(
+            "saveModal"
+        )
+        .classList.remove(
+            "hidden"
+        );
 }
 
 function closeSaveModal(){
 
     document
-        .getElementById("saveModal")
-        .classList.add("hidden");
+        .getElementById(
+            "saveModal"
+        )
+        .classList.add(
+            "hidden"
+        );
 }
 
 document.getElementById(
-    "saveButton"
-).addEventListener("click",openSaveModal);
+    "editorSave"
+).addEventListener(
+    "click",
+    openSaveModal
+);
 
 document.getElementById(
     "saveCancel"
-).addEventListener("click",closeSaveModal);
+).addEventListener(
+    "click",
+    closeSaveModal
+);
 
 document.getElementById(
     "saveConfirm"
-).addEventListener("click",()=>{
+).addEventListener(
+    "click",
+    ()=>{
 
-    const name =
-        document
-            .getElementById("stageNameInput")
-            .value
-            .trim();
+        const name =
+            document.getElementById(
+                "stageName"
+            ).value.trim();
 
-    if(!name){
-        return;
+        if(!name){
+            return;
+        }
+
+        const data =
+            savedStages();
+
+        data.push({
+
+            id:newId(),
+
+            name:name,
+
+            createdAt:
+                new Date().toISOString(),
+
+            objects:
+                serializeStage()
+        });
+
+        saveStages(data);
+
+        document.getElementById(
+            "stageName"
+        ).value = "";
+
+        closeSaveModal();
     }
-
-    const stages =
-        getSavedStages();
-
-    stages.push({
-
-        id:newId(),
-
-        name:name,
-
-        createdAt:
-            new Date().toISOString(),
-
-        objects:
-            serializeStage()
-
-    });
-
-    saveStages(stages);
-
-    document
-        .getElementById("stageNameInput")
-        .value = "";
-
-    closeSaveModal();
-
-    selectionStatus.textContent =
-        "ステージを保存しました。";
-});
+);
 
 function openSavedModal(){
 
-    renderStageList();
+    renderSavedStages();
 
     document
-        .getElementById("savedModal")
-        .classList.remove("hidden");
+        .getElementById(
+            "savedModal"
+        )
+        .classList.remove(
+            "hidden"
+        );
 }
 
 function closeSavedModal(){
 
     document
-        .getElementById("savedModal")
-        .classList.add("hidden");
+        .getElementById(
+            "savedModal"
+        )
+        .classList.add(
+            "hidden"
+        );
 }
 
-function renderStageList(){
+function renderSavedStages(){
 
     const list =
-        document.getElementById("stageList");
+        document.getElementById(
+            "stageList"
+        );
 
     list.innerHTML = "";
 
     const stages =
-        getSavedStages();
+        savedStages();
 
-    if(stages.length === 0){
+    if(
+        stages.length === 0
+    ){
 
         list.innerHTML =
-            "<div class='small-note'>保存されたステージはありません。</div>";
+            "<div class='stage-date'>保存されたステージはありません。</div>";
 
         return;
     }
@@ -3130,28 +3829,34 @@ function renderStageList(){
     stages.forEach(stage=>{
 
         const item =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
-        item.className = "stage-item";
+        item.className =
+            "stage-item";
 
         const date =
             new Date(
                 stage.createdAt
-            ).toLocaleString("ja-JP");
+            ).toLocaleString(
+                "ja-JP"
+            );
 
         item.innerHTML = `
-            <div class="stage-item-name">
+
+            <div class="stage-name">
                 ${escapeHtml(stage.name)}
             </div>
 
-            <div class="stage-item-date">
+            <div class="stage-date">
                 ${escapeHtml(date)}
             </div>
 
-            <div class="stage-item-buttons">
+            <div class="stage-buttons">
 
-                <button data-open="${stage.id}">
-                    開く
+                <button data-edit="${stage.id}">
+                    編集
                 </button>
 
                 <button data-play="${stage.id}">
@@ -3168,91 +3873,101 @@ function renderStageList(){
         list.appendChild(item);
     });
 
-    list.querySelectorAll("[data-open]").forEach(btn=>{
+    list.querySelectorAll(
+        "[data-edit]"
+    ).forEach(button=>{
 
-        btn.addEventListener("click",()=>{
+        button.addEventListener(
+            "click",
+            ()=>{
 
-            const stage =
-                getSavedStages().find(
-                    s=>s.id === btn.dataset.open
+                const stage =
+                    savedStages()
+                        .find(
+                            s=>
+                                s.id ===
+                                button.dataset.edit
+                        );
+
+                if(!stage){
+                    return;
+                }
+
+                openEditor();
+
+                loadObjects(
+                    stage.objects
                 );
 
-            if(!stage){
-                return;
+                closeSavedModal();
             }
-
-            playMode = false;
-
-            showGame();
-
-            loadStage(stage.objects);
-
-            closeSavedModal();
-        });
+        );
     });
 
-    list.querySelectorAll("[data-play]").forEach(btn=>{
+    list.querySelectorAll(
+        "[data-play]"
+    ).forEach(button=>{
 
-        btn.addEventListener("click",()=>{
+        button.addEventListener(
+            "click",
+            ()=>{
 
-            const stage =
-                getSavedStages().find(
-                    s=>s.id === btn.dataset.play
+                const stage =
+                    savedStages()
+                        .find(
+                            s=>
+                                s.id ===
+                                button.dataset.play
+                        );
+
+                if(!stage){
+                    return;
+                }
+
+                openPlay(
+                    stage
                 );
 
-            if(!stage){
-                return;
+                closeSavedModal();
             }
-
-            playMode = true;
-
-            showGame();
-
-            loadStage(stage.objects);
-
-            closeSavedModal();
-
-            selectionStatus.textContent =
-                "プレイモードです。爆弾を設置して全爆破できます。";
-        });
+        );
     });
 
-    list.querySelectorAll("[data-delete]").forEach(btn=>{
+    list.querySelectorAll(
+        "[data-delete]"
+    ).forEach(button=>{
 
-        btn.addEventListener("click",()=>{
+        button.addEventListener(
+            "click",
+            ()=>{
 
-            const stages =
-                getSavedStages()
-                    .filter(
-                        s=>s.id !== btn.dataset.delete
-                    );
+                const result =
+                    savedStages()
+                        .filter(
+                            s=>
+                                s.id !==
+                                button.dataset.delete
+                        );
 
-            saveStages(stages);
+                saveStages(
+                    result
+                );
 
-            renderStageList();
-        });
+                renderSavedStages();
+            }
+        );
     });
-}
-
-function escapeHtml(value){
-
-    return String(value)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
 }
 
 document.getElementById(
-    "savedStagesButton"
+    "savedButton"
 ).addEventListener(
     "click",
     openSavedModal
 );
 
 document.getElementById(
-    "savedFromGameButton"
+    "editorSaved"
 ).addEventListener(
     "click",
     openSavedModal
@@ -3266,76 +3981,494 @@ document.getElementById(
 );
 
 document.getElementById(
+    "newStageButton"
+).addEventListener(
+    "click",
+    ()=>{
+
+        openEditor();
+
+        loadObjects([]);
+
+        editorTool =
+            "select";
+
+        document
+            .querySelectorAll(
+                "[data-editor-tool]"
+            )
+            .forEach(button=>{
+                button.classList.toggle(
+                    "active",
+                    button.dataset.editorTool ===
+                    "select"
+                );
+            });
+    }
+);
+
+document.getElementById(
+    "playSavedButton"
+).addEventListener(
+    "click",
+    openSavedModal
+);
+
+function openEditor(){
+
+    currentMode =
+        "editor";
+
+    document
+        .getElementById(
+            "startScreen"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+    document
+        .getElementById(
+            "playScreen"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+    document
+        .getElementById(
+            "editorScreen"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+    activeCanvas =
+        editorCanvas;
+
+    activeCtx =
+        editorCtx;
+
+    resizeCanvas();
+
+    selectedBody =
+        null;
+
+    editorAction =
+        null;
+}
+
+function openPlay(stage){
+
+    currentMode =
+        "play";
+
+    currentPlayStage =
+        stage;
+
+    playOriginalObjects =
+        JSON.parse(
+            JSON.stringify(
+                stage.objects
+            )
+        );
+
+    document
+        .getElementById(
+            "startScreen"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+    document
+        .getElementById(
+            "editorScreen"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+    document
+        .getElementById(
+            "playScreen"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+    activeCanvas =
+        playCanvas;
+
+    activeCtx =
+        playCtx;
+
+    resizeCanvas();
+
+    loadPlayObjects();
+
+    document.getElementById(
+        "playDropperSettings"
+    ).classList.add(
+        "hidden"
+    );
+}
+
+function loadPlayObjects(){
+
+    clearObjects();
+
+    playOriginalObjects.forEach(o=>{
+
+        createBody(
+            o.type,
+            o.x,
+            o.y,
+            {
+                objectId:
+                    newId(),
+
+                width:
+                    o.width,
+
+                height:
+                    o.height,
+
+                angle:
+                    o.angle || 0,
+
+                factor:
+                    o.factor || 2,
+
+                timerDuration:
+                    o.timer || 8,
+
+                strength:
+                    o.strength,
+
+                dropInterval:
+                    o.dropInterval || 5,
+
+                dropCount:
+                    o.dropCount || 1,
+
+                dropBombTimer:
+                    o.dropBombTimer || 10,
+
+                dropperEnabled:
+                    o.dropperEnabled || false
+            }
+        );
+    });
+
+    rebuildFloor();
+}
+
+document.getElementById(
+    "playReset"
+).addEventListener(
+    "click",
+    ()=>{
+
+        loadPlayObjects();
+
+        document.getElementById(
+            "playStatus"
+        ).textContent =
+            "ステージをやり直しました。";
+    }
+);
+
+document.getElementById(
+    "playExplodeAll"
+).addEventListener(
+    "click",
+    ()=>{
+
+        Composite
+            .allBodies(engine.world)
+            .filter(
+                b=>b.objectType === "bomb"
+            )
+            .forEach(
+                explodeBomb
+            );
+    }
+);
+
+document.getElementById(
+    "playSettings"
+).addEventListener(
+    "click",
+    ()=>{
+
+        document.getElementById(
+            "playDropperSettings"
+        ).classList.toggle(
+            "hidden"
+        );
+    }
+);
+
+document.getElementById(
+    "playDropperApply"
+).addEventListener(
+    "click",
+    ()=>{
+
+        const bodies =
+            Composite
+                .allBodies(engine.world)
+                .filter(
+                    b=>
+                        b.objectType ===
+                        "dropper"
+                );
+
+        const interval =
+            clamp(
+                Number(
+                    document.getElementById(
+                        "playInterval"
+                    ).value
+                )||5,
+                .1,
+                3600
+            );
+
+        const count =
+            clamp(
+                Math.floor(
+                    Number(
+                        document.getElementById(
+                            "playCount"
+                        ).value
+                    )||1
+                ),
+                1,
+                100
+            );
+
+        const timer =
+            clamp(
+                Number(
+                    document.getElementById(
+                        "playBombTimer"
+                    ).value
+                )||10,
+                .1,
+                3600
+            );
+
+        bodies.forEach(body=>{
+
+            body.dropInterval =
+                interval;
+
+            body.dropCount =
+                count;
+
+            body.dropBombTimer =
+                timer;
+        });
+
+        document.getElementById(
+            "playStatus"
+        ).textContent =
+            "自動爆弾投下機の設定を反映しました。";
+    }
+);
+
+document.getElementById(
+    "playBack"
+).addEventListener(
+    "click",
+    ()=>{
+
+        currentMode =
+            "editor";
+
+        selectedBody =
+            null;
+
+        document
+            .getElementById(
+                "playScreen"
+            )
+            .classList.add(
+                "hidden"
+            );
+
+        document
+            .getElementById(
+                "startScreen"
+            )
+            .classList.remove(
+                "hidden"
+            );
+    }
+);
+
+document.getElementById(
+    "editorBack"
+).addEventListener(
+    "click",
+    ()=>{
+
+        currentMode =
+            "editor";
+
+        selectedBody =
+            null;
+
+        document
+            .getElementById(
+                "editorScreen"
+            )
+            .classList.add(
+                "hidden"
+            );
+
+        document
+            .getElementById(
+                "startScreen"
+            )
+            .classList.remove(
+                "hidden"
+            );
+    }
+);
+
+document.getElementById(
+    "editorZoomIn"
+).addEventListener(
+    "click",
+    ()=>{
+        setZoom(
+            zoomEditor+.1
+        );
+    }
+);
+
+document.getElementById(
+    "editorZoomOut"
+).addEventListener(
+    "click",
+    ()=>{
+        setZoom(
+            zoomEditor-.1
+        );
+    }
+);
+
+document.getElementById(
+    "playZoomIn"
+).addEventListener(
+    "click",
+    ()=>{
+        setZoom(
+            zoomPlay+.1
+        );
+    }
+);
+
+document.getElementById(
+    "playZoomOut"
+).addEventListener(
+    "click",
+    ()=>{
+        setZoom(
+            zoomPlay-.1
+        );
+    }
+);
+
+function exportData(){
+
+    const data = {
+
+        version:3,
+
+        exportedAt:
+            new Date().toISOString(),
+
+        stages:
+            savedStages()
+    };
+
+    const blob =
+        new Blob(
+            [
+                JSON.stringify(
+                    data,
+                    null,
+                    2
+                )
+            ],
+            {
+                type:
+                    "application/json"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+    const a =
+        document.createElement(
+            "a"
+        );
+
+    a.href =
+        url;
+
+    a.download =
+        "slime-castle-stages.json";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    URL.revokeObjectURL(
+        url
+    );
+}
+
+document.getElementById(
     "migrationButton"
 ).addEventListener(
     "click",
     ()=>{
         document
-            .getElementById("migrationModal")
-            .classList.remove("hidden");
-    }
-);
-
-document.getElementById(
-    "migrationClose"
-).addEventListener(
-    "click",
-    ()=>{
-        document
-            .getElementById("migrationModal")
-            .classList.add("hidden");
-    }
-);
-
-document.getElementById(
-    "exportData"
-).addEventListener(
-    "click",
-    ()=>{
-
-        const data = {
-            version:2,
-            exportedAt:
-                new Date().toISOString(),
-            stages:getSavedStages()
-        };
-
-        const blob =
-            new Blob(
-                [JSON.stringify(data,null,2)],
-                {
-                    type:"application/json"
-                }
+            .getElementById(
+                "migrationModal"
+            )
+            .classList.remove(
+                "hidden"
             );
-
-        const url =
-            URL.createObjectURL(blob);
-
-        const a =
-            document.createElement("a");
-
-        a.href = url;
-
-        a.download =
-            "hino-history-stages.json";
-
-        document.body.appendChild(a);
-
-        a.click();
-
-        a.remove();
-
-        URL.revokeObjectURL(url);
     }
 );
 
 document.getElementById(
-    "importData"
+    "exportButton"
+).addEventListener(
+    "click",
+    exportData
+);
+
+document.getElementById(
+    "importButton"
 ).addEventListener(
     "click",
     ()=>{
         document
-            .getElementById("importFile")
+            .getElementById(
+                "importFile"
+            )
             .click();
     }
 );
@@ -3359,34 +4492,44 @@ document.getElementById(
                 await file.text();
 
             const data =
-                JSON.parse(text);
+                JSON.parse(
+                    text
+                );
 
             if(
                 !data ||
-                !Array.isArray(data.stages)
+                !Array.isArray(
+                    data.stages
+                )
             ){
                 return;
             }
 
             const current =
-                getSavedStages();
+                savedStages();
 
             const merged =
                 [...current];
 
             data.stages.forEach(stage=>{
 
-                const exists =
-                    merged.some(
-                        s=>s.id === stage.id
-                    );
+                if(
+                    !merged.some(
+                        s=>
+                            s.id ===
+                            stage.id
+                    )
+                ){
 
-                if(!exists){
-                    merged.push(stage);
+                    merged.push(
+                        stage
+                    );
                 }
             });
 
-            saveStages(merged);
+            saveStages(
+                merged
+            );
 
             e.target.value = "";
 
@@ -3398,108 +4541,87 @@ document.getElementById(
 );
 
 document.getElementById(
-    "createStageButton"
+    "migrationClose"
 ).addEventListener(
     "click",
     ()=>{
-
-        playMode = false;
-
-        showGame();
-
-        loadStage([]);
-
-        setTool("select");
-
-        selectionStatus.textContent =
-            "ステージ作成モードです。";
-
+        document
+            .getElementById(
+                "migrationModal"
+            )
+            .classList.add(
+                "hidden"
+            );
     }
 );
 
-document.getElementById(
-    "playStageButton"
-).addEventListener(
-    "click",
-    openSavedModal
+editorCanvas.addEventListener(
+    "pointerdown",
+    pointerDown
 );
 
-document.getElementById(
-    "backButton"
-).addEventListener(
-    "click",
-    ()=>{
-
-        showStart();
-
-        selectedBody = null;
-
-    }
+editorCanvas.addEventListener(
+    "pointermove",
+    pointerMove
 );
 
-let resizeTimer = null;
+editorCanvas.addEventListener(
+    "pointerup",
+    pointerUp
+);
+
+editorCanvas.addEventListener(
+    "pointercancel",
+    pointerUp
+);
+
+playCanvas.addEventListener(
+    "pointerdown",
+    pointerDown
+);
+
+playCanvas.addEventListener(
+    "pointermove",
+    pointerMove
+);
+
+playCanvas.addEventListener(
+    "pointerup",
+    pointerUp
+);
+
+playCanvas.addEventListener(
+    "pointercancel",
+    pointerUp
+);
 
 window.addEventListener(
     "resize",
     ()=>{
-
-        clearTimeout(resizeTimer);
-
-        resizeTimer =
-            setTimeout(
-                resizeCanvas,
-                100
-            );
+        resizeCanvas();
     }
 );
-
-document.getElementById(
-    "zoomIn"
-).addEventListener(
-    "click",
-    ()=>{
-
-        zoom =
-            clamp(
-                zoom+.1,
-                .5,
-                2
-            );
-
-        updateZoom();
-    }
-);
-
-document.getElementById(
-    "zoomOut"
-).addEventListener(
-    "click",
-    ()=>{
-
-        zoom =
-            clamp(
-                zoom-.1,
-                .5,
-                2
-            );
-
-        updateZoom();
-    }
-);
-
-function updateZoom(){
-
-    document.getElementById(
-        "zoomValue"
-    ).textContent =
-        Math.round(zoom*100)+"%";
-}
 
 createEngine();
-resizeCanvas();
-rebuildFloor();
-showStart();
 
+currentMode =
+    "editor";
+
+document
+    .getElementById(
+        "editorScreen"
+    )
+    .classList.add(
+        "hidden"
+    );
+
+document
+    .getElementById(
+        "playScreen"
+    )
+    .classList.add(
+        "hidden"
+    );
 </script>
 
 </body>
