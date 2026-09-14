@@ -5,4624 +5,1737 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>日野市の街並みに歴史</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
-
 <style>
-*{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:#f3f3f3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;color:#222}
+button,input,select{font:inherit}
+button{border:0;cursor:pointer}
+.hidden{display:none!important}
+
+#app{min-height:100vh;padding:14px}
+.screen{display:none;min-height:calc(100vh - 28px)}
+.screen.active{display:block}
+
+.home{
+ max-width:760px;margin:40px auto;background:white;border-radius:28px;
+ padding:32px;box-shadow:0 8px 30px #0002;text-align:center
+}
+.home h1{font-size:34px;margin:8px 0 28px}
+.home button{display:block;width:100%;margin:12px 0;padding:16px;border-radius:16px;background:#f80;color:white;font-weight:800;font-size:18px;box-shadow:0 4px 0 #c60}
+.home button.secondary{background:white;color:#333;border:2px solid #ddd;box-shadow:none}
+
+.workspace{max-width:1200px;margin:auto}
+.topbar{
+ display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:white;
+ border-radius:18px;padding:10px;box-shadow:0 5px 20px #0001;margin-bottom:10px
+}
+.topbar h2{margin:0 10px 0 4px;font-size:20px}
+.btn{
+ padding:9px 13px;border-radius:12px;background:#f80;color:white;font-weight:700;
+ box-shadow:0 3px 0 #c60
+}
+.btn.white{background:white;color:#222;border:1px solid #ddd;box-shadow:none}
+.btn.danger{background:#d33;box-shadow:0 3px 0 #922}
+.btn.active{outline:3px solid #222;outline-offset:1px}
+
+.stageWrap{
+ background:white;border-radius:24px;padding:10px;box-shadow:0 8px 28px #0002;
+ position:relative;overflow:hidden
+}
+#gameCanvas{
+ display:block;width:100%;height:min(70vh,700px);min-height:420px;
+ background:linear-gradient(#dff3ff,#f9fbff);border-radius:18px;
+ touch-action:none
 }
 
-html,body{
-    margin:0;
-    padding:0;
-    min-height:100%;
-    background:#f7f7f7;
-    color:#333;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+.editorBar{
+ margin-top:10px;background:#fff;border-radius:18px;padding:10px;
+ box-shadow:0 5px 20px #0001
 }
-
-body{
-    overflow-x:hidden;
+.palette{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.palette button{
+ padding:8px 11px;border-radius:10px;background:#fafafa;border:1px solid #ddd;font-weight:700
 }
+.palette button.selectedTool{background:#f80;color:white;border-color:#f80}
+.palette .selectTool{order:-1}
 
-button,input{
-    font:inherit;
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.actions button{padding:8px 12px;border-radius:10px;background:white;border:1px solid #ddd}
+.actions button.active{background:#222;color:white}
+
+.playBar{
+ background:#fff;border-radius:18px;padding:10px;box-shadow:0 5px 20px #0001;
+ display:flex;gap:7px;align-items:center;flex-wrap:wrap
 }
+.playBar .info{margin-left:auto;font-size:14px;font-weight:700}
 
-button{
-    border:0;
-    cursor:pointer;
-    touch-action:manipulation;
+.smallPanel{
+ position:absolute;z-index:20;left:14px;right:14px;top:14px;
+ background:#fffffff5;backdrop-filter:blur(12px);
+ border:1px solid #ddd;border-radius:14px;padding:9px;
+ box-shadow:0 7px 25px #0003
 }
-
-.hidden{
-    display:none!important;
+.smallPanelLine{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;white-space:nowrap}
+.smallPanel input,.smallPanel select{
+ width:auto;min-width:55px;padding:5px 6px;border:1px solid #ccc;border-radius:7px
 }
+.smallPanel button{padding:6px 9px;border-radius:8px;background:#f80;color:white;font-weight:700}
 
-.screen{
-    width:100%;
-    min-height:100vh;
-}
-
-.start-screen{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-}
-
-.start-card{
-    width:min(600px,100%);
-    background:#fff;
-    border-radius:28px;
-    padding:32px 22px;
-    box-shadow:0 8px 28px rgba(0,0,0,.14);
-    text-align:center;
-}
-
-.start-title{
-    margin:0 0 8px;
-    font-size:clamp(28px,8vw,48px);
-    font-weight:900;
-    line-height:1.2;
-}
-
-.start-description{
-    color:#777;
-    font-size:13px;
-    margin-bottom:25px;
-}
-
-.main-button{
-    min-height:54px;
-    width:100%;
-    padding:10px 18px;
-    margin:7px 0;
-    border-radius:17px;
-    background:#f80;
-    color:#fff;
-    font-weight:900;
-    box-shadow:0 4px 0 #c60;
-}
-
-.main-button:active{
-    transform:translateY(3px);
-    box-shadow:0 1px 0 #c60;
-}
-
-.white-button{
-    min-height:45px;
-    padding:8px 15px;
-    border-radius:14px;
-    background:#fff;
-    border:2px solid #ddd;
-    color:#333;
-    font-weight:800;
-}
-
-.game{
-    padding:8px;
-}
-
-.editor-ui,
-.play-ui{
-    position:relative;
-    z-index:20;
-    background:#fff;
-    border-radius:20px;
-    box-shadow:0 5px 20px rgba(0,0,0,.13);
-    padding:10px;
-    margin-bottom:8px;
-}
-
-.ui-title{
-    font-weight:900;
-    font-size:16px;
-    margin-bottom:8px;
-}
-
-.button-row{
-    display:flex;
-    flex-wrap:wrap;
-    gap:6px;
-}
-
-.orange-button{
-    min-height:42px;
-    padding:7px 12px;
-    border-radius:14px;
-    background:#f80;
-    color:#fff;
-    font-size:14px;
-    font-weight:900;
-    box-shadow:0 3px 0 #c60;
-}
-
-.orange-button:active{
-    transform:translateY(2px);
-    box-shadow:0 1px 0 #c60;
-}
-
-.orange-button.active{
-    background:#000;
-    box-shadow:0 3px 0 #333;
-}
-
-.white-small{
-    min-height:40px;
-    padding:7px 12px;
-    border-radius:13px;
-    background:#fff;
-    border:2px solid #ddd;
-    font-weight:800;
-}
-
-.edit-actions{
-    display:flex;
-    gap:6px;
-    flex-wrap:wrap;
-    margin-top:8px;
-    padding-top:8px;
-    border-top:1px solid #eee;
-}
-
-.edit-actions button{
-    min-height:39px;
-    padding:6px 12px;
-    border-radius:12px;
-    background:#fff;
-    border:2px solid #ddd;
-    font-weight:800;
-}
-
-.edit-actions button.active{
-    background:#f80;
-    color:#fff;
-    border-color:#f80;
-}
-
-.status{
-    margin-top:8px;
-    padding:7px 10px;
-    border-radius:11px;
-    background:#f5f5f5;
-    font-size:12px;
-    font-weight:700;
-}
-
-.dropper-line{
-    display:flex;
-    align-items:center;
-    gap:5px;
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    margin-top:7px;
-    padding:6px 0 2px;
-}
-
-.dropper-line span{
-    white-space:nowrap;
-    font-size:12px;
-    font-weight:800;
-}
-
-.dropper-line input{
-    width:55px;
-    min-width:55px;
-    height:32px;
-    padding:3px 6px;
-    border:2px solid #ddd;
-    border-radius:9px;
-    text-align:center;
-}
-
-.dropper-line button{
-    min-height:32px;
-    padding:4px 9px;
-    border-radius:9px;
-    background:#f80;
-    color:#fff;
-    font-size:12px;
-    font-weight:900;
-    white-space:nowrap;
-}
-
-.dropper-status{
-    min-width:45px;
-    text-align:center;
-    padding:5px 7px;
-    border-radius:8px;
-    background:#eee;
-    font-size:11px;
-    font-weight:900;
-}
-
-.dropper-status.on{
-    background:#f80;
-    color:#fff;
-}
-
-.stage-area{
-    position:relative;
-    z-index:1;
-    width:100%;
-    height:min(72vh,760px);
-    min-height:400px;
-    overflow:hidden;
-    background:#fff;
-    border-radius:23px;
-    box-shadow:0 7px 25px rgba(0,0,0,.15);
-}
-
-#canvas{
-    position:absolute;
-    left:0;
-    top:0;
-    display:block;
-    touch-action:none;
-}
-
-.floor-label{
-    position:absolute;
-    z-index:4;
-    left:0;
-    bottom:0;
-    width:100%;
-    height:42px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:rgba(0,0,0,.78);
-    color:#fff;
-    font-weight:900;
-    pointer-events:none;
-}
-
-.bottom-ui{
-    position:relative;
-    z-index:20;
-    background:#fff;
-    border-radius:18px;
-    box-shadow:0 5px 18px rgba(0,0,0,.12);
-    padding:9px;
-    margin-top:8px;
-}
-
-.zoom-row{
-    display:flex;
-    align-items:center;
-    gap:7px;
-    margin-bottom:8px;
-}
-
-.zoom-row button{
-    width:42px;
-    height:40px;
-    border-radius:12px;
-    background:#fff;
-    border:2px solid #ddd;
-    font-size:20px;
-    font-weight:900;
-}
-
-.zoom-number{
-    min-width:65px;
-    text-align:center;
-    font-weight:900;
-}
-
-.modal-bg{
-    position:fixed;
-    z-index:100;
-    inset:0;
-    background:rgba(255,255,255,.74);
-    backdrop-filter:blur(7px);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:15px;
+.selectionInfo{
+ position:absolute;z-index:15;right:15px;bottom:15px;
+ background:#fffffff2;border-radius:13px;padding:10px 12px;
+ box-shadow:0 4px 18px #0003;font-size:14px;min-width:180px
 }
 
 .modal{
-    width:min(650px,100%);
-    max-height:90vh;
-    overflow:auto;
-    background:#fff;
-    border-radius:24px;
-    box-shadow:0 10px 40px rgba(0,0,0,.22);
-    padding:20px;
+ position:fixed;inset:0;background:#0005;z-index:100;
+ display:flex;align-items:center;justify-content:center;padding:15px
+}
+.modalBox{
+ width:min(600px,100%);max-height:90vh;overflow:auto;background:white;
+ border-radius:22px;padding:20px;box-shadow:0 12px 50px #0005
+}
+.modalBox h3{margin-top:0}
+.modalRow{display:flex;gap:8px;align-items:center;margin:9px 0;flex-wrap:wrap}
+.modalRow input,.modalRow select{
+ flex:1;min-width:120px;padding:9px;border:1px solid #ccc;border-radius:9px
 }
 
-.modal h2{
-    margin:0 0 15px;
+.stageListItem{
+ border:1px solid #ddd;border-radius:14px;padding:12px;margin:9px 0
 }
+.stageListItem strong{display:block;margin-bottom:8px}
+.stageListItem .row{display:flex;gap:6px;flex-wrap:wrap}
+.stageListItem button{padding:7px 10px;border-radius:8px;background:#f80;color:white}
+.stageListItem button.white{background:white;color:#222;border:1px solid #ddd}
 
-.modal-input{
-    width:100%;
-    height:45px;
-    border:2px solid #ddd;
-    border-radius:12px;
-    padding:7px 10px;
-}
-
-.modal-row{
-    display:flex;
-    flex-wrap:wrap;
-    gap:7px;
-    margin-top:12px;
-}
-
-.modal-row button{
-    flex:1;
-    min-width:120px;
-}
-
-.stage-list{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-}
-
-.stage-item{
-    border:2px solid #eee;
-    border-radius:15px;
-    padding:11px;
-}
-
-.stage-name{
-    font-weight:900;
-}
-
-.stage-date{
-    color:#888;
-    font-size:11px;
-    margin-top:3px;
-}
-
-.stage-buttons{
-    display:flex;
-    flex-wrap:wrap;
-    gap:5px;
-    margin-top:8px;
-}
-
-.stage-buttons button{
-    min-height:36px;
-    padding:5px 10px;
-    border-radius:10px;
-    background:#f80;
-    color:#fff;
-    font-size:12px;
-    font-weight:900;
-}
-
-.stage-buttons .delete{
-    background:#fff;
-    color:#c00;
-    border:2px solid #ecc;
-}
-
-.play-info{
-    font-size:12px;
-    color:#666;
-    margin-top:7px;
+.notice{
+ padding:9px 11px;background:#fff5e9;border-radius:10px;font-size:13px;margin-bottom:10px
 }
 
 @media(max-width:600px){
-    .game{
-        padding:5px;
-    }
-
-    .editor-ui,
-    .play-ui{
-        border-radius:16px;
-        padding:8px;
-    }
-
-    .orange-button{
-        font-size:12px;
-        padding:6px 9px;
-        min-height:38px;
-    }
-
-    .stage-area{
-        min-height:380px;
-        height:64vh;
-    }
+ #app{padding:7px}
+ .home{margin:15px auto;padding:22px}
+ .home h1{font-size:27px}
+ #gameCanvas{min-height:390px;height:60vh}
+ .topbar h2{width:100%}
+ .smallPanelLine{overflow-x:auto}
 }
 </style>
 </head>
-
 <body>
+<div id="app">
 
-<div id="startScreen" class="screen start-screen">
-    <div class="start-card">
+<section id="homeScreen" class="screen active">
+ <div class="home">
+  <h1>街並みクラッシュ</h1>
+  <button onclick="newStage()">ステージを作る</button>
+  <button onclick="showStageList()">ステージで遊ぶ</button>
+  <button class="secondary" onclick="showStageList(true)">保存データ</button>
+ </div>
+</section>
 
-        <h1 class="start-title">
-            スライム城崩しメーカー
-        </h1>
+<section id="editorScreen" class="screen">
+ <div class="workspace">
+  <div class="topbar">
+   <h2>ステージ編集</h2>
+   <button class="btn white" onclick="goHome()">ホーム</button>
+   <button class="btn" onclick="openSaveDialog()">保存</button>
+   <button class="btn white" onclick="openImport()">データ移行</button>
+   <button class="btn white" onclick="exportData()">書き出す</button>
+  </div>
 
-        <div class="start-description">
-            ステージを作って、爆弾で遊べます。
-        </div>
+  <div class="stageWrap">
+   <canvas id="gameCanvas"></canvas>
+   <div id="dropperPanelEditor" class="smallPanel hidden"></div>
+  </div>
 
-        <button id="newStageButton" class="main-button">
-            ステージを作る
-        </button>
+  <div class="editorBar">
+   <div class="palette">
+    <button class="selectTool" onclick="setTool('select')">選択</button>
+    <button onclick="setTool('wood')">木</button>
+    <button onclick="setTool('glass')">ガラス</button>
+    <button onclick="setTool('stone')">石</button>
+    <button onclick="setTool('houseWood')">木の家</button>
+    <button onclick="setTool('houseGlass')">ガラスの家</button>
+    <button onclick="setTool('houseStone')">石の家</button>
+    <button onclick="setTool('houseBedrock')">岩盤の家</button>
+    <button onclick="setTool('multiplier')">倍ブロック</button>
+    <button onclick="setTool('bedrock')">岩盤</button>
+    <button onclick="setTool('bomb')">爆弾</button>
+    <button onclick="setTool('dog')">犬</button>
+    <button onclick="setTool('bigDog')">巨大犬</button>
+    <button onclick="setTool('armorDog')">よろい犬</button>
+    <button onclick="setTool('movingDog')">動く犬</button>
+    <button onclick="setTool('bombDropper')">爆弾投下機</button>
+    <button onclick="setTool('dogSpawner')">自動犬生成機</button>
+   </div>
 
-        <button id="playSavedButton" class="main-button">
-            ステージで遊ぶ
-        </button>
+   <div class="actions">
+    <button onclick="setEditAction('move')">移動</button>
+    <button onclick="setEditAction('resize')">形変更</button>
+    <button onclick="setEditAction('rotate')">回転</button>
+    <button onclick="duplicateSelected()">複製</button>
+    <button onclick="deleteSelected()">個別削除</button>
+    <button onclick="openSelectedMachineSettings()">生成機設定</button>
+    <button onclick="openManualBombSettings()">手動爆弾設定</button>
+    <button onclick="zoom(-0.1)">ズーム−</button>
+    <button onclick="zoom(0.1)">ズーム＋</button>
+   </div>
+  </div>
+ </div>
+</section>
 
-        <button id="savedButton" class="white-button" style="width:100%;margin-top:8px;">
-            保存データ一覧
-        </button>
+<section id="playScreen" class="screen">
+ <div class="workspace">
+  <div class="topbar">
+   <h2>ステージで遊ぶ</h2>
+   <button class="btn white" onclick="goHome()">ホーム</button>
+  </div>
 
-        <button id="migrationButton" class="white-button" style="width:100%;margin-top:7px;">
-            データ移行
-        </button>
+  <div class="stageWrap">
+   <canvas id="gameCanvasPlay"></canvas>
+   <div id="dropperPanelPlay" class="smallPanel hidden"></div>
+   <div id="selectionInfo" class="selectionInfo hidden"></div>
+  </div>
 
-    </div>
+  <div class="playBar">
+   <button class="btn" onclick="resetPlay()">リセット（やり直す）</button>
+   <button class="btn danger" onclick="explodeAll()">全爆破</button>
+   <button class="btn white" onclick="setPlaySelect()">選択</button>
+   <button class="btn white" onclick="openManualBombSettings()">手動爆弾設定</button>
+   <button class="btn white" onclick="openSelectedMachineSettings()">生成機設定</button>
+   <button class="btn white" onclick="zoom(-0.1)">ズーム−</button>
+   <button class="btn white" onclick="zoom(0.1)">ズーム＋</button>
+   <span class="info" id="playInfo">爆弾を置いてください</span>
+  </div>
+ </div>
+</section>
+
+<div id="modal" class="modal hidden">
+ <div class="modalBox" id="modalBox"></div>
 </div>
 
-
-<div id="editorScreen" class="screen game hidden">
-
-    <div class="editor-ui">
-
-        <div class="ui-title">
-            ステージを作る
-        </div>
-
-        <div class="button-row">
-
-            <button class="orange-button" data-editor-tool="select">
-                選択
-            </button>
-
-            <button class="orange-button" data-editor-tool="wood">
-                木
-            </button>
-
-            <button class="orange-button" data-editor-tool="stone">
-                石
-            </button>
-
-            <button class="orange-button" data-editor-tool="glass">
-                ガラス
-            </button>
-
-            <button class="orange-button" data-editor-tool="slime">
-                スライム
-            </button>
-
-            <button class="orange-button" data-editor-tool="bomb">
-                爆弾
-            </button>
-
-            <button class="orange-button" data-editor-tool="multiply">
-                倍
-            </button>
-
-            <button class="orange-button" data-editor-tool="bedrock">
-                岩盤
-            </button>
-
-            <button class="orange-button" data-editor-tool="house">
-                家
-            </button>
-
-            <button class="orange-button" data-editor-tool="dropper">
-                投下機
-            </button>
-
-        </div>
-
-        <div id="editorActions" class="edit-actions hidden">
-
-            <button data-editor-action="move">
-                移動
-            </button>
-
-            <button data-editor-action="resize">
-                形変更
-            </button>
-
-            <button data-editor-action="rotate">
-                回転
-            </button>
-
-            <button id="deleteSelectedButton">
-                削除
-            </button>
-
-        </div>
-
-        <div id="editorDropperSettings" class="dropper-line hidden">
-
-            <span>投下間隔</span>
-            <input id="editorInterval" type="number" min=".1" step=".1" value="5">
-
-            <span>秒</span>
-
-            <span>個数</span>
-            <input id="editorCount" type="number" min="1" max="100" value="1">
-
-            <span>爆発</span>
-            <input id="editorBombTimer" type="number" min=".1" step=".1" value="10">
-
-            <span>秒</span>
-
-            <button id="editorDropperApply">
-                反映
-            </button>
-
-            <button id="editorDropperToggle">
-                ON/OFF
-            </button>
-
-            <span id="editorDropperStatus" class="dropper-status">
-                OFF
-            </span>
-
-        </div>
-
-        <div id="editorStatus" class="status">
-            選択してブロックを操作できます。
-        </div>
-
-    </div>
-
-    <div class="stage-area">
-        <canvas id="canvas"></canvas>
-        <div class="floor-label">消せない岩盤</div>
-    </div>
-
-    <div class="bottom-ui">
-
-        <div class="zoom-row">
-            <button id="editorZoomOut">−</button>
-            <div id="editorZoomValue" class="zoom-number">100%</div>
-            <button id="editorZoomIn">＋</button>
-        </div>
-
-        <div class="button-row">
-
-            <button id="editorSave" class="orange-button">
-                ステージを保存
-            </button>
-
-            <button id="editorSaved" class="white-small">
-                保存データ
-            </button>
-
-            <button id="editorBack" class="white-small">
-                戻る
-            </button>
-
-        </div>
-
-    </div>
+<input id="importInput" type="file" accept=".json,application/json" class="hidden">
 
 </div>
-
-
-<div id="playScreen" class="screen game hidden">
-
-    <div class="play-ui">
-
-        <div class="ui-title">
-            ステージで遊ぶ
-        </div>
-
-        <div class="button-row">
-
-            <button id="playBombTool" class="orange-button active">
-                爆弾を投下
-            </button>
-
-            <button id="playReset" class="orange-button">
-                リセット（やり直す）
-            </button>
-
-            <button id="playExplodeAll" class="orange-button">
-                全爆破
-            </button>
-
-            <button id="playSettings" class="white-small">
-                自動投下機設定
-            </button>
-
-            <button id="playBack" class="white-small">
-                戻る
-            </button>
-
-        </div>
-
-        <div id="playDropperSettings" class="dropper-line hidden">
-
-            <span>間隔</span>
-            <input id="playInterval" type="number" min=".1" step=".1" value="5">
-
-            <span>秒</span>
-
-            <span>個数</span>
-            <input id="playCount" type="number" min="1" max="100" value="1">
-
-            <span>爆発</span>
-            <input id="playBombTimer" type="number" min=".1" step=".1" value="10">
-
-            <span>秒</span>
-
-            <button id="playDropperApply">
-                反映
-            </button>
-
-        </div>
-
-        <div class="play-info">
-            爆弾をステージ内でタップすると投下します。自動爆弾投下機はステージ上の投下機を直接タップしてON/OFFできます。
-        </div>
-
-        <div id="playStatus" class="status">
-            爆弾投下モード
-        </div>
-
-    </div>
-
-    <div class="stage-area">
-        <canvas id="playCanvas"></canvas>
-        <div class="floor-label">消せない岩盤</div>
-    </div>
-
-    <div class="bottom-ui">
-
-        <div class="zoom-row">
-            <button id="playZoomOut">−</button>
-            <div id="playZoomValue" class="zoom-number">100%</div>
-            <button id="playZoomIn">＋</button>
-        </div>
-
-    </div>
-
-</div>
-
-
-<div id="saveModal" class="modal-bg hidden">
-
-    <div class="modal">
-
-        <h2>ステージを保存</h2>
-
-        <input
-            id="stageName"
-            class="modal-input"
-            maxlength="100"
-            placeholder="ステージ名"
-        >
-
-        <div class="modal-row">
-
-            <button id="saveConfirm" class="main-button">
-                保存
-            </button>
-
-            <button id="saveCancel" class="white-button">
-                キャンセル
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<div id="savedModal" class="modal-bg hidden">
-
-    <div class="modal">
-
-        <h2>保存データ一覧</h2>
-
-        <div id="stageList" class="stage-list"></div>
-
-        <div class="modal-row">
-            <button id="savedClose" class="white-button">
-                閉じる
-            </button>
-        </div>
-
-    </div>
-
-</div>
-
-
-<div id="migrationModal" class="modal-bg hidden">
-
-    <div class="modal">
-
-        <h2>データ移行</h2>
-
-        <div class="modal-row">
-
-            <button id="exportButton" class="main-button">
-                データを書き出す
-            </button>
-
-            <button id="importButton" class="white-button">
-                データを読み込む
-            </button>
-
-            <input
-                id="importFile"
-                type="file"
-                accept=".json,application/json"
-                class="hidden"
-            >
-
-        </div>
-
-        <div class="modal-row">
-            <button id="migrationClose" class="white-button">
-                閉じる
-            </button>
-        </div>
-
-    </div>
-
-</div>
-
 
 <script>
 const {
-    Engine,
-    Bodies,
-    Body,
-    Composite,
-    Events,
-    Vector
-} = Matter;
+ Engine,Render,Runner,World,Bodies,Body,Composite,Events,Vector
+}=Matter;
 
-const STORAGE_KEY = "slime_castle_original_stages_v3";
+const canvas=document.getElementById("gameCanvas");
+const playCanvas=document.getElementById("gameCanvasPlay");
 
-const FLOOR_HEIGHT = 42;
+let engine=null;
+let mode="editor";
+let stage=null;
+let selected=null;
+let tool="select";
+let editAction=null;
+let zoomLevel=1;
+let pointerState=null;
+let playSourceStage=null;
+let explosions=[];
+let lastTime=performance.now();
+let manualBombTimer=5;
+let activeMachine=null;
+let nextMachineTimes=new Map();
+let generatedVisuals=[];
+let stageCounter=1;
 
-let engine = null;
+const FLOOR_H=35;
+const WORLD_W=1000;
+const MIN_SIZE=18;
 
-let editorCanvas = document.getElementById("canvas");
-let editorCtx = editorCanvas.getContext("2d");
-
-let playCanvas = document.getElementById("playCanvas");
-let playCtx = playCanvas.getContext("2d");
-
-let activeCanvas = editorCanvas;
-let activeCtx = editorCtx;
-
-let canvasWidth = 0;
-let canvasHeight = 0;
-
-let currentMode = "editor";
-
-let editorTool = "select";
-let editorAction = null;
-
-let selectedBody = null;
-
-let pointerData = null;
-
-let zoomEditor = 1;
-let zoomPlay = 1;
-
-let animationFrame = null;
-let lastTime = performance.now();
-
-let explosions = [];
-
-let idCounter = 0;
-
-let currentPlayStage = null;
-let playOriginalObjects = [];
-
-let editorObjectsBeforePlay = [];
-
-const multiplierTouch = new WeakMap();
+const MATERIALS={
+ wood:{name:"木",max:5,color:"#a96832",damage:1},
+ glass:{name:"ガラス",max:2,color:"#aee8ff",damage:1},
+ stone:{name:"石",max:10,color:"#888",damage:1},
+ bedrock:{name:"岩盤",max:Infinity,color:"#30343b",damage:0}
+};
 
 function newId(){
-
-    idCounter++;
-
-    return (
-        "object_" +
-        Date.now().toString(36) +
-        "_" +
-        idCounter.toString(36) +
-        "_" +
-        Math.random().toString(36).slice(2,8)
-    );
+ return "id_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,9);
 }
 
-function clamp(v,min,max){
-    return Math.max(min,Math.min(max,v));
+function deepCopy(v){
+ return JSON.parse(JSON.stringify(v));
 }
 
-function createEngine(){
-
-    engine = Engine.create({
-        enableSleeping:false
-    });
-
-    engine.gravity.y = 1;
-
-    engine.positionIterations = 12;
-    engine.velocityIterations = 10;
-    engine.constraintIterations = 5;
-
-    installPhysicsEvents();
-
-    if(!animationFrame){
-
-        lastTime = performance.now();
-
-        animationFrame =
-            requestAnimationFrame(gameLoop);
-    }
+function closeModal(){
+ document.getElementById("modal").classList.add("hidden");
+ document.getElementById("modalBox").innerHTML="";
 }
 
-function gameLoop(now){
-
-    const dt =
-        Math.min(
-            50,
-            now-lastTime
-        );
-
-    lastTime = now;
-
-    if(engine){
-
-        Engine.update(
-            engine,
-            dt
-        );
-
-        updateBombTimers(now);
-
-        updateDroppers(now);
-
-        draw();
-
-    }
-
-    animationFrame =
-        requestAnimationFrame(gameLoop);
+function openModal(html){
+ document.getElementById("modalBox").innerHTML=html;
+ document.getElementById("modal").classList.remove("hidden");
 }
 
-function getStageArea(){
+function showScreen(id){
+ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ resizeCanvas();
+}
 
-    return document.querySelector(
-        currentMode === "editor"
-            ? "#editorScreen .stage-area"
-            : "#playScreen .stage-area"
-    );
+function goHome(){
+ closeModal();
+ showScreen("homeScreen");
+}
+
+function blankStage(name){
+ return {
+  id:newId(),
+  name:name||"ステージ "+stageCounter++,
+  objects:[]
+ };
+}
+
+function newStage(){
+ stage=blankStage();
+ playSourceStage=null;
+ selected=null;
+ mode="editor";
+ resetEngine();
+ showScreen("editorScreen");
+}
+
+function getCanvas(){
+ return mode==="editor"?canvas:playCanvas;
 }
 
 function resizeCanvas(){
+ const c=getCanvas();
+ if(!c)return;
+ const rect=c.getBoundingClientRect();
+ const dpr=Math.min(devicePixelRatio||1,2);
+ c.width=Math.max(1,rect.width*dpr);
+ c.height=Math.max(1,rect.height*dpr);
+ if(engine){
+  engine.renderWidth=c.width/dpr;
+  engine.renderHeight=c.height/dpr;
+ }
+ rebuildFloor();
+}
 
-    const area =
-        getStageArea();
+function worldWidth(){
+ return 1000;
+}
 
-    if(!area){
-        return;
-    }
+function screenSize(){
+ const c=getCanvas();
+ const r=c.getBoundingClientRect();
+ return {w:r.width,h:r.height};
+}
 
-    const rect =
-        area.getBoundingClientRect();
+function worldFloorY(){
+ const s=screenSize();
+ return s.h-FLOOR_H;
+}
 
-    canvasWidth =
-        Math.max(
-            300,
-            rect.width
-        );
+function createEngine(){
+ engine=Engine.create({enableSleeping:false});
+ engine.gravity.y=1;
+ engine.gravity.scale=0.001;
+ Events.on(engine,"collisionStart",handleCollision);
+}
 
-    canvasHeight =
-        Math.max(
-            400,
-            rect.height
-        );
-
-    const canvas =
-        currentMode === "editor"
-            ? editorCanvas
-            : playCanvas;
-
-    const dpr =
-        window.devicePixelRatio || 1;
-
-    canvas.width =
-        Math.floor(
-            canvasWidth*dpr
-        );
-
-    canvas.height =
-        Math.floor(
-            canvasHeight*dpr
-        );
-
-    canvas.style.width =
-        canvasWidth+"px";
-
-    canvas.style.height =
-        canvasHeight+"px";
-
-    if(currentMode === "editor"){
-
-        editorCtx =
-            editorCanvas.getContext("2d");
-
-        editorCtx.setTransform(
-            dpr,
-            0,
-            0,
-            dpr,
-            0,
-            0
-        );
-
-        activeCanvas =
-            editorCanvas;
-
-        activeCtx =
-            editorCtx;
-
-    }else{
-
-        playCtx =
-            playCanvas.getContext("2d");
-
-        playCtx.setTransform(
-            dpr,
-            0,
-            0,
-            dpr,
-            0,
-            0
-        );
-
-        activeCanvas =
-            playCanvas;
-
-        activeCtx =
-            playCtx;
-    }
-
-    rebuildFloor();
+function resetEngine(){
+ if(engine){
+  Events.off(engine,"collisionStart",handleCollision);
+ }
+ createEngine();
+ nextMachineTimes=new Map();
+ explosions=[];
+ generatedVisuals=[];
+ rebuildPhysicsFromStage();
 }
 
 function rebuildFloor(){
-
-    if(!engine){
-        return;
-    }
-
-    Composite
-        .allBodies(engine.world)
-        .filter(
-            b=>b.isGroundBedrock
-        )
-        .forEach(
-            b=>Composite.remove(
-                engine.world,
-                b
-            )
-        );
-
-    const floor =
-        Bodies.rectangle(
-            canvasWidth/2,
-            canvasHeight-FLOOR_HEIGHT/2,
-            canvasWidth+300,
-            FLOOR_HEIGHT,
-            {
-                isStatic:true,
-                isGroundBedrock:true,
-                label:"groundBedrock",
-                friction:1.5,
-                frictionStatic:5,
-                restitution:0
-            }
-        );
-
-    Composite.add(
-        engine.world,
-        floor
-    );
+ if(!engine)return;
+ const bodies=Composite.allBodies(engine.world);
+ bodies.filter(b=>b.label==="ground").forEach(b=>World.remove(engine.world,b));
+ const s=screenSize();
+ const floor=Bodies.rectangle(s.w/2,(s.h-FLOOR_H/2),s.w,FLOOR_H,{
+  isStatic:true,label:"ground",friction:0.9,restitution:0
+ });
+ floor.plugin={kind:"ground"};
+ World.add(engine.world,floor);
 }
 
-function objectDefaults(type){
+function rebuildPhysicsFromStage(){
+ if(!engine)return;
+ World.clear(engine.world,false);
+ rebuildFloor();
 
-    const data = {
+ if(!stage)return;
 
-        wood:{
-            width:75,
-            height:45,
-            strength:30
-        },
-
-        stone:{
-            width:75,
-            height:45,
-            strength:55
-        },
-
-        glass:{
-            width:75,
-            height:45,
-            strength:22
-        },
-
-        slime:{
-            width:35,
-            height:35,
-            strength:25
-        },
-
-        bomb:{
-            width:34,
-            height:34,
-            strength:999999
-        },
-
-        multiply:{
-            width:80,
-            height:55,
-            strength:999999
-        },
-
-        bedrock:{
-            width:82,
-            height:50,
-            strength:999999
-        },
-
-        house:{
-            width:110,
-            height:75,
-            strength:40
-        },
-
-        dropper:{
-            width:95,
-            height:54,
-            strength:999999
-        }
-
-    };
-
-    return data[type];
+ stage.objects.forEach(o=>{
+  const b=createBodyFromObject(o);
+  if(b)World.add(engine.world,b);
+ });
 }
 
-function createBody(type,x,y,opt={}){
-
-    const d =
-        objectDefaults(type);
-
-    const width =
-        opt.width || d.width;
-
-    const height =
-        opt.height || d.height;
-
-    const angle =
-        opt.angle || 0;
-
-    let body;
-
-    if(type === "slime"){
-
-        body =
-            Bodies.circle(
-                x,
-                y,
-                width/2,
-                {
-                    restitution:.15,
-                    friction:.8,
-                    density:.002
-                }
-            );
-
-    }else if(type === "bomb"){
-
-        body =
-            Bodies.circle(
-                x,
-                y,
-                width/2,
-                {
-                    restitution:.2,
-                    friction:.7,
-                    density:.002
-                }
-            );
-
-    }else if(type === "house"){
-
-        body =
-            createHouseBody(
-                x,
-                y,
-                width,
-                height,
-                angle
-            );
-
-    }else{
-
-        body =
-            Bodies.rectangle(
-                x,
-                y,
-                width,
-                height,
-                {
-                    isStatic:
-                        type === "multiply" ||
-                        type === "bedrock" ||
-                        type === "dropper",
-
-                    isSensor:
-                        type === "multiply",
-
-                    restitution:
-                        type === "glass"
-                            ? .05
-                            : .1,
-
-                    friction:
-                        type === "glass"
-                            ? .45
-                            : .8,
-
-                    density:.002
-                }
-            );
-    }
-
-    body.objectId =
-        opt.objectId || newId();
-
-    body.objectType =
-        type;
-
-    body.objectWidth =
-        width;
-
-    body.objectHeight =
-        height;
-
-    body.baseWidth =
-        width;
-
-    body.baseHeight =
-        height;
-
-    body.strength =
-        opt.strength ?? d.strength;
-
-    body.damage =
-        opt.damage || 0;
-
-    body.factor =
-        opt.factor || 2;
-
-    body.timerDuration =
-        opt.timerDuration || 8;
-
-    body.createdAt =
-        performance.now();
-
-    body.exploded =
-        false;
-
-    body.fromMultiplierId =
-        opt.fromMultiplierId || null;
-
-    body.dropInterval =
-        opt.dropInterval || 5;
-
-    body.dropCount =
-        opt.dropCount || 1;
-
-    body.dropBombTimer =
-        opt.dropBombTimer || 10;
-
-    body.dropperEnabled =
-        opt.dropperEnabled !== undefined
-            ? opt.dropperEnabled
-            : false;
-
-    body.dropperLastDrop =
-        performance.now();
-
-    Body.setAngle(
-        body,
-        angle
-    );
-
-    body.objectAngle =
-        angle;
-
-    Composite.add(
-        engine.world,
-        body
-    );
-
-    return body;
+function objectMaterial(o){
+ if(o.type==="wood"||o.type==="houseWood")return "wood";
+ if(o.type==="glass"||o.type==="houseGlass")return "glass";
+ if(o.type==="stone"||o.type==="houseStone")return "stone";
+ if(o.type==="bedrock"||o.type==="houseBedrock")return "bedrock";
+ return null;
 }
 
-function createHouseBody(
-    x,
-    y,
-    width,
-    height,
-    angle
-){
-
-    const thickness =
-        Math.max(
-            9,
-            Math.min(width,height)*.14
-        );
-
-    const top =
-        Bodies.rectangle(
-            x,
-            y-height/2+thickness/2,
-            width,
-            thickness,
-            {
-                density:.002,
-                friction:.8
-            }
-        );
-
-    const bottom =
-        Bodies.rectangle(
-            x,
-            y+height/2-thickness/2,
-            width,
-            thickness,
-            {
-                density:.002,
-                friction:.8
-            }
-        );
-
-    const left =
-        Bodies.rectangle(
-            x-width/2+thickness/2,
-            y,
-            thickness,
-            height-thickness*2,
-            {
-                density:.002,
-                friction:.8
-            }
-        );
-
-    const right =
-        Bodies.rectangle(
-            x+width/2-thickness/2,
-            y,
-            thickness,
-            height-thickness*2,
-            {
-                density:.002,
-                friction:.8
-            }
-        );
-
-    const compound =
-        Body.create({
-            parts:[
-                top,
-                bottom,
-                left,
-                right
-            ],
-            density:.002,
-            friction:.8
-        });
-
-    Body.setPosition(
-        compound,
-        {
-            x:x,
-            y:y
-        }
-    );
-
-    Body.setAngle(
-        compound,
-        angle
-    );
-
-    return compound;
+function isHouse(o){
+ return o.type.startsWith("house");
 }
 
-function installPhysicsEvents(){
-
-    Events.on(
-        engine,
-        "collisionStart",
-        event=>{
-
-            event.pairs.forEach(pair=>{
-
-                processMultiplier(
-                    pair.bodyA,
-                    pair.bodyB
-                );
-
-                processMultiplier(
-                    pair.bodyB,
-                    pair.bodyA
-                );
-            });
-        }
-    );
-
-    Events.on(
-        engine,
-        "collisionEnd",
-        event=>{
-
-            event.pairs.forEach(pair=>{
-
-                releaseMultiplier(
-                    pair.bodyA,
-                    pair.bodyB
-                );
-
-                releaseMultiplier(
-                    pair.bodyB,
-                    pair.bodyA
-                );
-            });
-        }
-    );
+function objectStrength(o){
+ if(o.maxHp!=null)return o.maxHp;
+ if(o.type==="dog")return 3;
+ if(o.type==="bigDog")return 6;
+ if(o.type==="armorDog")return 3;
+ if(o.type==="movingDog")return 3;
+ const m=objectMaterial(o);
+ if(m)return MATERIALS[m].max;
+ if(o.type==="multiplier")return 7;
+ return Infinity;
 }
 
-function processMultiplier(
-    bomb,
-    multiplier
-){
+function createBodyFromObject(o){
+ let b;
 
-    if(
-        !bomb ||
-        !multiplier ||
-        bomb.objectType !== "bomb" ||
-        multiplier.objectType !== "multiply"
-    ){
-        return;
-    }
+ if(isHouse(o)){
+  const w=o.width||120;
+  const h=o.height||100;
+  const t=Math.max(10,Math.min(w,h)*0.18);
+  const parts=[
+   Bodies.rectangle(o.x,o.y-h/2+t/2,w,t),
+   Bodies.rectangle(o.x,o.y+h/2-t/2,w,t),
+   Bodies.rectangle(o.x-w/2+t/2,o.y,t,h-2*t),
+   Bodies.rectangle(o.x+w/2-t/2,o.y,t,h-2*t)
+  ];
+  b=Body.create({
+   parts,
+   angle:o.angle||0,
+   label:o.type,
+   isStatic:o.type==="houseBedrock"
+  });
+ }else if(o.type==="bomb"){
+  b=Bodies.circle(o.x,o.y,o.radius||13,{
+   restitution:0.15,friction:0.7,label:"bomb"
+  });
+ }else if(o.type==="dog"||o.type==="bigDog"||o.type==="armorDog"||o.type==="movingDog"){
+  const r=o.type==="bigDog"?24:15;
+  b=Bodies.circle(o.x,o.y,r,{restitution:0.05,friction:0.9,label:o.type});
+ }else if(o.type==="bombDropper"||o.type==="dogSpawner"){
+  b=Bodies.rectangle(o.x,o.y,o.width||100,o.height||35,{
+   isStatic:true,isSensor:false,label:o.type
+  });
+ }else{
+  b=Bodies.rectangle(o.x,o.y,o.width||80,o.height||45,{
+   angle:o.angle||0,
+   isStatic:o.type==="bedrock",
+   isSensor:o.type==="multiplier",
+   label:o.type,
+   friction:0.8,restitution:0.05
+  });
+ }
 
-    /*
-       重要：
+ b.plugin=b.plugin||{};
+ b.plugin.objectId=o.id;
+ b.plugin.kind=o.type;
+ b.plugin.hp=o.hp!=null?o.hp:objectStrength(o);
+ b.plugin.maxHp=objectStrength(o);
+ b.plugin.blockedMultiplierId=o.blockedMultiplierId||null;
+ b.plugin.bombDuration=o.bombDuration||manualBombTimer;
+ b.plugin.createdAt=o.createdAt||performance.now();
+ b.plugin.nextDropAt=o.nextDropAt||0;
+ b.plugin.enabled=o.enabled!==false;
+ b.plugin.dogDirection=o.dogDirection||1;
+ b.plugin.lastWalkChange=performance.now()+500+Math.random()*2000;
 
-       Aで増殖した爆弾
-       ↓
-       fromMultiplierId = A
-
-       Aでは増殖不可
-       Bでは増殖可能
-
-       Bで増殖した爆弾
-       ↓
-       fromMultiplierId = B
-
-       Bでは増殖不可
-       Aでは増殖可能
-
-       過去にどこを通ったかは記憶しない。
-    */
-
-    if(
-        bomb.fromMultiplierId ===
-        multiplier.objectId
-    ){
-        return;
-    }
-
-    let set =
-        multiplierTouch.get(bomb);
-
-    if(!set){
-
-        set = new Set();
-
-        multiplierTouch.set(
-            bomb,
-            set
-        );
-    }
-
-    if(
-        set.has(
-            multiplier.objectId
-        )
-    ){
-        return;
-    }
-
-    set.add(
-        multiplier.objectId
-    );
-
-    const factor =
-        clamp(
-            Number(multiplier.factor)||2,
-            2,
-            20
-        );
-
-    multiplyBomb(
-        bomb,
-        factor,
-        multiplier.objectId
-    );
+ return b;
 }
 
-function releaseMultiplier(
-    bomb,
-    multiplier
-){
-
-    if(
-        !bomb ||
-        !multiplier ||
-        bomb.objectType !== "bomb" ||
-        multiplier.objectType !== "multiply"
-    ){
-        return;
-    }
-
-    const set =
-        multiplierTouch.get(bomb);
-
-    if(!set){
-        return;
-    }
-
-    set.delete(
-        multiplier.objectId
-    );
+function findObject(id){
+ return stage?.objects.find(o=>o.id===id);
 }
 
-function multiplyBomb(
-    original,
-    factor,
-    multiplierId
-){
-
-    if(
-        !original ||
-        original.exploded
-    ){
-        return;
-    }
-
-    const x =
-        original.position.x;
-
-    const y =
-        original.position.y;
-
-    const timer =
-        original.timerDuration;
-
-    /*
-       factor=2なら1個追加
-       factor=3なら2個追加
-
-       元の爆弾と合わせて
-       合計factor個。
-
-       全てに
-       「直前の倍ブロック」
-       を記録する。
-    */
-
-    for(
-        let i=0;
-        i<factor-1;
-        i++
-    ){
-
-        const child =
-            createBody(
-                "bomb",
-                x,
-                y,
-                {
-                    timerDuration:timer,
-                    fromMultiplierId:multiplierId
-                }
-            );
-
-        child.createdAt =
-            performance.now();
-    }
-
-    original.fromMultiplierId =
-        multiplierId;
-
-    original.createdAt =
-        performance.now();
+function rootBody(body){
+ return body.parent||body;
 }
 
-function createBomb(
-    x,
-    y,
-    timer=8
-){
+function bodyObject(body){
+ const r=rootBody(body);
+ return findObject(r.plugin?.objectId);
+}
 
-    return createBody(
-        "bomb",
-        x,
-        y,
-        {
-            timerDuration:timer
-        }
-    );
+function addObject(type,x,y){
+ if(mode!=="editor")return;
+
+ let o={
+  id:newId(),type,x,y,width:80,height:45,angle:0,
+  hp:objectStrength({type}),
+ };
+
+ if(isHouse({type})){
+  o.width=130;
+  o.height=100;
+  o.hp=objectStrength(o);
+ }
+
+ if(type==="bomb"){
+  o.width=26;o.height=26;
+  o.radius=13;
+  o.bombDuration=manualBombTimer;
+  o.createdAt=performance.now();
+ }
+
+ if(type==="multiplier"){
+  o.factor=2;
+ }
+
+ if(type==="bombDropper"){
+  o.width=105;o.height=34;
+  o.interval=3;
+  o.count=1;
+  o.bombTimer=manualBombTimer;
+  o.enabled=true;
+ }
+
+ if(type==="dogSpawner"){
+  o.width=105;o.height=34;
+  o.interval=4;
+  o.count=1;
+  o.dogType="dog";
+  o.direction="down";
+  o.enabled=true;
+ }
+
+ if(type==="dog"||type==="bigDog"||type==="armorDog"||type==="movingDog"){
+  o.width=30;o.height=30;
+  o.hp=objectStrength(o);
+ }
+
+ stage.objects.push(o);
+ const b=createBodyFromObject(o);
+ World.add(engine.world,b);
+ selected=b;
+}
+
+function setTool(t){
+ tool=t;
+ editAction=null;
+ document.querySelectorAll(".palette button").forEach(b=>b.classList.remove("selectedTool"));
+ const map={
+  select:"選択",wood:"木",glass:"ガラス",stone:"石",
+  houseWood:"木の家",houseGlass:"ガラスの家",houseStone:"石の家",
+  houseBedrock:"岩盤の家",multiplier:"倍ブロック",bedrock:"岩盤",
+  bomb:"爆弾",dog:"犬",bigDog:"巨大犬",armorDog:"よろい犬",
+  movingDog:"動く犬",bombDropper:"爆弾投下機",dogSpawner:"自動犬生成機"
+ };
+ [...document.querySelectorAll(".palette button")].find(b=>b.textContent===map[t])?.classList.add("selectedTool");
+}
+
+function setEditAction(a){
+ if(tool!=="select")setTool("select");
+ editAction=a;
+ document.querySelectorAll(".actions button").forEach(b=>b.classList.remove("active"));
+ const names={move:"移動",resize:"形変更",rotate:"回転"};
+ const target=[...document.querySelectorAll(".actions button")].find(b=>b.textContent===names[a]);
+ if(target)target.classList.add("active");
+}
+
+function setPlaySelect(){
+ tool="select";
+ editAction="inspect";
+ document.getElementById("playInfo").textContent="ブロックを選択できます";
+}
+
+function getPointer(e){
+ const c=getCanvas();
+ const r=c.getBoundingClientRect();
+ return {x:e.clientX-r.left,y:e.clientY-r.top};
+}
+
+function screenToWorld(p){
+ const s=screenSize();
+ return {
+  x:s.w/2+(p.x-s.w/2)/zoomLevel,
+  y:s.h+(p.y-s.h)/zoomLevel
+ };
+}
+
+function worldToScreen(p){
+ const s=screenSize();
+ return {
+  x:s.w/2+(p.x-s.w/2)*zoomLevel,
+  y:s.h+(p.y-s.h)*zoomLevel
+ };
+}
+
+function bodyAt(p){
+ const w=screenToWorld(p);
+ const bodies=Composite.allBodies(engine.world).filter(b=>b.label!=="ground");
+ for(let i=bodies.length-1;i>=0;i--){
+  const b=bodies[i];
+  if(b.plugin?.kind==="bombDropper"||b.plugin?.kind==="dogSpawner"||b.plugin?.kind==="bomb"||b.plugin?.kind?.includes("Dog")||b.plugin?.kind==="dog"||b.plugin?.kind==="wood"||b.plugin?.kind==="glass"||b.plugin?.kind==="stone"||b.plugin?.kind==="bedrock"||b.plugin?.kind==="multiplier"||b.plugin?.kind?.startsWith("house")){
+   if(Matter.Bounds.contains(b.bounds,w)){
+    if(Matter.Vertices.contains(b.vertices,w))return rootBody(b);
+   }
+  }
+ }
+ return null;
+}
+
+function handlePointerDown(e){
+ const p=getPointer(e);
+ const w=screenToWorld(p);
+
+ if(mode==="play"){
+  const b=bodyAt(p);
+  if(b){
+   const o=bodyObject(b);
+
+   if(o?.type==="bombDropper"||o?.type==="dogSpawner"){
+    activeMachine=b;
+    o.enabled=o.enabled===false;
+    b.plugin.enabled=o.enabled;
+    showSelection(b);
+    return;
+   }
+
+   if(tool==="select"){
+    selected=b;
+    showSelection(b);
+    return;
+   }
+
+   return;
+  }
+
+  if(tool==="select")return;
+
+  if(tool==="bomb"){
+   addObject("bomb",w.x,w.y);
+   return;
+  }
+
+  return;
+ }
+
+ if(tool!=="select"){
+  addObject(tool,w.x,w.y);
+  return;
+ }
+
+ const b=bodyAt(p);
+
+ if(editAction==="rotate"&&selected){
+  if(rotationHandleHit(selected,w)){
+   pointerState={type:"rotate",body:selected};
+   return;
+  }
+ }
+
+ if(editAction==="resize"&&selected){
+  const h=resizeHandleHit(selected,w);
+  if(h){
+   pointerState={type:"resize",body:selected,corner:h};
+   return;
+  }
+ }
+
+ if(b){
+  selected=b;
+  showSelection(b);
+
+  if(editAction==="move"){
+   pointerState={
+    type:"move",body:b,
+    dx:b.position.x-w.x,
+    dy:b.position.y-w.y
+   };
+  }
+ }else{
+  selected=null;
+ }
+}
+
+function handlePointerMove(e){
+ if(!pointerState)return;
+ const p=getPointer(e);
+ const w=screenToWorld(p);
+ const b=pointerState.body;
+ const o=bodyObject(b);
+ if(!o)return;
+
+ if(pointerState.type==="move"){
+  Body.setPosition(b,{
+   x:w.x+pointerState.dx,
+   y:w.y+pointerState.dy
+  });
+  o.x=b.position.x;o.y=b.position.y;
+ }
+
+ if(pointerState.type==="rotate"){
+  const a=Math.atan2(w.y-b.position.y,w.x-b.position.x)+Math.PI/2;
+  Body.setAngle(b,a);
+  o.angle=a;
+ }
+
+ if(pointerState.type==="resize"){
+  resizeBodyFromCenter(b,o,w);
+ }
+}
+
+function handlePointerUp(){
+ pointerState=null;
+}
+
+function rotationHandleHit(b,w){
+ const end=rotateHandlePosition(b);
+ return Math.hypot(end.x-w.x,end.y-w.y)<18/zoomLevel;
+}
+
+function rotateHandlePosition(b){
+ const len=Math.max(35,(b.bounds.max.y-b.bounds.min.y)*0.5);
+ return Vector.add(b.position,Vector.rotate({x:0,y:-len},b.angle));
+}
+
+function resizeHandleHit(b,w){
+ const o=bodyObject(b);
+ if(!o||o.type==="bombDropper"||o.type==="dogSpawner")return null;
+
+ const hw=(o.width||80)/2;
+ const hh=(o.height||45)/2;
+ const local=Vector.rotate(
+  {x:w.x-b.position.x,y:w.y-b.position.y},
+  -(b.angle||0)
+ );
+
+ const corners=[
+  {x:hw,y:hh,n:"br"},
+  {x:-hw,y:hh,n:"bl"},
+  {x:hw,y:-hh,n:"tr"},
+  {x:-hw,y:-hh,n:"tl"}
+ ];
+
+ let best=null,dist=Infinity;
+ corners.forEach(c=>{
+  const d=Math.hypot(c.x-local.x,c.y-local.y);
+  if(d<dist){dist=d;best=c.n}
+ });
+ return dist<20/zoomLevel?best:null;
+}
+
+function resizeBodyFromCenter(b,o,w){
+ const local=Vector.rotate(
+  {x:w.x-b.position.x,y:w.y-b.position.y},
+  -(b.angle||0)
+ );
+
+ const nw=Math.max(MIN_SIZE,Math.abs(local.x)*2);
+ const nh=Math.max(MIN_SIZE,Math.abs(local.y)*2);
+
+ const ow=o.width||80;
+ const oh=o.height||45;
+
+ const sx=nw/ow;
+ const sy=nh/oh;
+
+ Body.scale(b,sx,sy);
+ Body.setVelocity(b,{x:0,y:0});
+ Body.setAngularVelocity(b,0);
+
+ o.width=nw;
+ o.height=nh;
+}
+
+function showSelection(b){
+ selected=b;
+ const o=bodyObject(b);
+ if(!o)return;
+
+ if(mode==="play"){
+  const box=document.getElementById("selectionInfo");
+  box.classList.remove("hidden");
+  const hp=b.plugin?.hp;
+  const max=b.plugin?.maxHp;
+  let txt=`<b>${displayType(o.type)}</b><br>`;
+  if(max===Infinity)txt+="耐久力：∞";
+  else txt+=`残り耐久力：${Math.max(0,Math.round(hp))} / ${max}`;
+
+  if(o.type==="bombDropper"||o.type==="dogSpawner"){
+   txt+="<br><button onclick=\"openSelectedMachineSettings()\" style=\"margin-top:6px;padding:5px 8px;border-radius:7px;background:#f80;color:white\">設定</button>";
+  }
+  box.innerHTML=txt;
+ }
+}
+
+function displayType(t){
+ const m={
+  wood:"木",glass:"ガラス",stone:"石",bedrock:"岩盤",
+  houseWood:"木の家",houseGlass:"ガラスの家",houseStone:"石の家",
+  houseBedrock:"岩盤の家",multiplier:"倍ブロック",bomb:"爆弾",
+  dog:"犬",bigDog:"巨大犬",armorDog:"よろい犬",movingDog:"動く犬",
+  bombDropper:"爆弾投下機",dogSpawner:"自動犬生成機"
+ };
+ return m[t]||t;
+}
+
+function deleteSelected(){
+ if(mode!=="editor"||!selected)return;
+ const o=bodyObject(selected);
+ if(!o)return;
+ if(o.type==="bedrock"||o.type==="houseBedrock")return;
+ World.remove(engine.world,selected);
+ stage.objects=stage.objects.filter(x=>x.id!==o.id);
+ selected=null;
+}
+
+function duplicateSelected(){
+ if(mode!=="editor"||!selected)return;
+ const o=bodyObject(selected);
+ if(!o)return;
+
+ const copy=deepCopy(o);
+ copy.id=newId();
+ copy.x=o.x+(o.width||60)+25;
+ copy.y=o.y;
+ copy.hp=objectStrength(copy);
+ copy.createdAt=performance.now();
+
+ stage.objects.push(copy);
+ const b=createBodyFromObject(copy);
+ World.add(engine.world,b);
+ selected=b;
+}
+
+function zoom(v){
+ zoomLevel=Math.max(.65,Math.min(1.5,zoomLevel+v));
+}
+
+function openManualBombSettings(){
+ openModal(`
+  <h3>手動爆弾設定</h3>
+  <div class="notice">ここで設定した時間は、新しく置く手動爆弾に適用されます。</div>
+  <div class="modalRow">
+   <label>爆発まで</label>
+   <input id="manualBombInput" type="number" min="0.2" max="60" step="0.1" value="${manualBombTimer}">
+   <span>秒</span>
+  </div>
+  <div class="modalRow">
+   <button class="btn" onclick="saveManualBombSettings()">保存</button>
+   <button class="btn white" onclick="closeModal()">閉じる</button>
+  </div>
+ `);
+}
+
+function saveManualBombSettings(){
+ const v=Math.max(.2,Math.min(60,Number(document.getElementById("manualBombInput").value)||5));
+ manualBombTimer=v;
+
+ if(mode==="editor"){
+  stage.objects.filter(o=>o.type==="bomb"&&o.manualBomb!==false).forEach(o=>{
+   o.bombDuration=v;
+  });
+ }
+
+ closeModal();
+}
+
+function openSelectedMachineSettings(){
+ let b=selected||activeMachine;
+
+ if(!b&&mode==="play"){
+  const machines=Composite.allBodies(engine.world).filter(x=>x.plugin?.kind==="bombDropper"||x.plugin?.kind==="dogSpawner");
+  if(machines.length===1)b=machines[0];
+ }
+
+ if(!b)return;
+
+ const o=bodyObject(b);
+ if(!o)return;
+
+ if(o.type==="bombDropper")openBombDropperSettings(o);
+ if(o.type==="dogSpawner")openDogSpawnerSettings(o);
+}
+
+function openBombDropperSettings(o){
+ openModal(`
+  <h3>爆弾投下機設定</h3>
+  <div class="modalRow">
+   <label>間隔</label>
+   <input id="bdInterval" type="number" min=".2" max="60" step=".1" value="${o.interval||3}">
+   <span>秒</span>
+   <label>1回</label>
+   <input id="bdCount" type="number" min="1" max="30" step="1" value="${o.count||1}">
+   <span>個</span>
+  </div>
+  <div class="modalRow">
+   <label>爆発</label>
+   <input id="bdTimer" type="number" min=".2" max="60" step=".1" value="${o.bombTimer||manualBombTimer}">
+   <span>秒</span>
+  </div>
+  <div class="modalRow">
+   <button class="btn" onclick="saveBombDropperSettings('${o.id}')">保存</button>
+   <button class="btn white" onclick="closeModal()">閉じる</button>
+  </div>
+ `);
+}
+
+function saveBombDropperSettings(id){
+ const o=findObject(id);
+ if(!o)return;
+
+ o.interval=Math.max(.2,Number(document.getElementById("bdInterval").value)||3);
+ o.count=Math.max(1,Math.min(30,parseInt(document.getElementById("bdCount").value)||1));
+ o.bombTimer=Math.max(.2,Number(document.getElementById("bdTimer").value)||manualBombTimer);
+
+ closeModal();
+}
+
+function openDogSpawnerSettings(o){
+ openModal(`
+  <h3>自動犬生成機設定</h3>
+  <div class="modalRow">
+   <label>犬</label>
+   <select id="dsType">
+    <option value="dog" ${o.dogType==="dog"?"selected":""}>犬</option>
+    <option value="bigDog" ${o.dogType==="bigDog"?"selected":""}>巨大犬</option>
+    <option value="armorDog" ${o.dogType==="armorDog"?"selected":""}>よろい犬</option>
+    <option value="movingDog" ${o.dogType==="movingDog"?"selected":""}>動く犬</option>
+   </select>
+   <label>間隔</label>
+   <input id="dsInterval" type="number" min=".2" max="60" step=".1" value="${o.interval||4}">
+   <span>秒</span>
+  </div>
+  <div class="modalRow">
+   <label>1回</label>
+   <input id="dsCount" type="number" min="1" max="30" step="1" value="${o.count||1}">
+   <span>匹</span>
+   <label>方向</label>
+   <select id="dsDirection">
+    <option value="left" ${o.direction==="left"?"selected":""}>左から</option>
+    <option value="right" ${o.direction==="right"?"selected":""}>右から</option>
+    <option value="up" ${o.direction==="up"?"selected":""}>上から</option>
+    <option value="down" ${o.direction==="down"?"selected":""}>下から</option>
+   </select>
+  </div>
+  <div class="modalRow">
+   <button class="btn" onclick="saveDogSpawnerSettings('${o.id}')">保存</button>
+   <button class="btn white" onclick="closeModal()">閉じる</button>
+  </div>
+ `);
+}
+
+function saveDogSpawnerSettings(id){
+ const o=findObject(id);
+ if(!o)return;
+
+ o.dogType=document.getElementById("dsType").value;
+ o.interval=Math.max(.2,Number(document.getElementById("dsInterval").value)||4);
+ o.count=Math.max(1,Math.min(30,parseInt(document.getElementById("dsCount").value)||1));
+ o.direction=document.getElementById("dsDirection").value;
+
+ closeModal();
+}
+
+function openSaveDialog(){
+ if(!stage)return;
+
+ openModal(`
+  <h3>ステージを保存</h3>
+  <div class="modalRow">
+   <label>ステージ名</label>
+   <input id="stageName" value="${escapeHtml(stage.name)}">
+  </div>
+  <div class="modalRow">
+   <button class="btn" onclick="saveAsNew()">新しく保存</button>
+   <button class="btn" onclick="overwriteStage()">上書き保存</button>
+   <button class="btn white" onclick="closeModal()">閉じる</button>
+  </div>
+ `);
+}
+
+function escapeHtml(s){
+ return String(s).replace(/[&<>"']/g,m=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[m]));
+}
+
+function saveAsNew(){
+ const name=document.getElementById("stageName").value.trim()||"ステージ";
+ const data=getStages();
+ const copy=deepCopy(stage);
+ copy.id=newId();
+ copy.name=name;
+ data.push(copy);
+ localStorage.setItem("street_history_stages",JSON.stringify(data));
+ stage=copy;
+ closeModal();
+}
+
+function overwriteStage(){
+ const name=document.getElementById("stageName").value.trim()||stage.name;
+ stage.name=name;
+ const data=getStages();
+ const i=data.findIndex(x=>x.id===stage.id);
+
+ if(i>=0)data[i]=deepCopy(stage);
+ else data.push(deepCopy(stage));
+
+ localStorage.setItem("street_history_stages",JSON.stringify(data));
+ closeModal();
+}
+
+function getStages(){
+ try{
+  return JSON.parse(localStorage.getItem("street_history_stages")||"[]");
+ }catch(e){
+  return [];
+ }
+}
+
+function showStageList(savedOnly=false){
+ const data=getStages();
+
+ let html=`<h3>保存データ</h3>`;
+
+ if(!data.length){
+  html+=`<p>保存されたステージはありません。</p>`;
+ }else{
+  data.forEach(o=>{
+   html+=`
+    <div class="stageListItem">
+     <strong>${escapeHtml(o.name)}</strong>
+     <div class="row">
+      <button onclick="playSaved('${o.id}')">遊ぶ</button>
+      <button onclick="editSaved('${o.id}')">編集</button>
+      <button onclick="deleteSaved('${o.id}')" class="white">削除</button>
+     </div>
+    </div>`;
+  });
+ }
+
+ html+=`
+  <div class="modalRow">
+   <button class="btn white" onclick="closeModal()">閉じる</button>
+   <button class="btn" onclick="exportData();closeModal()">データを書き出す</button>
+   <button class="btn white" onclick="openImport();closeModal()">データを読み込む</button>
+  </div>`;
+
+ openModal(html);
+}
+
+function editSaved(id){
+ const s=getStages().find(x=>x.id===id);
+ if(!s)return;
+ stage=deepCopy(s);
+ selected=null;
+ closeModal();
+ mode="editor";
+ resetEngine();
+ showScreen("editorScreen");
+}
+
+function playSaved(id){
+ const s=getStages().find(x=>x.id===id);
+ if(!s)return;
+ playSourceStage=deepCopy(s);
+ stage=deepCopy(s);
+ closeModal();
+ mode="play";
+ selected=null;
+ tool="bomb";
+ zoomLevel=1;
+ resetEngine();
+ showScreen("playScreen");
+}
+
+function deleteSaved(id){
+ const data=getStages().filter(x=>x.id!==id);
+ localStorage.setItem("street_history_stages",JSON.stringify(data));
+ showStageList(true);
+}
+
+function exportData(){
+ const data=getStages();
+ const blob=new Blob([JSON.stringify({
+  version:3,
+  stages:data
+ },null,2)],{type:"application/json"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="stage-data.json";
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+function openImport(){
+ document.getElementById("importInput").click();
+}
+
+document.getElementById("importInput").addEventListener("change",async e=>{
+ const file=e.target.files[0];
+ if(!file)return;
+ try{
+  const text=await file.text();
+  const data=JSON.parse(text);
+  if(!Array.isArray(data.stages))throw new Error();
+
+  const old=getStages();
+  const merged=[...old];
+
+  data.stages.forEach(s=>{
+   if(!s.id)s.id=newId();
+   merged.push(s);
+  });
+
+  localStorage.setItem("street_history_stages",JSON.stringify(merged));
+ }catch(err){
+  openModal(`
+   <h3>読み込み失敗</h3>
+   <p>ステージデータとして読み込めませんでした。</p>
+   <button class="btn" onclick="closeModal()">閉じる</button>
+  `);
+ }
+ e.target.value="";
+});
+
+function resetPlay(){
+ if(!playSourceStage)return;
+ stage=deepCopy(playSourceStage);
+ selected=null;
+ activeMachine=null;
+ explosions=[];
+ generatedVisuals=[];
+ resetEngine();
+ document.getElementById("selectionInfo").classList.add("hidden");
+ document.getElementById("playInfo").textContent="やり直しました";
+}
+
+function explodeAll(){
+ if(!engine)return;
+ const bombs=Composite.allBodies(engine.world).filter(b=>b.plugin?.kind==="bomb");
+ bombs.forEach(b=>explodeBomb(b,true));
+}
+
+function handleCollision(e){
+ if(mode!=="play"&&mode!=="editor")return;
+
+ e.pairs.forEach(pair=>{
+  const a=rootBody(pair.bodyA);
+  const b=rootBody(pair.bodyB);
+
+  if(a.plugin?.kind==="bomb"&&b.plugin?.kind==="multiplier"){
+   tryMultiply(a,b);
+  }else if(b.plugin?.kind==="bomb"&&a.plugin?.kind==="multiplier"){
+   tryMultiply(b,a);
+  }
+ });
+}
+
+function tryMultiply(bomb,mult){
+ if(bomb.plugin?.blockedMultiplierId===mult.plugin?.objectId)return;
+
+ const mo=bodyObject(mult);
+ if(!mo)return;
+
+ const factor=Math.max(2,Math.min(20,parseInt(mo.factor)||2));
+ const sourceId=mo.id;
+
+ bomb.plugin.blockedMultiplierId=sourceId;
+
+ const bo=bodyObject(bomb);
+ if(bo)bo.blockedMultiplierId=sourceId;
+
+ for(let i=1;i<factor;i++){
+  const child={
+   id:newId(),
+   type:"bomb",
+   x:bomb.position.x,
+   y:bomb.position.y,
+   width:26,
+   height:26,
+   radius:13,
+   angle:bomb.angle,
+   bombDuration:remainingBombTime(bomb),
+   createdAt:performance.now(),
+   blockedMultiplierId:sourceId,
+   manualBomb:false
+  };
+
+  stage.objects.push(child);
+  const cb=createBodyFromObject(child);
+  cb.plugin.blockedMultiplierId=sourceId;
+  World.add(engine.world,cb);
+ }
+}
+
+function remainingBombTime(b){
+ const dur=(b.plugin?.bombDuration||manualBombTimer)*1000;
+ const elapsed=performance.now()-(b.plugin?.createdAt||performance.now());
+ return Math.max(.2,(dur-elapsed)/1000);
+}
+
+function explodeBomb(b,manual=false){
+ if(!b||!b.world)return;
+
+ const o=bodyObject(b);
+ const x=b.position.x;
+ const y=b.position.y;
+
+ explosions.push({
+  x,y,r:10,max:100,start:performance.now(),duration:450
+ });
+
+ const force=manual?0.055:0.045;
+
+ Composite.allBodies(engine.world).forEach(target=>{
+  if(target===b||target.label==="ground")return;
+
+  const dx=target.position.x-x;
+  const dy=target.position.y-y;
+  const d=Math.hypot(dx,dy);
+
+  if(d>170||d<1)return;
+
+  const strength=(1-d/170)*force;
+  Body.applyForce(target,target.position,{
+   x:(dx/d)*strength,
+   y:(dy/d)*strength-0.008
+  });
+
+  if(mode==="play"){
+   damageBody(target,1);
+  }
+ });
+
+ if(o?.type==="bomb"){
+  stage.objects=stage.objects.filter(x=>x.id!==o.id);
+ }
+
+ World.remove(engine.world,b);
+}
+
+function damageBody(b,amount){
+ const o=bodyObject(b);
+ if(!o)return;
+
+ if(o.type==="bedrock"||o.type==="houseBedrock")return;
+
+ let defense=1;
+
+ if(o.type==="armorDog")defense=2;
+
+ const actual=amount/defense;
+
+ b.plugin.hp-=actual;
+ o.hp=b.plugin.hp;
+
+ if(b.plugin.hp<=0){
+  stage.objects=stage.objects.filter(x=>x.id!==o.id);
+  World.remove(engine.world,b);
+
+  if(selected===b){
+   selected=null;
+   document.getElementById("selectionInfo").classList.add("hidden");
+  }
+ }
+}
+
+function spawnBomb(x,y,timer,blockedId=null){
+ const o={
+  id:newId(),type:"bomb",x,y,width:26,height:26,
+  radius:13,angle:0,bombDuration:timer||manualBombTimer,
+  createdAt:performance.now(),blockedMultiplierId:blockedId,
+  manualBomb:false
+ };
+
+ stage.objects.push(o);
+ const b=createBodyFromObject(o);
+ World.add(engine.world,b);
+ return b;
+}
+
+function machineSpawnPoint(o){
+ if(o.type==="bombDropper"){
+  return {x:o.x,y:o.y+(o.height||34)/2+22};
+ }
+
+ const hw=(o.width||105)/2;
+ const hh=(o.height||34)/2;
+
+ if(o.direction==="left")return {x:o.x-hw-25,y:o.y};
+ if(o.direction==="right")return {x:o.x+hw+25,y:o.y};
+ if(o.direction==="up")return {x:o.x,y:o.y-hh-25};
+ return {x:o.x,y:o.y+hh+25};
+}
+
+function spawnDog(o){
+ const p=machineSpawnPoint(o);
+
+ const dog={
+  id:newId(),
+  type:o.dogType||"dog",
+  x:p.x,y:p.y,width:o.dogType==="bigDog"?48:30,height:o.dogType==="bigDog"?48:30,
+  angle:0,
+  hp:objectStrength({type:o.dogType||"dog"})
+ };
+
+ stage.objects.push(dog);
+ const b=createBodyFromObject(dog);
+
+ if(o.direction==="left")Body.setVelocity(b,{x:-3,y:0});
+ if(o.direction==="right")Body.setVelocity(b,{x:3,y:0});
+ if(o.direction==="up")Body.setVelocity(b,{x:0,y:-3});
+ if(o.direction==="down")Body.setVelocity(b,{x:0,y:3});
+
+ if(dog.type==="movingDog"){
+  b.plugin.walking=true;
+  b.plugin.lastWalkChange=performance.now();
+  b.plugin.dogDirection=Math.random()<.5?-1:1;
+ }
+
+ World.add(engine.world,b);
+ return b;
+}
+
+function updateMachines(now){
+ if(!stage||!engine)return;
+
+ stage.objects.forEach(o=>{
+  if(o.type!=="bombDropper"&&o.type!=="dogSpawner")return;
+  if(o.enabled===false)return;
+
+  let next=nextMachineTimes.get(o.id);
+  if(next==null){
+   next=now+(o.interval||3)*1000;
+   nextMachineTimes.set(o.id,next);
+   return;
+  }
+
+  if(now>=next){
+   const count=Math.max(1,Math.min(30,o.count||1));
+
+   if(o.type==="bombDropper"){
+    const p=machineSpawnPoint(o);
+    for(let i=0;i<count;i++){
+     spawnBomb(p.x+(i-(count-1)/2)*18,p.y,o.bombTimer||manualBombTimer);
+    }
+    generatedVisuals.push({
+     type:"bomb",x:p.x,y:p.y,start:now,duration:300
+    });
+   }
+
+   if(o.type==="dogSpawner"){
+    for(let i=0;i<count;i++){
+     const p=machineSpawnPoint(o);
+     spawnDog(o);
+    }
+    generatedVisuals.push({
+     type:"dog",x:o.x,y:o.y,start:now,duration:300
+    });
+   }
+
+   nextMachineTimes.set(o.id,now+(o.interval||3)*1000);
+  }
+ });
 }
 
 function updateBombTimers(now){
+ if(!engine)return;
 
-    Composite
-        .allBodies(engine.world)
-        .forEach(body=>{
+ Composite.allBodies(engine.world).forEach(b=>{
+  if(b.plugin?.kind!=="bomb")return;
 
-            if(
-                body.objectType !== "bomb" ||
-                body.exploded
-            ){
-                return;
-            }
+  const duration=(b.plugin.bombDuration||manualBombTimer)*1000;
+  const elapsed=now-(b.plugin.createdAt||now);
 
-            const elapsed =
-                (now-body.createdAt)/1000;
-
-            if(
-                elapsed >=
-                body.timerDuration
-            ){
-
-                explodeBomb(body);
-            }
-        });
+  if(elapsed>=duration){
+   explodeBomb(b);
+  }
+ });
 }
 
-function explodeBomb(bomb){
+function updateMovingDogs(now){
+ if(mode!=="play"||!engine)return;
 
-    if(
-        !bomb ||
-        bomb.exploded
-    ){
-        return;
-    }
+ const s=screenSize();
 
-    bomb.exploded =
-        true;
+ Composite.allBodies(engine.world).forEach(b=>{
+  if(b.plugin?.kind!=="movingDog")return;
 
-    const radius = 150;
+  if(now>(b.plugin.lastWalkChange||0)){
+   b.plugin.dogDirection=Math.random()<.5?-1:1;
+   b.plugin.lastWalkChange=now+800+Math.random()*2500;
+  }
 
-    const power = .055;
+  const vx=b.plugin.dogDirection*1.1;
+  Body.setVelocity(b,{x:vx,y:b.velocity.y});
 
-    Composite
-        .allBodies(engine.world)
-        .forEach(body=>{
+  const r=15;
+  const left=r;
+  const right=s.w-r;
 
-            if(
-                body === bomb ||
-                body.isStatic ||
-                body.isGroundBedrock
-            ){
-                return;
-            }
-
-            const dx =
-                body.position.x-
-                bomb.position.x;
-
-            const dy =
-                body.position.y-
-                bomb.position.y;
-
-            const distance =
-                Math.max(
-                    1,
-                    Math.hypot(dx,dy)
-                );
-
-            if(distance > radius){
-                return;
-            }
-
-            const strength =
-                (1-distance/radius)*
-                power;
-
-            Body.applyForce(
-                body,
-                body.position,
-                {
-                    x:dx/distance*strength,
-                    y:dy/distance*strength
-                }
-            );
-
-            if(
-                currentMode === "play"
-            ){
-
-                damageBody(
-                    body,
-                    strength*100
-                );
-            }
-        });
-
-    explosions.push({
-        x:bomb.position.x,
-        y:bomb.position.y,
-        start:performance.now(),
-        duration:500,
-        radius:radius
-    });
-
-    Composite.remove(
-        engine.world,
-        bomb
-    );
+  if(b.position.x<left)Body.setPosition(b,{x:left,y:b.position.y});
+  if(b.position.x>right)Body.setPosition(b,{x:right,y:b.position.y});
+ });
 }
 
-function damageBody(
-    body,
-    damage
-){
-
-    if(
-        body.isStatic ||
-        body.isGroundBedrock ||
-        body.objectType === "bomb" ||
-        body.objectType === "multiply" ||
-        body.objectType === "dropper"
-    ){
-        return;
-    }
-
-    body.damage =
-        (body.damage||0)+damage;
-
-    if(
-        body.damage >= body.strength
-    ){
-
-        Composite.remove(
-            engine.world,
-            body
-        );
-
-        if(selectedBody === body){
-            selectedBody = null;
-        }
-    }
+function updateExplosions(now){
+ explosions=explosions.filter(x=>now-x.start<x.duration);
+ generatedVisuals=generatedVisuals.filter(x=>now-x.start<x.duration);
 }
-
-function updateDroppers(now){
-
-    Composite
-        .allBodies(engine.world)
-        .forEach(body=>{
-
-            if(
-                body.objectType !== "dropper" ||
-                !body.dropperEnabled
-            ){
-                return;
-            }
-
-            const interval =
-                Math.max(
-                    .1,
-                    Number(
-                        body.dropInterval
-                    )||5
-                )*1000;
-
-            if(
-                now-body.dropperLastDrop >=
-                interval
-            ){
-
-                body.dropperLastDrop =
-                    now;
-
-                const count =
-                    clamp(
-                        Math.floor(
-                            Number(
-                                body.dropCount
-                            )||1
-                        ),
-                        1,
-                        100
-                    );
-
-                for(
-                    let i=0;
-                    i<count;
-                    i++
-                ){
-
-                    const offset =
-                        (i-(count-1)/2)*22;
-
-                    createBomb(
-                        body.position.x+offset,
-                        body.position.y+
-                        body.objectHeight/2+
-                        25,
-                        Number(
-                            body.dropBombTimer
-                        )||10
-                    );
-                }
-            }
-        });
-}
-
-function getZoom(){
-
-    return currentMode === "editor"
-        ? zoomEditor
-        : zoomPlay;
-}
-
-function setZoom(v){
-
-    v =
-        clamp(
-            v,
-            .5,
-            2
-        );
-
-    if(currentMode === "editor"){
-
-        zoomEditor = v;
-
-        document.getElementById(
-            "editorZoomValue"
-        ).textContent =
-            Math.round(v*100)+"%";
-
-    }else{
-
-        zoomPlay = v;
-
-        document.getElementById(
-            "playZoomValue"
-        ).textContent =
-            Math.round(v*100)+"%";
-    }
-}
-
-function pointerToWorld(e){
-
-    const rect =
-        activeCanvas.getBoundingClientRect();
-
-    const z =
-        getZoom();
-
-    return {
-        x:
-            (e.clientX-rect.left)/z,
-        y:
-            (e.clientY-rect.top)/z
-    };
-}
-
-function getBodyAt(x,y){
-
-    const bodies =
-        Composite.allBodies(
-            engine.world
-        );
-
-    for(
-        let i=bodies.length-1;
-        i>=0;
-        i--
-    ){
-
-        const body =
-            bodies[i];
-
-        if(body.isGroundBedrock){
-            continue;
-        }
-
-        if(
-            body.objectType === "house"
-        ){
-
-            if(
-                pointInHouse(
-                    body,
-                    x,
-                    y
-                )
-            ){
-                return body;
-            }
-
-            continue;
-        }
-
-        const local =
-            Vector.rotate(
-                {
-                    x:x-body.position.x,
-                    y:y-body.position.y
-                },
-                -body.angle
-            );
-
-        const w =
-            body.objectWidth ||
-            body.baseWidth ||
-            40;
-
-        const h =
-            body.objectHeight ||
-            body.baseHeight ||
-            40;
-
-        if(
-            Math.abs(local.x)<=w/2 &&
-            Math.abs(local.y)<=h/2
-        ){
-            return body;
-        }
-    }
-
-    return null;
-}
-
-function pointInHouse(
-    body,
-    x,
-    y
-){
-
-    const local =
-        Vector.rotate(
-            {
-                x:x-body.position.x,
-                y:y-body.position.y
-            },
-            -body.angle
-        );
-
-    const w =
-        body.objectWidth;
-
-    const h =
-        body.objectHeight;
-
-    const t =
-        Math.max(
-            9,
-            Math.min(w,h)*.14
-        );
-
-    if(
-        Math.abs(local.x)>w/2 ||
-        Math.abs(local.y)>h/2
-    ){
-        return false;
-    }
-
-    return (
-        Math.abs(local.x)>=w/2-t ||
-        Math.abs(local.y)>=h/2-t
-    );
-}
-
-function getResizeHandles(body){
-
-    if(
-        !body ||
-        body.objectType === "bomb" ||
-        body.objectType === "slime" ||
-        body.objectType === "dropper"
-    ){
-        return [];
-    }
-
-    const w =
-        body.objectWidth;
-
-    const h =
-        body.objectHeight;
-
-    const points = [
-        {x:-w/2,y:-h/2},
-        {x:w/2,y:-h/2},
-        {x:w/2,y:h/2},
-        {x:-w/2,y:h/2}
-    ];
-
-    return points.map(p=>{
-
-        const r =
-            Vector.rotate(
-                p,
-                body.angle
-            );
-
-        return {
-            x:
-                body.position.x+r.x,
-            y:
-                body.position.y+r.y
-        };
-    });
-}
-
-function getRotateHandle(body){
-
-    const distance =
-        Math.max(
-            body.objectWidth,
-            body.objectHeight
-        )/2+45;
-
-    const p =
-        Vector.rotate(
-            {
-                x:0,
-                y:-distance
-            },
-            body.angle
-        );
-
-    return {
-        x:
-            body.position.x+p.x,
-        y:
-            body.position.y+p.y
-    };
-}
-
-function selectBody(body){
-
-    if(
-        !body ||
-        body.isGroundBedrock
-    ){
-        return;
-    }
-
-    selectedBody =
-        body;
-
-    editorAction =
-        null;
-
-    document
-        .querySelectorAll(
-            "[data-editor-action]"
-        )
-        .forEach(btn=>{
-            btn.classList.remove(
-                "active"
-            );
-        });
-
-    document
-        .getElementById(
-            "editorActions"
-        )
-        .classList.remove(
-            "hidden"
-        );
-
-    if(
-        body.objectType === "dropper"
-    ){
-
-        openEditorDropperSettings();
-
-    }else{
-
-        document
-            .getElementById(
-                "editorDropperSettings"
-            )
-            .classList.add(
-                "hidden"
-            );
-    }
-
-    document
-        .getElementById(
-            "editorStatus"
-        ).textContent =
-        "ブロックを選択しました。操作を選んでください。";
-}
-
-function pointerDown(e){
-
-    if(!engine){
-        return;
-    }
-
-    e.preventDefault();
-
-    const p =
-        pointerToWorld(e);
-
-    pointerData = {
-        id:e.pointerId,
-        start:p,
-        body:null,
-        handle:null,
-        originalWidth:0,
-        originalHeight:0,
-        originalX:0,
-        originalY:0
-    };
-
-    try{
-        activeCanvas.setPointerCapture(
-            e.pointerId
-        );
-    }catch(_){}
-
-    if(currentMode === "play"){
-
-        const hit =
-            getBodyAt(
-                p.x,
-                p.y
-            );
-
-        if(
-            hit &&
-            hit.objectType === "dropper"
-        ){
-
-            toggleDropper(
-                hit
-            );
-
-            return;
-        }
-
-        createBomb(
-            p.x,
-            p.y,
-            8
-        );
-
-        return;
-    }
-
-    if(editorTool !== "select"){
-
-        if(
-            editorTool === "bomb"
-        ){
-
-            createBomb(
-                p.x,
-                p.y,
-                8
-            );
-
-        }else{
-
-            createBody(
-                editorTool,
-                p.x,
-                p.y
-            );
-        }
-
-        return;
-    }
-
-    if(!selectedBody){
-
-        const hit =
-            getBodyAt(
-                p.x,
-                p.y
-            );
-
-        if(hit){
-            selectBody(hit);
-        }
-
-        return;
-    }
-
-    if(editorAction === "move"){
-
-        pointerData.body =
-            selectedBody;
-
-        stopBody(
-            selectedBody
-        );
-
-        return;
-    }
-
-    if(editorAction === "resize"){
-
-        const handles =
-            getResizeHandles(
-                selectedBody
-            );
-
-        let nearest = null;
-        let best = Infinity;
-
-        handles.forEach((h,i)=>{
-
-            const d =
-                Math.hypot(
-                    p.x-h.x,
-                    p.y-h.y
-                );
-
-            if(
-                d<28 &&
-                d<best
-            ){
-
-                best=d;
-                nearest=i;
-            }
-        });
-
-        if(nearest !== null){
-
-            pointerData.body =
-                selectedBody;
-
-            pointerData.handle =
-                nearest;
-
-            pointerData.originalWidth =
-                selectedBody.objectWidth;
-
-            pointerData.originalHeight =
-                selectedBody.objectHeight;
-
-            pointerData.originalX =
-                selectedBody.position.x;
-
-            pointerData.originalY =
-                selectedBody.position.y;
-
-            stopBody(
-                selectedBody
-            );
-        }
-
-        return;
-    }
-
-    if(editorAction === "rotate"){
-
-        const handle =
-            getRotateHandle(
-                selectedBody
-            );
-
-        const d =
-            Math.hypot(
-                p.x-handle.x,
-                p.y-handle.y
-            );
-
-        if(d<32){
-
-            pointerData.body =
-                selectedBody;
-
-            stopBody(
-                selectedBody
-            );
-        }
-
-        return;
-    }
-}
-
-function pointerMove(e){
-
-    if(!pointerData){
-        return;
-    }
-
-    if(
-        pointerData.id !==
-        e.pointerId
-    ){
-        return;
-    }
-
-    e.preventDefault();
-
-    const p =
-        pointerToWorld(e);
-
-    const body =
-        pointerData.body;
-
-    if(!body){
-        return;
-    }
-
-    if(
-        editorAction === "move"
-    ){
-
-        Body.setPosition(
-            body,
-            {
-                x:p.x,
-                y:p.y
-            }
-        );
-
-        stopBody(body);
-
-        return;
-    }
-
-    if(
-        editorAction === "resize"
-    ){
-
-        resizeBody(
-            body,
-            p
-        );
-
-        stopBody(body);
-
-        return;
-    }
-
-    if(
-        editorAction === "rotate"
-    ){
-
-        const angle =
-            Math.atan2(
-                p.y-body.position.y,
-                p.x-body.position.x
-            )+
-            Math.PI/2;
-
-        Body.setAngle(
-            body,
-            angle
-        );
-
-        body.objectAngle =
-            angle;
-
-        stopBody(body);
-
-        return;
-    }
-}
-
-function pointerUp(e){
-
-    if(
-        pointerData &&
-        pointerData.body
-    ){
-
-        stopBody(
-            pointerData.body
-        );
-    }
-
-    pointerData = null;
-
-    try{
-        activeCanvas.releasePointerCapture(
-            e.pointerId
-        );
-    }catch(_){}
-}
-
-function stopBody(body){
-
-    Body.setVelocity(
-        body,
-        {
-            x:0,
-            y:0
-        }
-    );
-
-    Body.setAngularVelocity(
-        body,
-        0
-    );
-
-    Body.setSleeping(
-        body,
-        false
-    );
-}
-
-function resizeBody(
-    body,
-    pointer
-){
-
-    const local =
-        Vector.rotate(
-            {
-                x:
-                    pointer.x-
-                    body.position.x,
-
-                y:
-                    pointer.y-
-                    body.position.y
-            },
-            -body.angle
-        );
-
-    let w =
-        Math.abs(local.x)*2;
-
-    let h =
-        Math.abs(local.y)*2;
-
-    w =
-        clamp(
-            w,
-            25,
-            600
-        );
-
-    h =
-        clamp(
-            h,
-            25,
-            600
-        );
-
-    if(
-        body.objectType === "house"
-    ){
-
-        rebuildHouse(
-            body,
-            w,
-            h
-        );
-
-        return;
-    }
-
-    const sx =
-        w/body.objectWidth;
-
-    const sy =
-        h/body.objectHeight;
-
-    Body.scale(
-        body,
-        sx,
-        sy
-    );
-
-    body.objectWidth =
-        w;
-
-    body.objectHeight =
-        h;
-
-    Body.setPosition(
-        body,
-        {
-            x:pointerData.originalX,
-            y:pointerData.originalY
-        }
-    );
-}
-
-function rebuildHouse(
-    oldBody,
-    width,
-    height
-){
-
-    const x =
-        oldBody.position.x;
-
-    const y =
-        oldBody.position.y;
-
-    const angle =
-        oldBody.angle;
-
-    const id =
-        oldBody.objectId;
-
-    const strength =
-        oldBody.strength;
-
-    Composite.remove(
-        engine.world,
-        oldBody
-    );
-
-    const newBody =
-        createBody(
-            "house",
-            x,
-            y,
-            {
-                objectId:id,
-                width:width,
-                height:height,
-                angle:angle,
-                strength:strength
-            }
-        );
-
-    selectedBody =
-        newBody;
-
-    pointerData.body =
-        newBody;
-}
-
-function toggleDropper(body){
-
-    if(
-        !body ||
-        body.objectType !== "dropper"
-    ){
-        return;
-    }
-
-    body.dropperEnabled =
-        !body.dropperEnabled;
-
-    body.dropperLastDrop =
-        performance.now();
-
-    if(
-        currentMode === "editor"
-    ){
-
-        updateEditorDropperStatus();
-
-        document.getElementById(
-            "editorStatus"
-        ).textContent =
-            body.dropperEnabled
-                ? "自動爆弾投下機：ON"
-                : "自動爆弾投下機：OFF";
-    }
-}
-
-function openEditorDropperSettings(){
-
-    if(
-        !selectedBody ||
-        selectedBody.objectType !== "dropper"
-    ){
-        return;
-    }
-
-    document
-        .getElementById(
-            "editorDropperSettings"
-        )
-        .classList.remove(
-            "hidden"
-        );
-
-    document.getElementById(
-        "editorInterval"
-    ).value =
-        selectedBody.dropInterval;
-
-    document.getElementById(
-        "editorCount"
-    ).value =
-        selectedBody.dropCount;
-
-    document.getElementById(
-        "editorBombTimer"
-    ).value =
-        selectedBody.dropBombTimer;
-
-    updateEditorDropperStatus();
-}
-
-function updateEditorDropperStatus(){
-
-    if(
-        !selectedBody ||
-        selectedBody.objectType !== "dropper"
-    ){
-        return;
-    }
-
-    const status =
-        document.getElementById(
-            "editorDropperStatus"
-        );
-
-    status.textContent =
-        selectedBody.dropperEnabled
-            ? "ON"
-            : "OFF";
-
-    status.classList.toggle(
-        "on",
-        selectedBody.dropperEnabled
-    );
-}
-
-function applyEditorDropperSettings(){
-
-    if(
-        !selectedBody ||
-        selectedBody.objectType !== "dropper"
-    ){
-        return;
-    }
-
-    selectedBody.dropInterval =
-        clamp(
-            Number(
-                document.getElementById(
-                    "editorInterval"
-                ).value
-            )||5,
-            .1,
-            3600
-        );
-
-    selectedBody.dropCount =
-        clamp(
-            Math.floor(
-                Number(
-                    document.getElementById(
-                        "editorCount"
-                    ).value
-                )||1
-            ),
-            1,
-            100
-        );
-
-    selectedBody.dropBombTimer =
-        clamp(
-            Number(
-                document.getElementById(
-                    "editorBombTimer"
-                ).value
-            )||10,
-            .1,
-            3600
-        );
-
-    document.getElementById(
-        "editorStatus"
-    ).textContent =
-        "自動爆弾投下機の設定を反映しました。";
-}
-
-document.getElementById(
-    "editorDropperApply"
-).addEventListener(
-    "click",
-    applyEditorDropperSettings
-);
-
-document.getElementById(
-    "editorDropperToggle"
-).addEventListener(
-    "click",
-    ()=>{
-
-        if(selectedBody){
-            toggleDropper(
-                selectedBody
-            );
-        }
-    }
-);
-
-document.querySelectorAll(
-    "[data-editor-tool]"
-).forEach(button=>{
-
-    button.addEventListener(
-        "click",
-        ()=>{
-
-            editorTool =
-                button.dataset.editorTool;
-
-            document
-                .querySelectorAll(
-                    "[data-editor-tool]"
-                )
-                .forEach(b=>{
-                    b.classList.toggle(
-                        "active",
-                        b === button
-                    );
-                });
-
-            if(
-                editorTool !== "select"
-            ){
-
-                editorAction =
-                    null;
-
-                selectedBody =
-                    null;
-
-                document
-                    .getElementById(
-                        "editorActions"
-                    )
-                    .classList.add(
-                        "hidden"
-                    );
-
-                document
-                    .getElementById(
-                        "editorDropperSettings"
-                    )
-                    .classList.add(
-                        "hidden"
-                    );
-
-                document.getElementById(
-                    "editorStatus"
-                ).textContent =
-                    "ブロックをタップして設置できます。";
-
-            }else{
-
-                document.getElementById(
-                    "editorStatus"
-                ).textContent =
-                    "ブロックを選択してから操作を選んでください。";
-            }
-        }
-    );
-});
-
-document.querySelectorAll(
-    "[data-editor-action]"
-).forEach(button=>{
-
-    button.addEventListener(
-        "click",
-        ()=>{
-
-            if(!selectedBody){
-
-                document.getElementById(
-                    "editorStatus"
-                ).textContent =
-                    "先にブロックを選択してください。";
-
-                return;
-            }
-
-            const action =
-                button.dataset.editorAction;
-
-            if(
-                action === "resize" &&
-                (
-                    selectedBody.objectType === "bomb" ||
-                    selectedBody.objectType === "slime" ||
-                    selectedBody.objectType === "dropper"
-                )
-            ){
-
-                document.getElementById(
-                    "editorStatus"
-                ).textContent =
-                    "このブロックは形変更できません。";
-
-                return;
-            }
-
-            editorAction =
-                action;
-
-            document
-                .querySelectorAll(
-                    "[data-editor-action]"
-                )
-                .forEach(b=>{
-                    b.classList.toggle(
-                        "active",
-                        b === button
-                    );
-                });
-
-            document.getElementById(
-                "editorStatus"
-            ).textContent =
-                action === "move"
-                    ? "ブロックをドラッグして移動できます。"
-                    : action === "resize"
-                    ? "四隅のハンドルをドラッグしてください。"
-                    : "上の回転ハンドルをドラッグしてください。";
-        }
-    );
-});
-
-document.getElementById(
-    "deleteSelectedButton"
-).addEventListener(
-    "click",
-    ()=>{
-
-        if(
-            selectedBody &&
-            !selectedBody.isGroundBedrock
-        ){
-
-            Composite.remove(
-                engine.world,
-                selectedBody
-            );
-
-            selectedBody =
-                null;
-
-            document
-                .getElementById(
-                    "editorActions"
-                )
-                .classList.add(
-                    "hidden"
-                );
-
-            document
-                .getElementById(
-                    "editorDropperSettings"
-                )
-                .classList.add(
-                    "hidden"
-                );
-
-            document.getElementById(
-                "editorStatus"
-            ).textContent =
-                "ブロックを削除しました。";
-        }
-    }
-);
 
 function draw(){
+ const c=getCanvas();
+ if(!c||!engine)return;
 
-    activeCtx.clearRect(
-        0,
-        0,
-        canvasWidth,
-        canvasHeight
-    );
+ const ctx=c.getContext("2d");
+ const dpr=Math.min(devicePixelRatio||1,2);
+ const s=screenSize();
 
-    activeCtx.save();
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+ ctx.clearRect(0,0,s.w,s.h);
 
-    const z =
-        getZoom();
+ ctx.save();
+ ctx.translate(s.w/2,s.h);
+ ctx.scale(zoomLevel,zoomLevel);
+ ctx.translate(-s.w/2,-s.h);
 
-    activeCtx.scale(
-        z,
-        z
-    );
+ drawWorld(ctx,s);
+ ctx.restore();
 
-    drawBackground();
-
-    Composite
-        .allBodies(engine.world)
-        .forEach(
-            drawBody
-        );
-
-    drawExplosions();
-
-    if(
-        currentMode === "editor" &&
-        selectedBody
-    ){
-
-        drawSelection();
-    }
-
-    activeCtx.restore();
+ drawEffects(ctx);
 }
 
-function drawBackground(){
+function drawWorld(ctx,s){
+ const bodies=Composite.allBodies(engine.world);
 
-    const ctx =
-        activeCtx;
+ bodies.forEach(b=>{
+  if(b.label==="ground")return;
+  drawBody(ctx,b);
+ });
 
-    ctx.fillStyle =
-        "#fafafa";
+ ctx.fillStyle="#5b4636";
+ ctx.fillRect(0,s.h-FLOOR_H,s.w,FLOOR_H);
 
-    ctx.fillRect(
-        0,
-        0,
-        canvasWidth/getZoom(),
-        canvasHeight/getZoom()
-    );
-
-    ctx.strokeStyle =
-        "rgba(0,0,0,.035)";
-
-    ctx.lineWidth = 1;
-
-    const grid = 40;
-
-    for(
-        let x=0;
-        x<canvasWidth/getZoom();
-        x+=grid
-    ){
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            x,
-            0
-        );
-
-        ctx.lineTo(
-            x,
-            canvasHeight/getZoom()
-        );
-
-        ctx.stroke();
-    }
-
-    for(
-        let y=0;
-        y<canvasHeight/getZoom();
-        y+=grid
-    ){
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            0,
-            y
-        );
-
-        ctx.lineTo(
-            canvasWidth/getZoom(),
-            y
-        );
-
-        ctx.stroke();
-    }
+ ctx.fillStyle="#80634a";
+ for(let x=0;x<s.w;x+=40){
+  ctx.fillRect(x,s.h-FLOOR_H+6,25,5);
+ }
 }
 
-function drawBody(body){
-
-    const ctx =
-        activeCtx;
-
-    if(body.isGroundBedrock){
-
-        ctx.fillStyle =
-            "#3b3b3b";
-
-        ctx.fillRect(
-            body.bounds.min.x,
-            body.bounds.min.y,
-            body.bounds.max.x-
-            body.bounds.min.x,
-            body.bounds.max.y-
-            body.bounds.min.y
-        );
-
-        return;
-    }
-
-    const type =
-        body.objectType;
-
-    if(type === "house"){
-
-        drawHouse(body);
-        return;
-    }
-
-    ctx.save();
-
-    ctx.translate(
-        body.position.x,
-        body.position.y
-    );
-
-    ctx.rotate(
-        body.angle
-    );
-
-    const w =
-        body.objectWidth;
-
-    const h =
-        body.objectHeight;
-
-    if(type === "bomb"){
-
-        ctx.fillStyle =
-            "#222";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            0,
-            0,
-            w/2,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillStyle =
-            "#f80";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            0,
-            -w*.3,
-            5,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillStyle =
-            "#fff";
-
-        ctx.font =
-            "900 10px sans-serif";
-
-        ctx.textAlign =
-            "center";
-
-        ctx.textBaseline =
-            "middle";
-
-        const left =
-            Math.max(
-                0,
-                body.timerDuration-
-                (
-                    performance.now()-
-                    body.createdAt
-                )/1000
-            );
-
-        ctx.fillText(
-            left.toFixed(1),
-            0,
-            0
-        );
-
-    }else if(type === "multiply"){
-
-        ctx.fillStyle =
-            "#d56bff";
-
-        ctx.fillRect(
-            -w/2,
-            -h/2,
-            w,
-            h
-        );
-
-        ctx.strokeStyle =
-            "#7b2299";
-
-        ctx.lineWidth = 3;
-
-        ctx.strokeRect(
-            -w/2,
-            -h/2,
-            w,
-            h
-        );
-
-        ctx.fillStyle =
-            "#fff";
-
-        ctx.font =
-            "900 21px sans-serif";
-
-        ctx.textAlign =
-            "center";
-
-        ctx.textBaseline =
-            "middle";
-
-        ctx.fillText(
-            "×"+body.factor,
-            0,
-            0
-        );
-
-    }else if(type === "bedrock"){
-
-        ctx.fillStyle =
-            "#444";
-
-        ctx.fillRect(
-            -w/2,
-            -h/2,
-            w,
-            h
-        );
-
-        ctx.strokeStyle =
-            "#222";
-
-        ctx.lineWidth = 3;
-
-        ctx.strokeRect(
-            -w/2,
-            -h/2,
-            w,
-            h
-        );
-
-    }else if(type === "dropper"){
-
-        ctx.fillStyle =
-            body.dropperEnabled
-                ? "#f80"
-                : "#888";
-
-        ctx.fillRect(
-            -w/2,
-            -h/2,
-            w,
-            h
-        );
-
-        ctx.strokeStyle =
-            "#333";
-
-        ctx.lineWidth = 3;
-
-        ctx.strokeRect(
-            -w/2,
-            -h/2,
-            w,
-            h
-        );
-
-        ctx.fillStyle =
-            "#fff";
-
-        ctx.font =
-            "900 13px sans-serif";
-
-        ctx.textAlign =
-            "center";
-
-        ctx.textBaseline =
-            "middle";
-
-        ctx.fillText(
-            body.dropperEnabled
-                ? "投下 ON"
-                : "投下 OFF",
-            0,
-            0
-        );
-
-    }else if(type === "slime"){
-
-        ctx.fillStyle =
-            "#55b84a";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            0,
-            0,
-            w/2,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillStyle =
-            "#111";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            -6,
-            -3,
-            2.5,
-            0,
-            Math.PI*2
-        );
-
-        ctx.arc(
-            6,
-            -3,
-            2.5,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-    }else{
-
-        if(type === "wood"){
-            ctx.fillStyle =
-                "#9b641f";
-        }
-
-        if(type === "stone"){
-            ctx.fillStyle =
-                "#777";
-        }
-
-        if(type === "glass"){
-            ctx.fillStyle =
-                "rgba(120,210,255,.55)";
-        }
-
-        ctx.fillRect(
-            -w/2,
-            -h/2,
-            w,
-            h
-        );
-
-        ctx.strokeStyle =
-            type === "glass"
-                ? "#4aa6c8"
-                : "#333";
-
-        ctx.lineWidth = 2;
-
-        ctx.strokeRect(
-            -w/2,
-            -h/2,
-            w,
-            h
-        );
-    }
-
-    ctx.restore();
+function drawBody(ctx,b){
+ const o=bodyObject(b);
+ if(!o)return;
+
+ ctx.save();
+ ctx.translate(b.position.x,b.position.y);
+ ctx.rotate(b.angle||0);
+
+ const w=o.width||80;
+ const h=o.height||45;
+
+ if(isHouse(o)){
+  const mat=objectMaterial(o);
+  const m=MATERIALS[mat];
+  ctx.fillStyle=m.color;
+  ctx.globalAlpha=mat==="glass"?.55:1;
+
+  const t=Math.max(10,Math.min(w,h)*.18);
+  ctx.fillRect(-w/2,-h/2,w,t);
+  ctx.fillRect(-w/2,h/2-t,w,t);
+  ctx.fillRect(-w/2,-h/2,t,h);
+  ctx.fillRect(w/2-t,-h/2,t,h);
+
+  ctx.globalAlpha=1;
+  ctx.strokeStyle="#222";
+  ctx.lineWidth=2;
+  ctx.strokeRect(-w/2,-h/2,w,h);
+ }else if(o.type==="wood"){
+  ctx.fillStyle=MATERIALS.wood.color;
+  ctx.fillRect(-w/2,-h/2,w,h);
+  ctx.strokeStyle="#6b3c1c";
+  ctx.strokeRect(-w/2,-h/2,w,h);
+ }else if(o.type==="glass"){
+  ctx.fillStyle=MATERIALS.glass.color;
+  ctx.globalAlpha=.55;
+  ctx.fillRect(-w/2,-h/2,w,h);
+  ctx.globalAlpha=1;
+  ctx.strokeStyle="#5bb8df";
+  ctx.lineWidth=2;
+  ctx.strokeRect(-w/2,-h/2,w,h);
+ }else if(o.type==="stone"){
+  ctx.fillStyle=MATERIALS.stone.color;
+  ctx.fillRect(-w/2,-h/2,w,h);
+  ctx.strokeStyle="#555";
+  ctx.strokeRect(-w/2,-h/2,w,h);
+ }else if(o.type==="bedrock"){
+  ctx.fillStyle=MATERIALS.bedrock.color;
+  ctx.fillRect(-w/2,-h/2,w,h);
+  ctx.strokeStyle="#111";
+  ctx.strokeRect(-w/2,-h/2,w,h);
+ }else if(o.type==="multiplier"){
+  ctx.fillStyle="#d58cff";
+  ctx.fillRect(-w/2,-h/2,w,h);
+  ctx.fillStyle="#fff";
+  ctx.font="bold 24px sans-serif";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.fillText("×"+(o.factor||2),0,0);
+ }else if(o.type==="bomb"){
+  ctx.fillStyle="#252525";
+  ctx.beginPath();
+  ctx.arc(0,0,13,0,Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle="#111";
+  ctx.lineWidth=2;
+  ctx.stroke();
+  ctx.strokeStyle="#c8752d";
+  ctx.beginPath();
+  ctx.moveTo(7,-10);
+  ctx.quadraticCurveTo(15,-20,10,-25);
+  ctx.stroke();
+ }else if(o.type==="dog"||o.type==="bigDog"||o.type==="armorDog"||o.type==="movingDog"){
+  const r=o.type==="bigDog"?24:15;
+  ctx.fillStyle=o.type==="armorDog"?"#7b8189":"#d69b62";
+  ctx.beginPath();
+  ctx.arc(0,0,r,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle="#222";
+  ctx.beginPath();
+  ctx.arc(-r*.35,-r*.1,2.5,0,Math.PI*2);
+  ctx.arc(r*.35,-r*.1,2.5,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle="#f4c4a0";
+  ctx.beginPath();
+  ctx.arc(0,r*.25,r*.35,0,Math.PI*2);
+  ctx.fill();
+
+  if(o.type==="armorDog"){
+   ctx.strokeStyle="#454b54";
+   ctx.lineWidth=4;
+   ctx.stroke();
+  }
+ }else if(o.type==="bombDropper"){
+  ctx.fillStyle="#4b667d";
+  ctx.fillRect(-w/2,-h/2,w,h);
+  ctx.fillStyle=o.enabled===false?"#d33":"#4cce67";
+  ctx.beginPath();
+  ctx.arc(w/2-12,-h/2+10,5,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle="#fff";
+  ctx.font="bold 12px sans-serif";
+  ctx.textAlign="center";
+  ctx.fillText(o.enabled===false?"OFF":"ON",0,4);
+ }else if(o.type==="dogSpawner"){
+  ctx.fillStyle="#70578d";
+  ctx.fillRect(-w/2,-h/2,w,h);
+  ctx.fillStyle=o.enabled===false?"#d33":"#4cce67";
+  ctx.beginPath();
+  ctx.arc(w/2-12,-h/2+10,5,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle="#fff";
+  ctx.font="bold 11px sans-serif";
+  ctx.textAlign="center";
+  ctx.fillText(o.enabled===false?"OFF":"犬生成",0,4);
+ }
+
+ ctx.restore();
+
+ if(selected===b&&mode==="editor"){
+  drawSelection(ctx,b);
+ }
+ if(selected===b&&mode==="play"){
+  drawPlaySelection(ctx,b);
+ }
 }
 
-function drawHouse(body){
+function drawSelection(ctx,b){
+ const o=bodyObject(b);
+ if(!o)return;
 
-    const ctx =
-        activeCtx;
+ ctx.save();
+ ctx.translate(b.position.x,b.position.y);
+ ctx.rotate(b.angle||0);
 
-    const w =
-        body.objectWidth;
+ const w=o.width||60;
+ const h=o.height||40;
 
-    const h =
-        body.objectHeight;
+ ctx.strokeStyle="#f80";
+ ctx.lineWidth=3/zoomLevel;
+ ctx.strokeRect(-w/2-4,-h/2-4,w+8,h+8);
 
-    const t =
-        Math.max(
-            9,
-            Math.min(w,h)*.14
-        );
+ if(editAction==="resize"){
+  ctx.fillStyle="#fff";
+  ctx.strokeStyle="#f80";
+  ctx.lineWidth=2/zoomLevel;
+  [[-w/2,-h/2],[w/2,-h/2],[-w/2,h/2],[w/2,h/2]].forEach(p=>{
+   ctx.beginPath();
+   ctx.rect(p[0]-6/zoomLevel,p[1]-6/zoomLevel,12/zoomLevel,12/zoomLevel);
+   ctx.fill();
+   ctx.stroke();
+  });
+ }
 
-    ctx.save();
+ if(editAction==="rotate"){
+  const len=Math.max(35,h*.5);
+  ctx.strokeStyle="#f80";
+  ctx.lineWidth=3/zoomLevel;
+  ctx.beginPath();
+  ctx.moveTo(0,-h/2);
+  ctx.lineTo(0,-h/2-len);
+  ctx.stroke();
 
-    ctx.translate(
-        body.position.x,
-        body.position.y
-    );
+  ctx.fillStyle="#fff";
+  ctx.strokeStyle="#f80";
+  ctx.beginPath();
+  ctx.arc(0,-h/2-len,8/zoomLevel,0,Math.PI*2);
+  ctx.fill();
+  ctx.stroke();
+ }
 
-    ctx.rotate(
-        body.angle
-    );
-
-    ctx.fillStyle =
-        "#d28a3a";
-
-    ctx.fillRect(
-        -w/2,
-        -h/2,
-        w,
-        t
-    );
-
-    ctx.fillRect(
-        -w/2,
-        h/2-t,
-        w,
-        t
-    );
-
-    ctx.fillRect(
-        -w/2,
-        -h/2+t,
-        t,
-        h-t*2
-    );
-
-    ctx.fillRect(
-        w/2-t,
-        -h/2+t,
-        t,
-        h-t*2
-    );
-
-    ctx.strokeStyle =
-        "#754617";
-
-    ctx.lineWidth = 2;
-
-    ctx.strokeRect(
-        -w/2,
-        -h/2,
-        w,
-        h
-    );
-
-    ctx.restore();
+ ctx.restore();
 }
 
-function drawSelection(){
+function drawPlaySelection(ctx,b){
+ const o=bodyObject(b);
+ if(!o)return;
 
-    const body =
-        selectedBody;
+ ctx.save();
+ ctx.translate(b.position.x,b.position.y);
+ ctx.rotate(b.angle||0);
 
-    if(!body){
-        return;
-    }
+ const w=o.width||30;
+ const h=o.height||30;
 
-    const ctx =
-        activeCtx;
+ ctx.strokeStyle="#f80";
+ ctx.lineWidth=3/zoomLevel;
+ ctx.strokeRect(-w/2-4,-h/2-4,w+8,h+8);
 
-    const w =
-        body.objectWidth;
-
-    const h =
-        body.objectHeight;
-
-    ctx.save();
-
-    ctx.translate(
-        body.position.x,
-        body.position.y
-    );
-
-    ctx.rotate(
-        body.angle
-    );
-
-    ctx.strokeStyle =
-        "#f80";
-
-    ctx.lineWidth = 3;
-
-    ctx.setLineDash(
-        [7,4]
-    );
-
-    ctx.strokeRect(
-        -w/2,
-        -h/2,
-        w,
-        h
-    );
-
-    ctx.setLineDash([]);
-
-    ctx.restore();
-
-    if(
-        editorAction === "resize"
-    ){
-
-        getResizeHandles(body)
-            .forEach(h=>{
-
-                ctx.fillStyle =
-                    "#fff";
-
-                ctx.strokeStyle =
-                    "#f80";
-
-                ctx.lineWidth = 3;
-
-                ctx.beginPath();
-
-                ctx.arc(
-                    h.x,
-                    h.y,
-                    7,
-                    0,
-                    Math.PI*2
-                );
-
-                ctx.fill();
-                ctx.stroke();
-            });
-    }
-
-    if(
-        editorAction === "rotate"
-    ){
-
-        const handle =
-            getRotateHandle(body);
-
-        ctx.strokeStyle =
-            "#f80";
-
-        ctx.lineWidth = 3;
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            body.position.x,
-            body.position.y
-        );
-
-        ctx.lineTo(
-            handle.x,
-            handle.y
-        );
-
-        ctx.stroke();
-
-        ctx.fillStyle =
-            "#fff";
-
-        ctx.strokeStyle =
-            "#f80";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            handle.x,
-            handle.y,
-            8,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.stroke();
-    }
+ ctx.restore();
 }
 
-function drawExplosions(){
+function drawEffects(ctx){
+ const now=performance.now();
 
-    const now =
-        performance.now();
+ explosions.forEach(e=>{
+  const p=worldToScreen({x:e.x,y:e.y});
+  const q=(now-e.start)/e.duration;
+  const r=(e.max||100)*q;
 
-    explosions =
-        explosions.filter(explosion=>{
+  ctx.save();
+  ctx.globalAlpha=1-q;
+  const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r);
+  g.addColorStop(0,"#fff");
+  g.addColorStop(.25,"#ffdc66");
+  g.addColorStop(1,"transparent");
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,r,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+ });
 
-            const elapsed =
-                now-explosion.start;
+ generatedVisuals.forEach(v=>{
+  const p=worldToScreen({x:v.x,y:v.y});
+  const q=(now-v.start)/v.duration;
 
-            if(
-                elapsed >
-                explosion.duration
-            ){
-                return false;
-            }
-
-            const t =
-                elapsed/explosion.duration;
-
-            const radius =
-                explosion.radius*t;
-
-            const alpha =
-                1-t;
-
-            const gradient =
-                activeCtx.createRadialGradient(
-                    explosion.x,
-                    explosion.y,
-                    0,
-                    explosion.x,
-                    explosion.y,
-                    radius
-                );
-
-            gradient.addColorStop(
-                0,
-                `rgba(255,255,255,${alpha})`
-            );
-
-            gradient.addColorStop(
-                .3,
-                `rgba(255,170,0,${alpha})`
-            );
-
-            gradient.addColorStop(
-                .7,
-                `rgba(255,70,0,${alpha*.7})`
-            );
-
-            gradient.addColorStop(
-                1,
-                "rgba(255,0,0,0)"
-            );
-
-            activeCtx.fillStyle =
-                gradient;
-
-            activeCtx.beginPath();
-
-            activeCtx.arc(
-                explosion.x,
-                explosion.y,
-                radius,
-                0,
-                Math.PI*2
-            );
-
-            activeCtx.fill();
-
-            return true;
-        });
+  ctx.save();
+  ctx.globalAlpha=1-q;
+  ctx.fillStyle=v.type==="bomb"?"#222":"#70578d";
+  ctx.beginPath();
+  ctx.arc(p.x,p.y+q*35,8,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+ });
 }
 
-function serializeBody(body){
-
-    if(
-        body.isGroundBedrock
-    ){
-        return null;
-    }
-
-    return {
-
-        id:
-            body.objectId,
-
-        type:
-            body.objectType,
-
-        x:
-            body.position.x,
-
-        y:
-            body.position.y,
-
-        angle:
-            body.angle,
-
-        width:
-            body.objectWidth,
-
-        height:
-            body.objectHeight,
-
-        factor:
-            body.factor || 2,
-
-        timer:
-            body.timerDuration || 8,
-
-        strength:
-            body.strength,
-
-        dropInterval:
-            body.dropInterval || 5,
-
-        dropCount:
-            body.dropCount || 1,
-
-        dropBombTimer:
-            body.dropBombTimer || 10,
-
-        dropperEnabled:
-            body.dropperEnabled || false
-    };
+function updateInfo(){
+ if(mode!=="play")return;
+ const bombs=Composite.allBodies(engine.world).filter(b=>b.plugin?.kind==="bomb").length;
+ document.getElementById("playInfo").textContent=`爆弾 ${bombs}個`;
 }
 
-function serializeStage(){
+function loop(now){
+ const dt=Math.min(33,now-lastTime);
+ lastTime=now;
 
-    return Composite
-        .allBodies(engine.world)
-        .map(serializeBody)
-        .filter(Boolean);
+ if(engine){
+  updateBombTimers(now);
+  updateMachines(now);
+  updateMovingDogs(now);
+  updateExplosions(now);
+
+  Matter.Engine.update(engine,dt);
+  draw();
+  updateInfo();
+ }
+
+ requestAnimationFrame(loop);
 }
 
-function clearObjects(){
+canvas.addEventListener("pointerdown",e=>{
+ canvas.setPointerCapture?.(e.pointerId);
+ handlePointerDown(e);
+});
+canvas.addEventListener("pointermove",handlePointerMove);
+canvas.addEventListener("pointerup",handlePointerUp);
+canvas.addEventListener("pointercancel",handlePointerUp);
 
-    Composite
-        .allBodies(engine.world)
-        .forEach(body=>{
+playCanvas.addEventListener("pointerdown",e=>{
+ playCanvas.setPointerCapture?.(e.pointerId);
+ handlePointerDown(e);
+});
+playCanvas.addEventListener("pointermove",handlePointerMove);
+playCanvas.addEventListener("pointerup",handlePointerUp);
+playCanvas.addEventListener("pointercancel",handlePointerUp);
 
-            if(
-                !body.isGroundBedrock
-            ){
+window.addEventListener("resize",resizeCanvas);
 
-                Composite.remove(
-                    engine.world,
-                    body
-                );
-            }
-        });
-
-    selectedBody =
-        null;
+function setupCanvasSwitch(){
+ canvas.style.display=mode==="editor"?"block":"none";
+ playCanvas.style.display=mode==="play"?"block":"none";
 }
 
-function loadObjects(objects){
+const originalShowScreen=showScreen;
+showScreen=function(id){
+ originalShowScreen(id);
+ setupCanvasSwitch();
+ setTimeout(resizeCanvas,30);
+};
 
-    clearObjects();
+const originalResetEngine=resetEngine;
+resetEngine=function(){
+ originalResetEngine();
+ setupCanvasSwitch();
+};
 
-    if(
-        Array.isArray(objects)
-    ){
+document.addEventListener("click",e=>{
+ if(!e.target.closest(".modalBox")&&e.target.id==="modal"){
+  closeModal();
+ }
+});
 
-        objects.forEach(o=>{
-
-            createBody(
-                o.type,
-                o.x,
-                o.y,
-                {
-                    objectId:
-                        o.id || newId(),
-
-                    width:
-                        o.width,
-
-                    height:
-                        o.height,
-
-                    angle:
-                        o.angle || 0,
-
-                    factor:
-                        o.factor || 2,
-
-                    timerDuration:
-                        o.timer || 8,
-
-                    strength:
-                        o.strength,
-
-                    dropInterval:
-                        o.dropInterval || 5,
-
-                    dropCount:
-                        o.dropCount || 1,
-
-                    dropBombTimer:
-                        o.dropBombTimer || 10,
-
-                    dropperEnabled:
-                        o.dropperEnabled || false
-                }
-            );
-        });
-    }
-
-    rebuildFloor();
+function boot(){
+ canvas.style.display="block";
+ playCanvas.style.display="none";
+ createEngine();
+ stage=blankStage("ステージ "+stageCounter);
+ mode="editor";
+ setTool("select");
+ resizeCanvas();
+ requestAnimationFrame(loop);
 }
 
-function savedStages(){
-
-    try{
-
-        const data =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
-
-        if(!data){
-            return [];
-        }
-
-        const parsed =
-            JSON.parse(data);
-
-        return Array.isArray(parsed)
-            ? parsed
-            : [];
-
-    }catch(_){
-
-        return [];
-    }
-}
-
-function saveStages(data){
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(data)
-    );
-}
-
-function escapeHtml(text){
-
-    return String(text)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-}
-
-function openSaveModal(){
-
-    document
-        .getElementById(
-            "saveModal"
-        )
-        .classList.remove(
-            "hidden"
-        );
-}
-
-function closeSaveModal(){
-
-    document
-        .getElementById(
-            "saveModal"
-        )
-        .classList.add(
-            "hidden"
-        );
-}
-
-document.getElementById(
-    "editorSave"
-).addEventListener(
-    "click",
-    openSaveModal
-);
-
-document.getElementById(
-    "saveCancel"
-).addEventListener(
-    "click",
-    closeSaveModal
-);
-
-document.getElementById(
-    "saveConfirm"
-).addEventListener(
-    "click",
-    ()=>{
-
-        const name =
-            document.getElementById(
-                "stageName"
-            ).value.trim();
-
-        if(!name){
-            return;
-        }
-
-        const data =
-            savedStages();
-
-        data.push({
-
-            id:newId(),
-
-            name:name,
-
-            createdAt:
-                new Date().toISOString(),
-
-            objects:
-                serializeStage()
-        });
-
-        saveStages(data);
-
-        document.getElementById(
-            "stageName"
-        ).value = "";
-
-        closeSaveModal();
-    }
-);
-
-function openSavedModal(){
-
-    renderSavedStages();
-
-    document
-        .getElementById(
-            "savedModal"
-        )
-        .classList.remove(
-            "hidden"
-        );
-}
-
-function closeSavedModal(){
-
-    document
-        .getElementById(
-            "savedModal"
-        )
-        .classList.add(
-            "hidden"
-        );
-}
-
-function renderSavedStages(){
-
-    const list =
-        document.getElementById(
-            "stageList"
-        );
-
-    list.innerHTML = "";
-
-    const stages =
-        savedStages();
-
-    if(
-        stages.length === 0
-    ){
-
-        list.innerHTML =
-            "<div class='stage-date'>保存されたステージはありません。</div>";
-
-        return;
-    }
-
-    stages.forEach(stage=>{
-
-        const item =
-            document.createElement(
-                "div"
-            );
-
-        item.className =
-            "stage-item";
-
-        const date =
-            new Date(
-                stage.createdAt
-            ).toLocaleString(
-                "ja-JP"
-            );
-
-        item.innerHTML = `
-
-            <div class="stage-name">
-                ${escapeHtml(stage.name)}
-            </div>
-
-            <div class="stage-date">
-                ${escapeHtml(date)}
-            </div>
-
-            <div class="stage-buttons">
-
-                <button data-edit="${stage.id}">
-                    編集
-                </button>
-
-                <button data-play="${stage.id}">
-                    遊ぶ
-                </button>
-
-                <button class="delete" data-delete="${stage.id}">
-                    削除
-                </button>
-
-            </div>
-        `;
-
-        list.appendChild(item);
-    });
-
-    list.querySelectorAll(
-        "[data-edit]"
-    ).forEach(button=>{
-
-        button.addEventListener(
-            "click",
-            ()=>{
-
-                const stage =
-                    savedStages()
-                        .find(
-                            s=>
-                                s.id ===
-                                button.dataset.edit
-                        );
-
-                if(!stage){
-                    return;
-                }
-
-                openEditor();
-
-                loadObjects(
-                    stage.objects
-                );
-
-                closeSavedModal();
-            }
-        );
-    });
-
-    list.querySelectorAll(
-        "[data-play]"
-    ).forEach(button=>{
-
-        button.addEventListener(
-            "click",
-            ()=>{
-
-                const stage =
-                    savedStages()
-                        .find(
-                            s=>
-                                s.id ===
-                                button.dataset.play
-                        );
-
-                if(!stage){
-                    return;
-                }
-
-                openPlay(
-                    stage
-                );
-
-                closeSavedModal();
-            }
-        );
-    });
-
-    list.querySelectorAll(
-        "[data-delete]"
-    ).forEach(button=>{
-
-        button.addEventListener(
-            "click",
-            ()=>{
-
-                const result =
-                    savedStages()
-                        .filter(
-                            s=>
-                                s.id !==
-                                button.dataset.delete
-                        );
-
-                saveStages(
-                    result
-                );
-
-                renderSavedStages();
-            }
-        );
-    });
-}
-
-document.getElementById(
-    "savedButton"
-).addEventListener(
-    "click",
-    openSavedModal
-);
-
-document.getElementById(
-    "editorSaved"
-).addEventListener(
-    "click",
-    openSavedModal
-);
-
-document.getElementById(
-    "savedClose"
-).addEventListener(
-    "click",
-    closeSavedModal
-);
-
-document.getElementById(
-    "newStageButton"
-).addEventListener(
-    "click",
-    ()=>{
-
-        openEditor();
-
-        loadObjects([]);
-
-        editorTool =
-            "select";
-
-        document
-            .querySelectorAll(
-                "[data-editor-tool]"
-            )
-            .forEach(button=>{
-                button.classList.toggle(
-                    "active",
-                    button.dataset.editorTool ===
-                    "select"
-                );
-            });
-    }
-);
-
-document.getElementById(
-    "playSavedButton"
-).addEventListener(
-    "click",
-    openSavedModal
-);
-
-function openEditor(){
-
-    currentMode =
-        "editor";
-
-    document
-        .getElementById(
-            "startScreen"
-        )
-        .classList.add(
-            "hidden"
-        );
-
-    document
-        .getElementById(
-            "playScreen"
-        )
-        .classList.add(
-            "hidden"
-        );
-
-    document
-        .getElementById(
-            "editorScreen"
-        )
-        .classList.remove(
-            "hidden"
-        );
-
-    activeCanvas =
-        editorCanvas;
-
-    activeCtx =
-        editorCtx;
-
-    resizeCanvas();
-
-    selectedBody =
-        null;
-
-    editorAction =
-        null;
-}
-
-function openPlay(stage){
-
-    currentMode =
-        "play";
-
-    currentPlayStage =
-        stage;
-
-    playOriginalObjects =
-        JSON.parse(
-            JSON.stringify(
-                stage.objects
-            )
-        );
-
-    document
-        .getElementById(
-            "startScreen"
-        )
-        .classList.add(
-            "hidden"
-        );
-
-    document
-        .getElementById(
-            "editorScreen"
-        )
-        .classList.add(
-            "hidden"
-        );
-
-    document
-        .getElementById(
-            "playScreen"
-        )
-        .classList.remove(
-            "hidden"
-        );
-
-    activeCanvas =
-        playCanvas;
-
-    activeCtx =
-        playCtx;
-
-    resizeCanvas();
-
-    loadPlayObjects();
-
-    document.getElementById(
-        "playDropperSettings"
-    ).classList.add(
-        "hidden"
-    );
-}
-
-function loadPlayObjects(){
-
-    clearObjects();
-
-    playOriginalObjects.forEach(o=>{
-
-        createBody(
-            o.type,
-            o.x,
-            o.y,
-            {
-                objectId:
-                    newId(),
-
-                width:
-                    o.width,
-
-                height:
-                    o.height,
-
-                angle:
-                    o.angle || 0,
-
-                factor:
-                    o.factor || 2,
-
-                timerDuration:
-                    o.timer || 8,
-
-                strength:
-                    o.strength,
-
-                dropInterval:
-                    o.dropInterval || 5,
-
-                dropCount:
-                    o.dropCount || 1,
-
-                dropBombTimer:
-                    o.dropBombTimer || 10,
-
-                dropperEnabled:
-                    o.dropperEnabled || false
-            }
-        );
-    });
-
-    rebuildFloor();
-}
-
-document.getElementById(
-    "playReset"
-).addEventListener(
-    "click",
-    ()=>{
-
-        loadPlayObjects();
-
-        document.getElementById(
-            "playStatus"
-        ).textContent =
-            "ステージをやり直しました。";
-    }
-);
-
-document.getElementById(
-    "playExplodeAll"
-).addEventListener(
-    "click",
-    ()=>{
-
-        Composite
-            .allBodies(engine.world)
-            .filter(
-                b=>b.objectType === "bomb"
-            )
-            .forEach(
-                explodeBomb
-            );
-    }
-);
-
-document.getElementById(
-    "playSettings"
-).addEventListener(
-    "click",
-    ()=>{
-
-        document.getElementById(
-            "playDropperSettings"
-        ).classList.toggle(
-            "hidden"
-        );
-    }
-);
-
-document.getElementById(
-    "playDropperApply"
-).addEventListener(
-    "click",
-    ()=>{
-
-        const bodies =
-            Composite
-                .allBodies(engine.world)
-                .filter(
-                    b=>
-                        b.objectType ===
-                        "dropper"
-                );
-
-        const interval =
-            clamp(
-                Number(
-                    document.getElementById(
-                        "playInterval"
-                    ).value
-                )||5,
-                .1,
-                3600
-            );
-
-        const count =
-            clamp(
-                Math.floor(
-                    Number(
-                        document.getElementById(
-                            "playCount"
-                        ).value
-                    )||1
-                ),
-                1,
-                100
-            );
-
-        const timer =
-            clamp(
-                Number(
-                    document.getElementById(
-                        "playBombTimer"
-                    ).value
-                )||10,
-                .1,
-                3600
-            );
-
-        bodies.forEach(body=>{
-
-            body.dropInterval =
-                interval;
-
-            body.dropCount =
-                count;
-
-            body.dropBombTimer =
-                timer;
-        });
-
-        document.getElementById(
-            "playStatus"
-        ).textContent =
-            "自動爆弾投下機の設定を反映しました。";
-    }
-);
-
-document.getElementById(
-    "playBack"
-).addEventListener(
-    "click",
-    ()=>{
-
-        currentMode =
-            "editor";
-
-        selectedBody =
-            null;
-
-        document
-            .getElementById(
-                "playScreen"
-            )
-            .classList.add(
-                "hidden"
-            );
-
-        document
-            .getElementById(
-                "startScreen"
-            )
-            .classList.remove(
-                "hidden"
-            );
-    }
-);
-
-document.getElementById(
-    "editorBack"
-).addEventListener(
-    "click",
-    ()=>{
-
-        currentMode =
-            "editor";
-
-        selectedBody =
-            null;
-
-        document
-            .getElementById(
-                "editorScreen"
-            )
-            .classList.add(
-                "hidden"
-            );
-
-        document
-            .getElementById(
-                "startScreen"
-            )
-            .classList.remove(
-                "hidden"
-            );
-    }
-);
-
-document.getElementById(
-    "editorZoomIn"
-).addEventListener(
-    "click",
-    ()=>{
-        setZoom(
-            zoomEditor+.1
-        );
-    }
-);
-
-document.getElementById(
-    "editorZoomOut"
-).addEventListener(
-    "click",
-    ()=>{
-        setZoom(
-            zoomEditor-.1
-        );
-    }
-);
-
-document.getElementById(
-    "playZoomIn"
-).addEventListener(
-    "click",
-    ()=>{
-        setZoom(
-            zoomPlay+.1
-        );
-    }
-);
-
-document.getElementById(
-    "playZoomOut"
-).addEventListener(
-    "click",
-    ()=>{
-        setZoom(
-            zoomPlay-.1
-        );
-    }
-);
-
-function exportData(){
-
-    const data = {
-
-        version:3,
-
-        exportedAt:
-            new Date().toISOString(),
-
-        stages:
-            savedStages()
-    };
-
-    const blob =
-        new Blob(
-            [
-                JSON.stringify(
-                    data,
-                    null,
-                    2
-                )
-            ],
-            {
-                type:
-                    "application/json"
-            }
-        );
-
-    const url =
-        URL.createObjectURL(
-            blob
-        );
-
-    const a =
-        document.createElement(
-            "a"
-        );
-
-    a.href =
-        url;
-
-    a.download =
-        "slime-castle-stages.json";
-
-    document.body.appendChild(a);
-
-    a.click();
-
-    a.remove();
-
-    URL.revokeObjectURL(
-        url
-    );
-}
-
-document.getElementById(
-    "migrationButton"
-).addEventListener(
-    "click",
-    ()=>{
-        document
-            .getElementById(
-                "migrationModal"
-            )
-            .classList.remove(
-                "hidden"
-            );
-    }
-);
-
-document.getElementById(
-    "exportButton"
-).addEventListener(
-    "click",
-    exportData
-);
-
-document.getElementById(
-    "importButton"
-).addEventListener(
-    "click",
-    ()=>{
-        document
-            .getElementById(
-                "importFile"
-            )
-            .click();
-    }
-);
-
-document.getElementById(
-    "importFile"
-).addEventListener(
-    "change",
-    async e=>{
-
-        const file =
-            e.target.files[0];
-
-        if(!file){
-            return;
-        }
-
-        try{
-
-            const text =
-                await file.text();
-
-            const data =
-                JSON.parse(
-                    text
-                );
-
-            if(
-                !data ||
-                !Array.isArray(
-                    data.stages
-                )
-            ){
-                return;
-            }
-
-            const current =
-                savedStages();
-
-            const merged =
-                [...current];
-
-            data.stages.forEach(stage=>{
-
-                if(
-                    !merged.some(
-                        s=>
-                            s.id ===
-                            stage.id
-                    )
-                ){
-
-                    merged.push(
-                        stage
-                    );
-                }
-            });
-
-            saveStages(
-                merged
-            );
-
-            e.target.value = "";
-
-        }catch(_){
-
-            e.target.value = "";
-        }
-    }
-);
-
-document.getElementById(
-    "migrationClose"
-).addEventListener(
-    "click",
-    ()=>{
-        document
-            .getElementById(
-                "migrationModal"
-            )
-            .classList.add(
-                "hidden"
-            );
-    }
-);
-
-editorCanvas.addEventListener(
-    "pointerdown",
-    pointerDown
-);
-
-editorCanvas.addEventListener(
-    "pointermove",
-    pointerMove
-);
-
-editorCanvas.addEventListener(
-    "pointerup",
-    pointerUp
-);
-
-editorCanvas.addEventListener(
-    "pointercancel",
-    pointerUp
-);
-
-playCanvas.addEventListener(
-    "pointerdown",
-    pointerDown
-);
-
-playCanvas.addEventListener(
-    "pointermove",
-    pointerMove
-);
-
-playCanvas.addEventListener(
-    "pointerup",
-    pointerUp
-);
-
-playCanvas.addEventListener(
-    "pointercancel",
-    pointerUp
-);
-
-window.addEventListener(
-    "resize",
-    ()=>{
-        resizeCanvas();
-    }
-);
-
-createEngine();
-
-currentMode =
-    "editor";
-
-document
-    .getElementById(
-        "editorScreen"
-    )
-    .classList.add(
-        "hidden"
-    );
-
-document
-    .getElementById(
-        "playScreen"
-    )
-    .classList.add(
-        "hidden"
-    );
+boot();
 </script>
-
 </body>
 </html>
